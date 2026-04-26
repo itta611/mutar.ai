@@ -16,6 +16,7 @@ import { Avatar } from "./ui/avatar"
 import { authClient } from "@/lib/auth-client"
 import { ChevronDown } from "lucide-react"
 import Image from "next/image"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu"
 
 export function AppSidebar() {
   const session = authClient.useSession()
@@ -41,15 +42,22 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem className="border-t pt-1">
-            <SidebarMenuButton className="h-14 gap-4">
-              <Avatar size="lg" className="text-center font-bold flex justify-center items-center text-lg text-white bg-indigo-500">
-                {user?.image ? <Image src={user?.image} alt="Avatar" fill /> : (user?.name || user?.email)?.[0].toUpperCase()}
-              </Avatar>
-              <div className="grow">
-                <div className="font-semibold">{user?.name}</div>
-                <div className="text-xs">{user?.email}</div></div>
-              <ChevronDown className="text-neutral-500" />
-            </SidebarMenuButton>
+            <DropdownMenu>
+              <DropdownMenuTrigger render={<SidebarMenuButton className="h-14 gap-4">
+                <Avatar size="lg" className="text-center font-bold flex justify-center items-center text-lg text-white bg-indigo-500">
+                  {user?.image ? <Image src={user?.image} alt="Avatar" fill /> : (user?.name || user?.email)?.[0].toUpperCase()}
+                </Avatar>
+                <div className="grow">
+                  <div className="font-semibold">{user?.name}</div>
+                  <div className="text-xs">{user?.email}</div>
+                </div>
+                <ChevronDown className="text-neutral-500" />
+              </SidebarMenuButton>}>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => authClient.signOut()}>ログアウト</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
