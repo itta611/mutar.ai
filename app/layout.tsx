@@ -9,6 +9,9 @@ import {
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
+import { AuthDialog } from "@/components/auth-dialog"
+import { AuthDialogProvider } from "@/hooks/use-auth-dialog"
+import { Navbar } from "@/components/navbar"
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -70,7 +73,11 @@ export default function RootLayout({
       )}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <AuthDialogProvider>
+          <Navbar />
+          <ThemeProvider>{children}</ThemeProvider>
+          <AuthDialog />
+        </AuthDialogProvider>
       </body>
     </html>
   )

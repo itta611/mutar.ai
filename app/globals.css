@@ -122,22 +122,6 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-image:
-      radial-gradient(
-        circle at top left,
-        rgba(218, 198, 171, 0.42),
-        transparent 30%
-      ),
-      radial-gradient(
-        circle at top right,
-        rgba(255, 255, 255, 0.7),
-        transparent 25%
-      ),
-      linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.65),
-        rgba(247, 241, 231, 0.92)
-      );
     min-height: 100svh;
   }
   html {

@@ -6,20 +6,17 @@ import { useEffect, useState } from "react"
 import { authClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useAuthDialog } from "@/hooks/use-auth-dialog"
 
-type AuthDialogProps = {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
-
-export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
+export function AuthDialog() {
+  const { closeAuthDialog, isAuthDialogOpen } = useAuthDialog()
   const [email, setEmail] = useState("")
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busyMode, setBusyMode] = useState<"email" | "google" | null>(null)
 
   useEffect(() => {
-    if (!open) {
+    if (!isAuthDialogOpen) {
       return
     }
 
@@ -29,9 +26,9 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
     return () => {
       document.body.style.overflow = previousOverflow
     }
-  }, [open])
+  }, [isAuthDialogOpen])
 
-  if (!open) {
+  if (!isAuthDialogOpen) {
     return null
   }
 
@@ -85,7 +82,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 backdrop-blur-sm"
-      onClick={() => onOpenChange(false)}
+      onClick={closeAuthDialog}
     >
       <div
         className="relative w-full max-w-md rounded-[2rem] border border-white/50 bg-[#f8f4ec] p-6 shadow-[0_40px_120px_rgba(15,15,15,0.25)]"
@@ -93,7 +90,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
       >
         <button
           type="button"
-          onClick={() => onOpenChange(false)}
+          onClick={closeAuthDialog}
           className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white/70 text-black/70 transition hover:bg-white"
           aria-label="Close"
         >
