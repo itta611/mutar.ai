@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils"
 import { AuthDialog } from "@/components/auth-dialog"
 import { AuthDialogProvider } from "@/hooks/use-auth-dialog"
 import { Navbar } from "@/components/navbar"
+import { SidebarProvider } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -73,11 +75,14 @@ export default function RootLayout({
       )}
     >
       <body>
-        <AuthDialogProvider>
-          <Navbar />
-          <ThemeProvider>{children}</ThemeProvider>
-          <AuthDialog />
-        </AuthDialogProvider>
+        <SidebarProvider>
+          <AuthDialogProvider>
+            <Navbar />
+            <AppSidebar />
+            <ThemeProvider>{children}</ThemeProvider>
+            <AuthDialog />
+          </AuthDialogProvider>
+        </SidebarProvider>
       </body>
     </html>
   )

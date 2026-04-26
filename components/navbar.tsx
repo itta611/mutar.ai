@@ -1,4 +1,5 @@
 "use client"
+
 import { authClient } from "@/lib/auth-client"
 import { useAuthDialog } from "@/hooks/use-auth-dialog"
 import { Button } from "./ui/button"
