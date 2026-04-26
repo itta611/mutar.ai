@@ -1,25 +1,11 @@
 "use client"
 
-import { authClient } from "@/lib/auth-client"
-import { useAuthDialog } from "@/hooks/use-auth-dialog"
-import { Button } from "./ui/button"
+import { Input } from "./ui/input"
 
 export function Navbar() {
-  const { openAuthDialog } = useAuthDialog()
-  const session = authClient.useSession()
-  const user = session.data?.user
-
   return (
-    <nav className="flex items-center justify-between py-2">
-      <div className="flex items-center gap-3">
-        {user ? (
-          user.email
-        ) : (
-          <Button variant="outline" onClick={openAuthDialog}>
-            ログイン
-          </Button>
-        )}
-      </div>
+    <nav className="h-13 shadow-sm flex justify-center items-center">
+      <Input placeholder="検索..." className="w-[40%]" />
     </nav>
   )
 }
