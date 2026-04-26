@@ -109,25 +109,27 @@ export function PromptInput() {
       setIsGenerating(false)
     }
   }
-  return (<div className="p-3.5 border-2 border-indigo-400 rounded-3xl"><Textarea
-    id="generation-prompt"
-    name="prompt"
-    value={prompt}
-    onChange={(event) => setPrompt(event.target.value)}
-    className="min-h-10 mb-3 resize-none shadow-none border-none outline-none ring-0! px-2 py-0 rounded-none"
-    placeholder="作りたい資料画像を自然文で書いてください。"
-  />
-    <div className="flex justify-between items-end">
-      <div className="flex gap-2">
-        <AspectSelect selectedAspect={aspect} onAspectChange={setAspect} />
-        <ModelSelect selectedModel={model} onModelChange={setModel} />
-      </div>
-      <Button
-        size="lg"
-        onClick={handleGenerate}
-        disabled={isGenerating || prompt.trim().length < 12}
-      >
-        <SparklesIcon data-icon="inline-end" />
-        {isGenerating ? "生成中" : "生成"}
-      </Button></div></div>)
+  return (
+    <div className="p-3.5 border-2 border-indigo-400 rounded-2xl shadow-sm">
+      <Textarea
+        id="generation-prompt"
+        name="prompt"
+        value={prompt}
+        onChange={(event) => setPrompt(event.target.value)}
+        className="min-h-10 mb-3 resize-none shadow-none border-none outline-none ring-0! px-2 py-0 rounded-none"
+        placeholder="作りたい資料画像を自然文で書いてください。"
+      />
+      <div className="flex justify-between items-end">
+        <div className="flex gap-2">
+          <AspectSelect selectedAspect={aspect} onAspectChange={setAspect} />
+          <ModelSelect selectedModel={model} onModelChange={setModel} />
+        </div>
+        <Button
+          size="lg"
+          onClick={handleGenerate}
+          disabled={isGenerating || prompt.trim().length < 12}
+        >
+          <SparklesIcon data-icon="inline-end" />
+          {isGenerating ? "生成中" : "生成"}
+        </Button></div></div>)
 }

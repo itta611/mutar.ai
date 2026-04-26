@@ -1,21 +1,9 @@
-import { HomeShell } from "@/components/home-shell"
-import { getServerSession } from "@/lib/session"
+import { PromptInput } from "@/components/prompt-input"
 
 export default async function Page() {
-  const session = await getServerSession()
-
   return (
-    <HomeShell
-      initialUser={
-        session
-          ? {
-              id: session.user.id,
-              name: session.user.name,
-              email: session.user.email,
-              image: session.user.image,
-            }
-          : null
-      }
-    />
+    <div className="pt-10">
+      <PromptInput />
+    </div>
   )
 }
