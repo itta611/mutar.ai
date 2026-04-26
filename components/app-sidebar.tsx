@@ -17,6 +17,7 @@ import { authClient } from "@/lib/auth-client"
 import { ChevronDown } from "lucide-react"
 import Image from "next/image"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu"
+import { Skeleton } from "./ui/skeleton"
 
 export function AppSidebar() {
   const session = authClient.useSession()
@@ -44,12 +45,13 @@ export function AppSidebar() {
           <SidebarMenuItem className="border-t pt-1">
             <DropdownMenu>
               <DropdownMenuTrigger render={<SidebarMenuButton className="h-14 gap-4">
-                <Avatar size="lg" className="text-center font-bold flex justify-center items-center text-lg text-white bg-indigo-500">
-                  {user?.image ? <Image src={user?.image} alt="Avatar" fill /> : (user?.name || user?.email)?.[0].toUpperCase()}
-                </Avatar>
+                {!user ? (<Skeleton className="h-10 w-10 rounded-full" />) : (
+                  <Avatar size="lg" className="text-center font-bold flex justify-center items-center text-lg text-white bg-indigo-500">
+                    {user?.image ? <Image src={user?.image} alt="Avatar" fill /> : (user?.name || user?.email)?.[0].toUpperCase()}
+                  </Avatar>)}
                 <div className="grow">
-                  <div className="font-semibold">{user?.name}</div>
-                  <div className="text-xs">{user?.email}</div>
+                  <div className="font-semibold">{user ? user.name : <Skeleton className="h-4 w-12 mb-1.5" />}</div>
+                  <div className="text-xs">{user ? user.email : <Skeleton className="h-3 w-24" />}</div>
                 </div>
                 <ChevronDown className="text-neutral-500" />
               </SidebarMenuButton>}>
