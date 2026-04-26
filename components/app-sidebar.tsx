@@ -25,7 +25,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-none">
-      <SidebarHeader className="h-13 flex justify-center outline-1 outline-border/50">
+      <SidebarHeader className="h-13 flex justify-center">
         <Logo width={120} className="ml-2" />
       </SidebarHeader>
       <SidebarContent>

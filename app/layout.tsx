@@ -84,14 +84,13 @@ export default function RootLayout({
           <AuthDialogProvider>
             <ThemeProvider>
               <AppSidebar />
-              <div className="bg-sidebar w-full z-50">
-                <div className="rounded-tl-md outline-1 outline-border bg-white h-full">
+              <div className="bg-background h-svh w-full z-50">
+                <div className="rounded-tl-md h-full w-full bg-background overflow-hidden outline-1 outline-border">
                   <Navbar />
                   <div className="max-w-[800px] px-10 mx-auto">
                     {children}
                   </div>
-                </div>
-              </div>
+                </div></div>
               <AuthDialog />
             </ThemeProvider>
           </AuthDialogProvider>
