@@ -8,6 +8,16 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuthDialog } from "@/hooks/use-auth-dialog"
 
+function getNameFromEmail(email: string) {
+  const localPart = email.trim().split("@")[0]?.trim()
+
+  if (!localPart) {
+    return ""
+  }
+
+  return localPart.charAt(0).toUpperCase() + localPart.slice(1).toLowerCase()
+}
+
 export function AuthDialog() {
   const { closeAuthDialog, isAuthDialogOpen } = useAuthDialog()
   const [email, setEmail] = useState("")
@@ -62,6 +72,7 @@ export function AuthDialog() {
 
     const result = await authClient.signIn.magicLink({
       email: email.trim(),
+      name: getNameFromEmail(email),
       callbackURL,
     })
 

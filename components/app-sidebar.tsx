@@ -45,7 +45,9 @@ export function AppSidebar() {
               <Avatar size="lg" className="text-center font-bold flex justify-center items-center text-lg text-white bg-indigo-500">
                 {user?.image ? <Image src={user?.image} alt="Avatar" fill /> : (user?.name || user?.email)?.[0].toUpperCase()}
               </Avatar>
-              <div className="grow font-semibold">{user?.email}</div>
+              <div className="grow">
+                <div className="font-semibold">{user?.name}</div>
+                <div className="text-xs">{user?.email}</div></div>
               <ChevronDown className="text-neutral-500" />
             </SidebarMenuButton>
           </SidebarMenuItem>
