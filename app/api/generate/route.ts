@@ -4,10 +4,10 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 
 import { db } from "@/db"
-import { projects, textBoxes, users } from "@/db/schema"
+import { projects, users } from "@/db/schema"
 import { ensureDatabaseSetup } from "@/db/setup"
 import { auth } from "@/lib/auth"
-import { runGenerationPipeline } from "@/lib/generation"
+import { generatePresentationImage } from "@/lib/generation"
 import { uploadImageToR2 } from "@/lib/r2"
 
 export const runtime = "nodejs"
@@ -15,6 +15,7 @@ export const maxDuration = 120
 
 const requestSchema = z.object({
   prompt: z.string().trim().min(12).max(1200),
+  model: z.enum(["Gemini", "GPT-image-2.0"]).default("GPT-image-2.0"),
 })
 
 export async function POST(request: Request) {
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Invalid request" }, { status: 400 })
   }
 
-  const { prompt } = parsedBody.data
+  const { prompt, model } = parsedBody.data
 
   const projectId = nanoid(12)
 
@@ -67,20 +68,12 @@ export async function POST(request: Request) {
     })
 
   try {
-    const pipeline = await runGenerationPipeline(prompt)
-
-    const [originalImageKey, cleanedImageKey] = await Promise.all([
-      uploadImageToR2({
-        keyPrefix: `projects/${projectId}/original`,
-        bytes: pipeline.originalImage.uint8Array,
-        mediaType: pipeline.originalImage.mediaType,
-      }),
-      uploadImageToR2({
-        keyPrefix: `projects/${projectId}/cleaned`,
-        bytes: pipeline.cleanedImage.uint8Array,
-        mediaType: pipeline.cleanedImage.mediaType,
-      }),
-    ])
+    const generated = await generatePresentationImage(prompt, model)
+    const originalImageKey = await uploadImageToR2({
+      keyPrefix: `projects/${projectId}/original`,
+      bytes: generated.image.uint8Array,
+      mediaType: generated.image.mediaType,
+    })
 
     await db.insert(projects).values({
       id: projectId,
@@ -88,32 +81,16 @@ export async function POST(request: Request) {
       prompt,
       status: "ready",
       originalImageKey,
-      cleanedImageKey,
-      width: pipeline.dimensions.width,
-      height: pipeline.dimensions.height,
-      analysis: pipeline.analysis,
+      width: generated.dimensions.width,
+      height: generated.dimensions.height,
+      analysis: { summary: "", boxes: [] },
     })
-
-    if (pipeline.analysis.boxes.length > 0) {
-      await db.insert(textBoxes).values(
-        pipeline.analysis.boxes.map((box) => ({
-          id: nanoid(14),
-          projectId,
-          content: box.text,
-          x: box.x,
-          y: box.y,
-          width: box.width,
-          height: box.height,
-          fontFamily: box.fontFamily,
-          fontSize: box.fontSize,
-          color: "#111111",
-        }))
-      )
-    }
 
     const [project] = await db
       .select({
         id: projects.id,
+        width: projects.width,
+        height: projects.height,
       })
       .from(projects)
       .where(
@@ -123,6 +100,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       projectId: project?.id ?? projectId,
+      width: project?.width ?? generated.dimensions.width,
+      height: project?.height ?? generated.dimensions.height,
     })
   } catch (error) {
     console.error("[hengen] failed to generate project", error)

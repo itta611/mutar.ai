@@ -1,8 +1,8 @@
 "use client"
 
 import { BotIcon, ProportionsIcon, SparklesIcon } from "lucide-react"
-import { startTransition, useState } from "react"
-import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuthDialog } from "@/hooks/use-auth-dialog"
@@ -18,21 +18,26 @@ const aspects = [
   { label: "1:1", width: 12, height: 12 },
 ]
 const models = [
-  "gpt-image-2.0",
-  "gpt-image-1.0"
-]
+  "Gemini",
+  "GPT-image-2.0",
+] as const
+
+type GeneratedImage = {
+  id: string
+  width: number
+  height: number
+}
 
 function AspectSelect({ selectedAspect, onAspectChange }: { selectedAspect: number, onAspectChange: (aspect: number) => void }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Button
-          variant="outline"
-          size="sm"
-        >
-          <ProportionsIcon />
-          {aspects[selectedAspect].label}
-        </Button></DropdownMenuTrigger>
+      <DropdownMenuTrigger render={<Button
+        variant="outline"
+        size="sm"
+      >
+        <ProportionsIcon />
+        {aspects[selectedAspect].label}
+      </Button>} />
       <DropdownMenuContent>
         {aspects.map((aspect, index) => (
           <DropdownMenuItem key={aspect.label} onClick={() => onAspectChange(index)}>
@@ -45,17 +50,17 @@ function AspectSelect({ selectedAspect, onAspectChange }: { selectedAspect: numb
     </DropdownMenu>)
 }
 
-function ModelSelect({ selectedModel, onModelChange }: { selectedModel: string, onModelChange: (model: string) => void }) {
+function ModelSelect({ selectedModel, onModelChange }: { selectedModel: (typeof models)[number], onModelChange: (model: (typeof models)[number]) => void }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger render={
         <Button
           variant="outline"
           size="sm"
         >
           <BotIcon />
           {selectedModel}
-        </Button></DropdownMenuTrigger>
+        </Button>} />
       <DropdownMenuContent>
         {models.map((model) => (
           <DropdownMenuItem key={model} onClick={() => onModelChange(model)}>
@@ -67,14 +72,14 @@ function ModelSelect({ selectedModel, onModelChange }: { selectedModel: string, 
 }
 
 export function PromptInput() {
-  const router = useRouter()
   const { openAuthDialog } = useAuthDialog()
   const session = authClient.useSession()
   const user = session.data?.user;
   const [prompt, setPrompt] = useState(defaultPrompt)
   const [isGenerating, setIsGenerating] = useState(false)
   const [aspect, setAspect] = useState(0)
-  const [model, setModel] = useState("gpt-image-2.0")
+  const [model, setModel] = useState<(typeof models)[number]>("GPT-image-2.0")
+  const [images, setImages] = useState<GeneratedImage[]>([])
 
   async function handleGenerate() {
     if (!user) {
@@ -92,6 +97,7 @@ export function PromptInput() {
         },
         body: JSON.stringify({
           prompt,
+          model,
         }),
       })
 
@@ -99,37 +105,56 @@ export function PromptInput() {
         throw new Error("generate_failed")
       }
 
-      const data = (await response.json()) as { projectId: string }
+      const data = (await response.json()) as GeneratedImage & {
+        projectId: string
+      }
 
-      startTransition(() => {
-        router.push(`/studio/${data.projectId}`)
-      })
+      setImages((currentImages) => [
+        { id: data.projectId, width: data.width, height: data.height },
+        ...currentImages,
+      ])
     } catch {
     } finally {
       setIsGenerating(false)
     }
   }
   return (
-    <div className="p-3.5 border-2 border-indigo-400 rounded-2xl shadow-sm">
-      <Textarea
-        id="generation-prompt"
-        name="prompt"
-        value={prompt}
-        onChange={(event) => setPrompt(event.target.value)}
-        className="min-h-10 mb-3 resize-none shadow-none border-none outline-none ring-0! px-2 py-0 rounded-none"
-        placeholder="作りたい資料画像を自然文で書いてください。"
-      />
-      <div className="flex justify-between items-end">
-        <div className="flex gap-2">
-          <AspectSelect selectedAspect={aspect} onAspectChange={setAspect} />
-          <ModelSelect selectedModel={model} onModelChange={setModel} />
-        </div>
-        <Button
-          size="lg"
-          onClick={handleGenerate}
-          disabled={isGenerating || prompt.trim().length < 12}
-        >
-          <SparklesIcon data-icon="inline-end" />
-          {isGenerating ? "生成中" : "生成"}
-        </Button></div></div>)
+    <div className="space-y-6">
+      <div className="p-3.5 border-2 border-indigo-400 rounded-2xl shadow-sm">
+        <Textarea
+          id="generation-prompt"
+          name="prompt"
+          value={prompt}
+          onChange={(event) => setPrompt(event.target.value)}
+          className="min-h-10 mb-3 resize-none shadow-none border-none outline-none ring-0! px-2 py-0 rounded-none"
+          placeholder="作りたい資料画像を自然文で書いてください。"
+        />
+        <div className="flex justify-between items-end">
+          <div className="flex gap-2">
+            <AspectSelect selectedAspect={aspect} onAspectChange={setAspect} />
+            <ModelSelect selectedModel={model} onModelChange={setModel} />
+          </div>
+          <Button
+            size="lg"
+            onClick={handleGenerate}
+            disabled={isGenerating || prompt.trim().length < 12}
+          >
+            <SparklesIcon data-icon="inline-end" />
+            {isGenerating ? "生成中" : "生成"}
+          </Button></div></div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {images.map((image) => (
+          <Image
+            key={image.id}
+            src={`/api/projects/${image.id}/image?variant=original`}
+            alt=""
+            width={image.width}
+            height={image.height}
+            unoptimized
+            className="w-full rounded-lg border"
+          />
+        ))}
+      </div>
+    </div>)
 }
