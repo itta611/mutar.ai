@@ -119,6 +119,7 @@ export function PromptInput() {
         },
         body: JSON.stringify({
           prompt,
+          aspectRatio: aspects[aspect].label,
           model,
         }),
       })

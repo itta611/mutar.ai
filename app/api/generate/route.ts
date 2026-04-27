@@ -17,6 +17,7 @@ export const maxDuration = 120
 
 const requestSchema = z.object({
   prompt: z.string().trim().min(12).max(1200),
+  aspectRatio: z.enum(["16:9", "4:3", "3:4", "1:1"]).default("16:9"),
   model: z.enum(["Gemini", "GPT-image-2.0"]).default("GPT-image-2.0"),
 })
 
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Invalid request" }, { status: 400 })
   }
 
-  const { prompt, model } = parsedBody.data
+  const { prompt, aspectRatio, model } = parsedBody.data
 
   const projectId = nanoid(12)
 
@@ -70,7 +71,7 @@ export async function POST(request: Request) {
     })
 
   try {
-    const generated = await generatePresentationImage(prompt, model)
+    const generated = await generatePresentationImage(prompt, aspectRatio, model)
     const originalImageKey = await uploadImageToR2({
       keyPrefix: `projects/${randomUUID()}`,
       bytes: generated.image.uint8Array,

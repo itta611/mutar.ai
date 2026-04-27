@@ -12,6 +12,7 @@ export type ImageModel = keyof typeof imageModels
 
 export async function generatePresentationImage(
   prompt: string,
+  aspectRatio: "16:9" | "4:3" | "3:4" | "1:1",
   selectedModel: ImageModel
 ) {
   const result = await generateImage({
@@ -20,13 +21,14 @@ export async function generatePresentationImage(
         allow_fallbacks: true,
       },
     }),
-    aspectRatio: "4:3",
+    aspectRatio,
     prompt: [
       "Create a presentation-ready visual for slides or posters.",
       "Use a calm, premium, editorial style with strong layout discipline.",
       "Include clear, realistic typography and hierarchy directly in the image.",
       "The output should feel like it was made by a senior designer, not clip art.",
       `User brief: ${prompt}`,
+      `Make the aspect ratio ${aspectRatio}`,
     ].join(" "),
   })
 
