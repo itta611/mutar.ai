@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto"
+
 import { and, eq } from "drizzle-orm"
 import { nanoid } from "nanoid"
 import { NextResponse } from "next/server"
@@ -70,7 +72,7 @@ export async function POST(request: Request) {
   try {
     const generated = await generatePresentationImage(prompt, model)
     const originalImageKey = await uploadImageToR2({
-      keyPrefix: `projects/${projectId}/original`,
+      keyPrefix: `projects/${randomUUID()}`,
       bytes: generated.image.uint8Array,
       mediaType: generated.image.mediaType,
     })
