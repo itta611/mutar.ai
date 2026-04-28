@@ -15,9 +15,9 @@ import { Logo } from "@/components/logo"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { authClient } from "@/lib/auth-client"
 import { ChevronDown } from "lucide-react"
-import Image from "next/image"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
+import Link from "next/link"
 
 export function AppSidebar() {
   const session = authClient.useSession()
@@ -26,7 +26,9 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-none">
       <SidebarHeader className="h-13 flex justify-center">
-        <Logo width={120} className="ml-2" />
+        <Link href="/" className="ml-2">
+          <Logo width={120} />
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
