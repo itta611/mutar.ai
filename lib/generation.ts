@@ -3,12 +3,9 @@ import { generateImage } from "ai"
 import { getImageDimensions } from "@/lib/image-dimensions"
 import { openrouter } from "@/lib/openrouter"
 
-const imageModels = {
-  Gemini: "google/gemini-2.5-flash-image",
-  "GPT-image-2.0": "openai/gpt-5.4-image-2",
-} as const
-
-export type ImageModel = keyof typeof imageModels
+export type ImageModel =
+  | "google/gemini-2.5-flash-image"
+  | "openai/gpt-5.4-image-2"
 
 export async function generatePresentationImage(
   prompt: string,
@@ -16,7 +13,7 @@ export async function generatePresentationImage(
   selectedModel: ImageModel
 ) {
   const result = await generateImage({
-    model: openrouter.imageModel(imageModels[selectedModel], {
+    model: openrouter.imageModel(selectedModel, {
       provider: {
         allow_fallbacks: true,
       },

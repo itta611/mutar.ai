@@ -33,7 +33,7 @@ export function PromptInput() {
     defaultValues: {
       prompt: defaultPrompt,
       aspect: "4:3",
-      model: "GPT-image-2.0",
+      model: "openai/gpt-5.4-image-2",
     },
   })
   const prompt = useWatch({ control, name: "prompt" })
