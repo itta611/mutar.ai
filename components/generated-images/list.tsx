@@ -33,7 +33,7 @@ export function GeneratedImagesList({
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {images.map((image) => (
-        <Link key={image.id} href={`/projects/${image.id}`}>
+        <Link key={image.id} href={`/editor/${image.id}`}>
           <Image
             src={`/api/projects/${image.id}/image?variant=original`}
             alt=""
