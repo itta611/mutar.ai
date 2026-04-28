@@ -1,12 +1,10 @@
 import { randomUUID } from "node:crypto"
 
-import { and, eq } from "drizzle-orm"
 import { nanoid } from "nanoid"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
-import { db } from "@/db"
-import { projects, users } from "@/db/schema"
+import { createProject, findProjectDimensionsByUserId } from "@/db/repo"
 import { auth } from "@/lib/auth"
 import { generatePresentationImage } from "@/lib/generation"
 import { uploadImageToR2 } from "@/lib/r2"
@@ -47,26 +45,6 @@ export async function POST(request: Request) {
 
   const projectId = nanoid(12)
 
-  await db
-    .insert(users)
-    .values({
-      id: session.user.id,
-      name: session.user.name,
-      email: session.user.email,
-      emailVerified: session.user.emailVerified,
-      image: session.user.image,
-    })
-    .onConflictDoUpdate({
-      target: users.id,
-      set: {
-        name: session.user.name,
-        email: session.user.email,
-        emailVerified: session.user.emailVerified,
-        image: session.user.image,
-        updatedAt: new Date(),
-      },
-    })
-
   try {
     const generated = await generatePresentationImage(
       prompt,
@@ -79,7 +57,7 @@ export async function POST(request: Request) {
       mediaType: generated.image.mediaType,
     })
 
-    await db.insert(projects).values({
+    await createProject({
       id: projectId,
       userId: session.user.id,
       prompt,
@@ -90,17 +68,10 @@ export async function POST(request: Request) {
       analysis: { summary: "", boxes: [] },
     })
 
-    const [project] = await db
-      .select({
-        id: projects.id,
-        width: projects.width,
-        height: projects.height,
-      })
-      .from(projects)
-      .where(
-        and(eq(projects.id, projectId), eq(projects.userId, session.user.id))
-      )
-      .limit(1)
+    const project = await findProjectDimensionsByUserId({
+      projectId,
+      userId: session.user.id,
+    })
 
     return NextResponse.json({
       projectId: project?.id ?? projectId,

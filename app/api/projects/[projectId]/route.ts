@@ -1,9 +1,13 @@
-import { and, eq } from "drizzle-orm"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
-import { db } from "@/db"
-import { projects, textBoxes } from "@/db/schema"
+import {
+  deleteTextBoxById,
+  findProjectIdByUserId,
+  listTextBoxIdsByProjectId,
+  touchProject,
+  updateTextBox,
+} from "@/db/repo"
 import { auth } from "@/lib/auth"
 import { isEditorFontName, normalizeEditorFont } from "@/lib/fonts"
 
@@ -54,26 +58,16 @@ export async function PATCH(
 
   const { boxes } = parsedBody.data
 
-  const [project] = await db
-    .select({
-      id: projects.id,
-    })
-    .from(projects)
-    .where(
-      and(eq(projects.id, projectId), eq(projects.userId, session.user.id))
-    )
-    .limit(1)
+  const project = await findProjectIdByUserId({
+    projectId,
+    userId: session.user.id,
+  })
 
   if (!project) {
     return NextResponse.json({ message: "Not found" }, { status: 404 })
   }
 
-  const existingBoxes = await db
-    .select({
-      id: textBoxes.id,
-    })
-    .from(textBoxes)
-    .where(eq(textBoxes.projectId, projectId))
+  const existingBoxes = await listTextBoxIdsByProjectId(projectId)
 
   const existingBoxIds = new Set(existingBoxes.map((box) => box.id))
   const hasUnknownBox = boxes.some((box) => !existingBoxIds.has(box.id))
@@ -88,34 +82,18 @@ export async function PATCH(
     .filter((id) => !submittedBoxIds.has(id))
 
   for (const box of boxes) {
-    await db
-      .update(textBoxes)
-      .set({
-        content: box.content,
-        x: box.x,
-        y: box.y,
-        width: box.width,
-        height: box.height,
-        fontFamily: normalizeEditorFont(box.fontFamily),
-        fontSize: box.fontSize,
-        color: box.color,
-        updatedAt: new Date(),
-      })
-      .where(and(eq(textBoxes.id, box.id), eq(textBoxes.projectId, projectId)))
+    await updateTextBox({
+      ...box,
+      projectId,
+      fontFamily: normalizeEditorFont(box.fontFamily),
+    })
   }
 
   for (const id of removedBoxIds) {
-    await db
-      .delete(textBoxes)
-      .where(and(eq(textBoxes.id, id), eq(textBoxes.projectId, projectId)))
+    await deleteTextBoxById({ id, projectId })
   }
 
-  await db
-    .update(projects)
-    .set({
-      updatedAt: new Date(),
-    })
-    .where(eq(projects.id, projectId))
+  await touchProject(projectId)
 
   return NextResponse.json({ ok: true })
 }

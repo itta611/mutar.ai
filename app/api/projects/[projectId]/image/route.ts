@@ -1,8 +1,6 @@
-import { and, eq } from "drizzle-orm"
 import { NextResponse } from "next/server"
 
-import { db } from "@/db"
-import { projects } from "@/db/schema"
+import { findProjectImageKeysByUserId } from "@/db/repo"
 import { auth } from "@/lib/auth"
 import { readImageFromR2 } from "@/lib/r2"
 
@@ -27,16 +25,10 @@ export async function GET(
     return NextResponse.json({ message: "Invalid variant" }, { status: 400 })
   }
 
-  const [project] = await db
-    .select({
-      originalImageKey: projects.originalImageKey,
-      cleanedImageKey: projects.cleanedImageKey,
-    })
-    .from(projects)
-    .where(
-      and(eq(projects.id, projectId), eq(projects.userId, session.user.id))
-    )
-    .limit(1)
+  const project = await findProjectImageKeysByUserId({
+    projectId,
+    userId: session.user.id,
+  })
 
   if (!project) {
     return NextResponse.json({ message: "Not found" }, { status: 404 })
