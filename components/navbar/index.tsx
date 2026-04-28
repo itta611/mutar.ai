@@ -1,6 +1,6 @@
 "use client"
 
-import { Input } from "./ui/input"
+import { Input } from "@/components/ui/input"
 
 export function Navbar() {
   return (

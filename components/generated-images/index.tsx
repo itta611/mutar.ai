@@ -3,7 +3,7 @@ import { desc, eq } from "drizzle-orm"
 import { db } from "@/db"
 import { projects } from "@/db/schema"
 import { getServerSession } from "@/lib/session"
-import { GeneratedImagesList } from "./generated-images-list"
+import { GeneratedImagesList } from "./list"
 
 export async function GeneratedImages() {
   const session = await getServerSession()

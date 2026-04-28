@@ -1,28 +1,17 @@
 "use client"
 
-import { BotIcon, ProportionsIcon, SparklesIcon } from "lucide-react"
+import { SparklesIcon } from "lucide-react"
 import { useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuthDialog } from "@/hooks/use-auth-dialog"
 import { authClient } from "@/lib/auth-client"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu"
+import { AspectSelect } from "./aspect-select"
+import { ModelSelect } from "./model-select"
 
 const defaultPrompt =
   "SaaSの料金プラン比較を、落ち着いたベージュと黒でまとめた横長スライド。大見出し、3カラム比較表、右下にCTA、洗練されたエディトリアルデザイン。"
-const aspects = [
-  { label: "16:9", width: 16, height: 9 },
-  { label: "4:3", width: 16, height: 12 },
-  { label: "3:4", width: 12, height: 16 },
-  { label: "1:1", width: 12, height: 12 },
-] as const
-const models = ["Gemini", "GPT-image-2.0"] as const
 
 type GeneratedImage = {
   id: string
@@ -32,73 +21,8 @@ type GeneratedImage = {
 
 type PromptForm = {
   prompt: string
-  aspect: number
-  model: (typeof models)[number]
-}
-
-function AspectSelect({
-  selectedAspect,
-  onAspectChange,
-}: {
-  selectedAspect: number
-  onAspectChange: (aspect: number) => void
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button variant="outline" size="sm">
-            <ProportionsIcon />
-            {aspects[selectedAspect].label}
-          </Button>
-        }
-      />
-      <DropdownMenuContent>
-        {aspects.map((aspect, index) => (
-          <DropdownMenuItem
-            key={aspect.label}
-            onClick={() => onAspectChange(index)}
-          >
-            <div className="mr-0.5 flex size-4 items-center justify-center">
-              <div
-                className="rounded-xs border-[1.5px] border-muted-foreground/80"
-                style={{ height: aspect.height, width: aspect.width }}
-              />
-            </div>
-            {aspect.label}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
-
-function ModelSelect({
-  selectedModel,
-  onModelChange,
-}: {
-  selectedModel: (typeof models)[number]
-  onModelChange: (model: (typeof models)[number]) => void
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button variant="outline" size="sm">
-            <BotIcon />
-            {selectedModel}
-          </Button>
-        }
-      />
-      <DropdownMenuContent>
-        {models.map((model) => (
-          <DropdownMenuItem key={model} onClick={() => onModelChange(model)}>
-            {model}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
+  aspect: string
+  model: string
 }
 
 export function PromptInput() {
@@ -108,13 +32,13 @@ export function PromptInput() {
   const { control, handleSubmit, register, setValue } = useForm<PromptForm>({
     defaultValues: {
       prompt: defaultPrompt,
-      aspect: 0,
+      aspect: "4:3",
       model: "GPT-image-2.0",
     },
   })
-  const prompt = useWatch({ control, name: "prompt" }) ?? ""
-  const aspect = useWatch({ control, name: "aspect" }) ?? 0
-  const model = useWatch({ control, name: "model" }) ?? "GPT-image-2.0"
+  const prompt = useWatch({ control, name: "prompt" })
+  const aspect = useWatch({ control, name: "aspect" })
+  const model = useWatch({ control, name: "model" })
   const [isGenerating, setIsGenerating] = useState(false)
 
   async function handleGenerate({ prompt, aspect, model }: PromptForm) {
@@ -133,7 +57,7 @@ export function PromptInput() {
         },
         body: JSON.stringify({
           prompt,
-          aspectRatio: aspects[aspect].label,
+          aspectRatio: aspect,
           model,
         }),
       })
