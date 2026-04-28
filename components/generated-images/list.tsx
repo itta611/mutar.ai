@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 import { useEffect, useState } from "react"
 
 export type GeneratedImage = {
@@ -32,15 +33,16 @@ export function GeneratedImagesList({
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {images.map((image) => (
-        <Image
-          key={image.id}
-          src={`/api/projects/${image.id}/image?variant=original`}
-          alt=""
-          width={image.width}
-          height={image.height}
-          unoptimized
-          className="w-full rounded-lg border"
-        />
+        <Link key={image.id} href={`/projects/${image.id}`}>
+          <Image
+            src={`/api/projects/${image.id}/image?variant=original`}
+            alt=""
+            width={image.width}
+            height={image.height}
+            unoptimized
+            className="w-full rounded-lg border"
+          />
+        </Link>
       ))}
     </div>
   )

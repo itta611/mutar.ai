@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto"
 
-import { nanoid } from "nanoid"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
@@ -43,7 +42,7 @@ export async function POST(request: Request) {
 
   const { prompt, aspectRatio, model } = parsedBody.data
 
-  const projectId = nanoid(12)
+  const projectId = randomUUID()
 
   try {
     const generated = await generatePresentationImage(

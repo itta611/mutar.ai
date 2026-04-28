@@ -16,7 +16,7 @@ import { editorFonts } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 import { TextLayer } from "@/components/text-layer"
 
-type StudioBox = {
+export type StudioBox = {
   id: string
   content: string
   x: number

@@ -57,6 +57,28 @@ export async function findProjectImageKeysByUserId({
   return project
 }
 
+export async function findProjectForEditorByUserId({
+  projectId,
+  userId,
+}: {
+  projectId: string
+  userId: string
+}) {
+  const [project] = await db
+    .select({
+      id: projects.id,
+      prompt: projects.prompt,
+      width: projects.width,
+      height: projects.height,
+      analysis: projects.analysis,
+    })
+    .from(projects)
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .limit(1)
+
+  return project
+}
+
 export async function listGeneratedImagesByUserId(userId: string) {
   return db
     .select({
