@@ -3,7 +3,6 @@ import { NextResponse } from "next/server"
 
 import { db } from "@/db"
 import { projects } from "@/db/schema"
-import { ensureDatabaseSetup } from "@/db/setup"
 import { auth } from "@/lib/auth"
 import { readImageFromR2 } from "@/lib/r2"
 
@@ -13,8 +12,6 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ projectId: string }> }
 ) {
-  await ensureDatabaseSetup()
-
   const session = await auth.api.getSession({
     headers: request.headers,
   })

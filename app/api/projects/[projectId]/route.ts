@@ -4,7 +4,6 @@ import { z } from "zod"
 
 import { db } from "@/db"
 import { projects, textBoxes } from "@/db/schema"
-import { ensureDatabaseSetup } from "@/db/setup"
 import { auth } from "@/lib/auth"
 import { isEditorFontName, normalizeEditorFont } from "@/lib/fonts"
 
@@ -30,8 +29,6 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ projectId: string }> }
 ) {
-  await ensureDatabaseSetup()
-
   const session = await auth.api.getSession({
     headers: request.headers,
   })

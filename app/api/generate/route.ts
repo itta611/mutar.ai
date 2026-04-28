@@ -7,7 +7,6 @@ import { z } from "zod"
 
 import { db } from "@/db"
 import { projects, users } from "@/db/schema"
-import { ensureDatabaseSetup } from "@/db/setup"
 import { auth } from "@/lib/auth"
 import { generatePresentationImage } from "@/lib/generation"
 import { uploadImageToR2 } from "@/lib/r2"
@@ -22,8 +21,6 @@ const requestSchema = z.object({
 })
 
 export async function POST(request: Request) {
-  await ensureDatabaseSetup()
-
   const session = await auth.api.getSession({
     headers: request.headers,
   })
@@ -71,7 +68,11 @@ export async function POST(request: Request) {
     })
 
   try {
-    const generated = await generatePresentationImage(prompt, aspectRatio, model)
+    const generated = await generatePresentationImage(
+      prompt,
+      aspectRatio,
+      model
+    )
     const originalImageKey = await uploadImageToR2({
       keyPrefix: `projects/${randomUUID()}`,
       bytes: generated.image.uint8Array,
