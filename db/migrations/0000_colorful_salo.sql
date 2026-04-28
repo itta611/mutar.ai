@@ -60,25 +60,8 @@ CREATE TABLE "project" (
 	"updatedAt" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "textBox" (
-	"id" text PRIMARY KEY NOT NULL,
-	"projectId" text NOT NULL,
-	"content" text NOT NULL,
-	"x" double precision NOT NULL,
-	"y" double precision NOT NULL,
-	"width" double precision NOT NULL,
-	"height" double precision NOT NULL,
-	"fontFamily" text NOT NULL,
-	"fontSize" integer NOT NULL,
-	"color" text DEFAULT '#111111' NOT NULL,
-	"createdAt" timestamp with time zone DEFAULT now() NOT NULL,
-	"updatedAt" timestamp with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_userId_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "session" ADD CONSTRAINT "session_userId_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "project" ADD CONSTRAINT "project_userId_user_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "textBox" ADD CONSTRAINT "textBox_projectId_project_id_fk" FOREIGN KEY ("projectId") REFERENCES "public"."project"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "account_provider_account_idx" ON "account" USING btree ("providerId","accountId");--> statement-breakpoint
-CREATE INDEX "project_user_idx" ON "project" USING btree ("userId","createdAt" DESC NULLS LAST);--> statement-breakpoint
-CREATE INDEX "textbox_project_idx" ON "textBox" USING btree ("projectId");
+CREATE INDEX "project_user_idx" ON "project" USING btree ("userId","createdAt" DESC NULLS LAST);

@@ -38,24 +38,6 @@ export async function findProjectDimensionsByUserId({
   return project
 }
 
-export async function findProjectIdByUserId({
-  projectId,
-  userId,
-}: {
-  projectId: string
-  userId: string
-}) {
-  const [project] = await db
-    .select({
-      id: projects.id,
-    })
-    .from(projects)
-    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
-    .limit(1)
-
-  return project
-}
-
 export async function findProjectImageKeysByUserId({
   projectId,
   userId,
@@ -85,13 +67,4 @@ export async function listGeneratedImagesByUserId(userId: string) {
     .from(projects)
     .where(eq(projects.userId, userId))
     .orderBy(desc(projects.createdAt))
-}
-
-export async function touchProject(projectId: string) {
-  await db
-    .update(projects)
-    .set({
-      updatedAt: new Date(),
-    })
-    .where(eq(projects.id, projectId))
 }
