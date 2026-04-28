@@ -2,6 +2,7 @@
 
 import { BotIcon, ProportionsIcon, SparklesIcon } from "lucide-react"
 import { useState } from "react"
+import { useForm, useWatch } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuthDialog } from "@/hooks/use-auth-dialog"
@@ -20,13 +21,19 @@ const aspects = [
   { label: "4:3", width: 16, height: 12 },
   { label: "3:4", width: 12, height: 16 },
   { label: "1:1", width: 12, height: 12 },
-]
+] as const
 const models = ["Gemini", "GPT-image-2.0"] as const
 
 type GeneratedImage = {
   id: string
   width: number
   height: number
+}
+
+type PromptForm = {
+  prompt: string
+  aspect: number
+  model: (typeof models)[number]
 }
 
 function AspectSelect({
@@ -98,12 +105,19 @@ export function PromptInput() {
   const { openAuthDialog } = useAuthDialog()
   const session = authClient.useSession()
   const user = session.data?.user
-  const [prompt, setPrompt] = useState(defaultPrompt)
+  const { control, handleSubmit, register, setValue } = useForm<PromptForm>({
+    defaultValues: {
+      prompt: defaultPrompt,
+      aspect: 0,
+      model: "GPT-image-2.0",
+    },
+  })
+  const prompt = useWatch({ control, name: "prompt" }) ?? ""
+  const aspect = useWatch({ control, name: "aspect" }) ?? 0
+  const model = useWatch({ control, name: "model" }) ?? "GPT-image-2.0"
   const [isGenerating, setIsGenerating] = useState(false)
-  const [aspect, setAspect] = useState(0)
-  const [model, setModel] = useState<(typeof models)[number]>("GPT-image-2.0")
 
-  async function handleGenerate() {
+  async function handleGenerate({ prompt, aspect, model }: PromptForm) {
     if (!user) {
       openAuthDialog()
       return
@@ -147,29 +161,36 @@ export function PromptInput() {
     }
   }
   return (
-    <div className="rounded-2xl border-2 border-indigo-400 p-3.5 shadow-sm">
+    <form
+      onSubmit={handleSubmit(handleGenerate)}
+      className="rounded-2xl border-2 border-indigo-400 p-3.5 shadow-sm"
+    >
       <Textarea
         id="generation-prompt"
-        name="prompt"
-        value={prompt}
-        onChange={(event) => setPrompt(event.target.value)}
+        {...register("prompt")}
         className="mb-3 min-h-10 resize-none rounded-none border-none px-2 py-0 shadow-none ring-0! outline-none"
         placeholder="作りたい資料画像を自然文で書いてください。"
       />
       <div className="flex items-end justify-between">
         <div className="flex gap-2">
-          <AspectSelect selectedAspect={aspect} onAspectChange={setAspect} />
-          <ModelSelect selectedModel={model} onModelChange={setModel} />
+          <AspectSelect
+            selectedAspect={aspect}
+            onAspectChange={(aspect) => setValue("aspect", aspect)}
+          />
+          <ModelSelect
+            selectedModel={model}
+            onModelChange={(model) => setValue("model", model)}
+          />
         </div>
         <Button
+          type="submit"
           size="lg"
-          onClick={handleGenerate}
-          disabled={isGenerating || prompt.trim().length < 12}
+          disabled={isGenerating || prompt.trim().length === 0}
         >
           <SparklesIcon data-icon="inline-end" />
           {isGenerating ? "生成中" : "生成"}
         </Button>
       </div>
-    </div>
+    </form>
   )
 }
