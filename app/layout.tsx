@@ -85,9 +85,9 @@ export default function RootLayout({
             <ThemeProvider>
               <AppSidebar />
               <div className="bg-background h-svh w-full z-50">
-                <div className="rounded-tl-md h-full w-full bg-background overflow-hidden outline-1 outline-border">
+                <div className="overflow-y-auto rounded-tl-md h-full w-full bg-background overflow-hidden outline-1 outline-border">
                   <Navbar />
-                  <div className="max-w-[800px] px-10 mx-auto">
+                  <div className="px-10 mx-auto">
                     {children}
                   </div>
                 </div></div>
