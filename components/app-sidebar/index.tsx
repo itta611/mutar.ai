@@ -44,7 +44,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem className="border-t pt-1.5">
+          <SidebarMenuItem className="border-t pt-2">
             <DropdownMenu>
               <DropdownMenuTrigger render={
                 <SidebarMenuButton className="h-15 gap-4">

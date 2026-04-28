@@ -77,8 +77,8 @@ export default function RootLayout({
       <body>
         <SidebarProvider style={
           {
-            "--sidebar-width": "20rem",
-            "--sidebar-width-mobile": "20rem",
+            "--sidebar-width": "18.75rem",
+            "--sidebar-width-mobile": "18.75rem",
           } as React.CSSProperties
         }>
           <AuthDialogProvider>
