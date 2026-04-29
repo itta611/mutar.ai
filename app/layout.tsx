@@ -83,13 +83,7 @@ export default function RootLayout({
         >
           <AuthDialogProvider>
             <ThemeProvider>
-              <AppSidebar />
-              <div className="h-dvh w-full overflow-y-auto flex flex-col">
-                <Navbar />
-                <div className="grow rounded-tl-md border border-border/70 overflow-hidden">
-                  {children}
-                </div>
-              </div>
+              {children}
               <AuthDialog />
             </ThemeProvider>
           </AuthDialogProvider>

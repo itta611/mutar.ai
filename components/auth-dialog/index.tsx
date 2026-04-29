@@ -1,12 +1,17 @@
 "use client"
 
-import { X } from "lucide-react"
 import { useEffect, useState } from "react"
 
 import { authClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useAuthDialog } from "@/hooks/use-auth-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "../ui/dialog"
 
 function getNameFromEmail(email: string) {
   const localPart = email.trim().split("@")[0]?.trim()
@@ -91,46 +96,34 @@ export function AuthDialog() {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 backdrop-blur-sm"
-      onClick={closeAuthDialog}
+    <Dialog
+      open={isAuthDialogOpen}
+      onOpenChange={(open) => !open && closeAuthDialog()}
     >
-      <div
-        className="relative w-full max-w-md rounded-[2rem] border border-white/50 bg-[#f8f4ec] p-6 shadow-[0_40px_120px_rgba(15,15,15,0.25)]"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <button
-          type="button"
-          onClick={closeAuthDialog}
-          className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white/70 text-black/70 transition hover:bg-white"
-          aria-label="Close"
-        >
-          <X className="size-4" />
-        </button>
+      <DialogContent>
+        <DialogTitle className="text-xl font-bold text-center">
+          ログイン・新規登録
+        </DialogTitle>
+        <DialogDescription className="text-center">
+          続行するにはログインまたは新規登録してください。
+        </DialogDescription>
 
-        <div className="space-y-3 pr-8">
-          <p className="text-xs font-medium tracking-[0.22em] text-black/45 uppercase">
-            BetterAuth
-          </p>
-          <h2 className="font-heading text-3xl tracking-tight text-black">
-            続けるにはログイン
-          </h2>
-          <p className="text-sm leading-6 text-black/60">
-            Google かメールのマジックリンクだけで入れるようにしています。
-          </p>
-        </div>
-
-        <div className="mt-8 flex flex-col gap-3">
+        <div className="flex flex-col gap-3">
           <Button
             type="button"
             size="lg"
+            variant="outline"
             onClick={handleGoogleLogin}
-            disabled={busyMode !== null}
+            disabled={busyMode === "google"}
           >
-            {busyMode === "google"
-              ? "Google を開いています..."
-              : "Google アカウントでログイン"}
+            Google アカウントでログイン
           </Button>
+
+          <div className="flex items-center h-12">
+            <div className="h-px flex-1 bg-border" />
+            <span className="mx-3 text-sm text-muted-foreground">または</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
 
           <Input
             id="login-email"
@@ -144,10 +137,9 @@ export function AuthDialog() {
 
           <Button
             type="button"
-            variant="outline"
             size="lg"
             onClick={handleMagicLink}
-            disabled={busyMode !== null || !email.trim()}
+            disabled={busyMode === "email"}
           >
             {busyMode === "email" ? "リンクを発行しています..." : "続ける"}
           </Button>
@@ -164,7 +156,7 @@ export function AuthDialog() {
             {error}
           </p>
         ) : null}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
