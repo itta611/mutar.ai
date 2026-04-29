@@ -4,8 +4,6 @@ import { z } from "zod"
 export const env = createEnv({
   server: {
     OPENROUTER_API_KEY: z.string().min(1),
-    OPENROUTER_IMAGE_MODEL: z.string().default("openai/gpt-5-image"),
-    OPENROUTER_TEXT_MODEL: z.string().default("google/gemini-2.5-flash"),
     GOOGLE_CLOUD_PROJECT_ID: z.string().min(1),
     GOOGLE_CLOUD_CLIENT_EMAIL: z.string().min(1),
     GOOGLE_CLOUD_PRIVATE_KEY: z.string().min(1),
@@ -17,7 +15,7 @@ export const env = createEnv({
     AUTH_GOOGLE_SECRET: z.string().min(1),
     DATABASE_URL: z.string().min(1),
     AUTH_SECRET: z.string().min(1),
-    BETTER_AUTH_URL: z.string().url(),
+    BETTER_AUTH_URL: z.string(),
     RESEND_SECRET: z.string().min(1),
     RESEND_FROM: z.string().min(1),
   },

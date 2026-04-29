@@ -16,9 +16,9 @@ export default function RootLayout({
   return (
     <>
       <AppSidebar />
-      <div className="h-dvh w-full overflow-y-auto flex flex-col">
+      <div className="overflow-visible h-dvh w-full overflow-y-auto flex flex-col">
         <Navbar />
-        <div className="grow rounded-tl-md border border-border/70 overflow-hidden">
+        <div className="z-50 grow rounded-tl-md outline outline-border/70">
           {children}
         </div>
       </div>
