@@ -1,8 +1,10 @@
 "use client"
 
+import { useSetAtom } from "jotai"
 import { SparklesIcon } from "lucide-react"
 import { useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
+import { generatedImageIdsAtom } from "@/components/generated-images/atoms"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuthDialog } from "@/hooks/use-auth-dialog"
@@ -13,12 +15,6 @@ import { ModelSelect } from "./model-select"
 const defaultPrompt =
   "SaaSの料金プラン比較を、落ち着いたベージュと黒でまとめた横長スライド。大見出し、3カラム比較表、右下にCTA、洗練されたエディトリアルデザイン。"
 
-type GeneratedImage = {
-  id: string
-  width: number
-  height: number
-}
-
 type PromptForm = {
   prompt: string
   aspect: string
@@ -26,6 +22,7 @@ type PromptForm = {
 }
 
 export function PromptInput() {
+  const setImageIds = useSetAtom(generatedImageIdsAtom)
   const { openAuthDialog } = useAuthDialog()
   const session = authClient.useSession()
   const user = session.data?.user
@@ -66,19 +63,9 @@ export function PromptInput() {
         throw new Error("generate_failed")
       }
 
-      const data = (await response.json()) as GeneratedImage & {
-        projectId: string
-      }
+      const data = (await response.json()) as { projectId: string }
 
-      window.dispatchEvent(
-        new CustomEvent<GeneratedImage>("generated-image-created", {
-          detail: {
-            id: data.projectId,
-            width: data.width,
-            height: data.height,
-          },
-        })
-      )
+      setImageIds((images) => [data.projectId, ...images])
     } catch {
     } finally {
       setIsGenerating(false)
@@ -87,7 +74,7 @@ export function PromptInput() {
   return (
     <form
       onSubmit={handleSubmit(handleGenerate)}
-      className="mx-auto max-w-200 rounded-2xl border-2 border-indigo-400 p-3.5 shadow-sm bg-background"
+      className="mx-auto max-w-200 rounded-2xl border-2 border-indigo-400 p-3.5 shadow-lg/6 bg-background"
     >
       <Textarea
         id="generation-prompt"

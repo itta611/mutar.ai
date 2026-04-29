@@ -1,18 +1,16 @@
-import { GeneratedImages } from "@/components/generated-images"
-import LogoIcon from "@/components/logo-icon"
-import { PromptInput } from "@/components/prompt-input"
+import { listGeneratedImagesByUserId } from "@/db/repo"
+import { getServerSession } from "@/lib/session"
+import { HomeContent } from "./content"
 
 export default async function Page() {
+  const session = await getServerSession()
+  const images = session
+    ? (await listGeneratedImagesByUserId(session.user.id)).map(({ id }) => id)
+    : []
+
   return (
     <div className="pt-10 bg-zinc-50 h-full px-20 pb-10">
-      <div className="mb-20">
-        <div className="flex w-200 mx-auto mb-5 px-3 items-center gap-3">
-          <LogoIcon width={32} />
-          <div className="text-xl">何を作りますか？</div>
-        </div>
-        <PromptInput />
-      </div>
-      <GeneratedImages />
+      <HomeContent initialImages={images} />
     </div>
   )
 }
