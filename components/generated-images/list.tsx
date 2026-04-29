@@ -59,7 +59,7 @@ export function GeneratedImagesList({
               unoptimized
               className="aspect-[16/9] w-full object-cover"
             />
-            <div className="flex items-center justify-between px-3 py-2.5">
+            <div className="flex items-center justify-between px-4 py-2.5">
               <span className="text-sm">タイトル</span>
               <DropdownMenu>
                 <DropdownMenuTrigger
