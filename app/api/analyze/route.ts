@@ -1,9 +1,11 @@
 import vision from "@google-cloud/vision"
 import { NextResponse } from "next/server"
+import sharp from "sharp"
 import { z } from "zod"
 
 import { findProjectImageKeysByUserId } from "@/db/repo"
 import { env } from "@/lib/env"
+import { getImageDimensions } from "@/lib/image-dimensions"
 import { readImageFromR2 } from "@/lib/r2"
 import { getServerSession } from "@/lib/session"
 
@@ -25,6 +27,36 @@ const requestSchema = z.object({
 type VisionVertex = {
   x?: number
   y?: number
+}
+
+function rectFromVertices(vertices: VisionVertex[]) {
+  const xs = vertices.map((vertex) => vertex.x ?? 0)
+  const ys = vertices.map((vertex) => vertex.y ?? 0)
+  const left = Math.min(...xs)
+  const top = Math.min(...ys)
+
+  return {
+    height: Math.max(...ys) - top,
+    left,
+    top,
+    width: Math.max(...xs) - left,
+  }
+}
+
+function createOverlaySvg(options: {
+  boxes: VisionVertex[][]
+  height: number
+  width: number
+}) {
+  const rects = options.boxes
+    .filter((box) => box.length > 0)
+    .map((box) => {
+      const rect = rectFromVertices(box)
+      return `<rect x="${rect.left}" y="${rect.top}" width="${rect.width}" height="${rect.height}" fill="rgba(0, 209, 255, 0.12)" stroke="#00d1ff" stroke-width="3"/>`
+    })
+    .join("")
+
+  return `<svg width="${options.width}" height="${options.height}" viewBox="0 0 ${options.width} ${options.height}" xmlns="http://www.w3.org/2000/svg">${rects}</svg>`
 }
 
 export async function POST(request: Request) {
@@ -63,13 +95,33 @@ export async function POST(request: Request) {
       image: { content: Buffer.from(image.bytes).toString("base64") },
     })
 
-    const words =
-      result.textAnnotations?.slice(1).map((annotation) => ({
-        label: annotation.description ?? "",
-        bbox: (annotation.boundingPoly?.vertices ?? []) as VisionVertex[],
-      })) ?? []
+    const boxes =
+      result.textAnnotations
+        ?.slice(1)
+        .map(
+          (annotation) =>
+            (annotation.boundingPoly?.vertices ?? []) as VisionVertex[]
+        ) ?? []
 
-    return NextResponse.json({ boxes: words })
+    const dimensions = getImageDimensions(image.bytes, image.mediaType)
+    const overlay = createOverlaySvg({
+      boxes,
+      height: dimensions.height,
+      width: dimensions.width,
+    })
+    const rendered = await sharp(Buffer.from(image.bytes))
+      .composite([{ input: Buffer.from(overlay) }])
+      .png()
+      .toBuffer()
+    const body = new ArrayBuffer(rendered.byteLength)
+    new Uint8Array(body).set(rendered)
+
+    return new Response(body, {
+      headers: {
+        "Cache-Control": "no-store",
+        "Content-Type": "image/png",
+      },
+    })
   } catch (error) {
     console.error("[hengen] failed to analyze image", error)
     return NextResponse.json(
