@@ -8,7 +8,7 @@ const Logo = (props: React.SVGProps<SVGSVGElement>) => (
     {...props}
   >
     <defs>
-      <style>{"\n      .cls-1 {\n        fill: #6366f1;\n      }\n    "}</style>
+      <style>{"\n      .cls-1 {\n        fill: #615fff;\n      }\n    "}</style>
     </defs>
     <g id="Layer_1-2" data-name="Layer 1">
       <g>
