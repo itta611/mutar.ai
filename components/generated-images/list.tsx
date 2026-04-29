@@ -1,5 +1,6 @@
 "use client"
 
+import { EllipsisIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -31,12 +32,12 @@ export function GeneratedImagesList({
   }, [])
 
   return (
-    <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-2 gap-x-7 gap-y-7 sm:grid-cols-3 xl:grid-cols-4">
       {images.map((image) => (
         <Link
           key={image.id}
           href={`/editor/${image.id}`}
-          className="block aspect-[4/3] overflow-hidden rounded-xl shadow-xs"
+          className="block overflow-hidden rounded-xl bg-accent"
         >
           <Image
             src={`/api/projects/${image.id}/image?variant=original`}
@@ -44,8 +45,12 @@ export function GeneratedImagesList({
             width={image.width}
             height={image.height}
             unoptimized
-            className="size-full object-cover"
+            className="w-full object-cover aspect-[16/9]"
           />
+          <div className="px-3 py-2.5 flex justify-between items-center">
+            <span>タイトル</span>
+            <EllipsisIcon className="size-4.5 text-muted-foreground" />
+          </div>
         </Link>
       ))}
     </div>
