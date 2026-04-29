@@ -5,6 +5,14 @@ import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "../ui/button"
+
 export type GeneratedImage = {
   id: string
   width: number
@@ -31,27 +39,48 @@ export function GeneratedImagesList({
     }
   }, [])
 
+  function deleteImage(id: string) {
+    setImages((currentImages) =>
+      currentImages.filter((image) => image.id !== id)
+    )
+    fetch(`/api/projects/${id}`, { method: "DELETE" })
+  }
+
   return (
     <div className="grid grid-cols-2 gap-x-7 gap-y-7 sm:grid-cols-3 xl:grid-cols-4">
       {images.map((image) => (
-        <Link
-          key={image.id}
-          href={`/editor/${image.id}`}
-          className="block overflow-hidden rounded-xl bg-accent"
-        >
-          <Image
-            src={`/api/projects/${image.id}/image?variant=original`}
-            alt=""
-            width={image.width}
-            height={image.height}
-            unoptimized
-            className="w-full object-cover aspect-[16/9]"
-          />
-          <div className="px-3 py-2.5 flex justify-between items-center">
+        <div key={image.id} className="overflow-hidden rounded-xl bg-accent">
+          <Link href={`/editor/${image.id}`} className="block">
+            <Image
+              src={`/api/projects/${image.id}/image?variant=original`}
+              alt=""
+              width={image.width}
+              height={image.height}
+              unoptimized
+              className="aspect-[16/9] w-full object-cover"
+            />
+          </Link>
+          <div className="flex items-center justify-between px-3 py-2.5">
             <span>タイトル</span>
-            <EllipsisIcon className="size-4.5 text-muted-foreground" />
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button size="icon-xs" variant="ghost" type="button" className="text-muted-foreground">
+                    <EllipsisIcon className="size-4.5" />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => deleteImage(image.id)}
+                >
+                  削除
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        </Link>
+        </div>
       ))}
     </div>
   )

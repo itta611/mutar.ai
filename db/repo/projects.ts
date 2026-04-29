@@ -90,3 +90,18 @@ export async function listGeneratedImagesByUserId(userId: string) {
     .where(eq(projects.userId, userId))
     .orderBy(desc(projects.createdAt))
 }
+
+export async function deleteProjectByUserId({
+  projectId,
+  userId,
+}: {
+  projectId: string
+  userId: string
+}) {
+  const [project] = await db
+    .delete(projects)
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .returning({ id: projects.id })
+
+  return project
+}
