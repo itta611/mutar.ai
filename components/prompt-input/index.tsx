@@ -79,7 +79,7 @@ export function PromptInput() {
       <Textarea
         id="generation-prompt"
         {...register("prompt")}
-        className="mb-3 min-h-10 resize-none rounded-none border-none px-2 py-0 shadow-none ring-0! outline-none"
+        className="min-h-10 resize-none rounded-none border-none px-2 pt-0 pb-2 shadow-none ring-0! outline-none leading-relaxed"
         placeholder="作りたい資料画像を自然文で書いてください。"
       />
       <div className="flex items-end justify-between">
