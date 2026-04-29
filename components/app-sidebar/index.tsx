@@ -23,8 +23,10 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export function AppSidebar() {
+  const router = useRouter()
   const session = authClient.useSession()
   const user = session.data?.user
 
@@ -84,7 +86,12 @@ export function AppSidebar() {
                 }
               ></DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => authClient.signOut()}>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    await authClient.signOut()
+                    router.push("/")
+                  }}
+                >
                   ログアウト
                 </DropdownMenuItem>
               </DropdownMenuContent>
