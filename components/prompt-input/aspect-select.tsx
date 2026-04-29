@@ -39,7 +39,7 @@ export function AspectSelect({
           >
             <div className="mr-0.5 flex size-4 items-center justify-center">
               <div
-                className="rounded-xs border-[1.5px] border-muted-foreground/80"
+                className="rounded-xs border-[1.5px] border-muted-foreground/85"
                 style={{ height: aspect.height, width: aspect.width }}
               />
             </div>
