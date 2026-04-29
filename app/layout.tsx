@@ -64,7 +64,6 @@ export default function RootLayout({
       lang="ja"
       suppressHydrationWarning
       className={cn(
-        "font-sans",
         manrope.variable,
         cormorant.variable,
         editorSans.variable,

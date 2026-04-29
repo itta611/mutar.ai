@@ -79,7 +79,7 @@ export function AppSidebar() {
                         {user ? user.email : <Skeleton className="h-3 w-24" />}
                       </div>
                     </div>
-                    <ChevronDown className="text-neutral-500" />
+                    <ChevronDown className="text-zinc-500" />
                   </SidebarMenuButton>
                 }
               ></DropdownMenuTrigger>
