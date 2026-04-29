@@ -64,7 +64,6 @@ export default function RootLayout({
       lang="ja"
       suppressHydrationWarning
       className={cn(
-        "antialiased",
         "font-sans",
         manrope.variable,
         cormorant.variable,
@@ -89,7 +88,7 @@ export default function RootLayout({
               <div className="z-50 h-svh w-full bg-background">
                 <div className="h-full w-full overflow-hidden overflow-y-auto rounded-tl-md bg-background outline-1 outline-border">
                   <Navbar />
-                  <div className="mx-auto px-10">{children}</div>
+                  {children}
                 </div>
               </div>
               <AuthDialog />

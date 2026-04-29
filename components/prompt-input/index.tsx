@@ -87,7 +87,7 @@ export function PromptInput() {
   return (
     <form
       onSubmit={handleSubmit(handleGenerate)}
-      className="mx-auto max-w-200 rounded-2xl border-2 border-indigo-400 p-3.5 shadow-sm"
+      className="mx-auto max-w-200 rounded-2xl border-2 border-indigo-400 p-3.5 shadow-sm bg-background"
     >
       <Textarea
         id="generation-prompt"
