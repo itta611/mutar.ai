@@ -5,7 +5,7 @@ import { magicLink } from "better-auth/plugins"
 
 import { db } from "@/db"
 import * as schema from "@/db/schema"
-import { sendMagicLinkEmail } from "@/lib/email"
+import { sendMagicLinkEmail } from "@/email"
 import { env } from "@/lib/env"
 
 export const auth = betterAuth({
