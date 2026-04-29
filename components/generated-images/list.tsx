@@ -31,12 +31,12 @@ export function GeneratedImagesList({
   }, [])
 
   return (
-    <div className="columns-2 gap-5 px-10 sm:columns-3 xl:columns-4">
+    <div className="grid grid-cols-2 gap-5 px-10 sm:grid-cols-3 xl:grid-cols-4">
       {images.map((image) => (
         <Link
           key={image.id}
           href={`/editor/${image.id}`}
-          className="mb-5 block break-inside-avoid"
+          className="block aspect-[4/3] overflow-hidden rounded-xl shadow-xs"
         >
           <Image
             src={`/api/projects/${image.id}/image?variant=original`}
@@ -44,7 +44,7 @@ export function GeneratedImagesList({
             width={image.width}
             height={image.height}
             unoptimized
-            className="w-full rounded-xl shadow-xs"
+            className="size-full object-cover"
           />
         </Link>
       ))}
