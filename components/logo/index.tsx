@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from "react"
 const Logo = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     id="Layer_2"
@@ -47,5 +47,5 @@ const Logo = (props: React.SVGProps<SVGSVGElement>) => (
       </g>
     </g>
   </svg>
-);
-export { Logo };
+)
+export { Logo }

@@ -31,7 +31,7 @@ export function GeneratedImagesList({
   }, [])
 
   return (
-    <div className="columns-2 gap-5 sm:columns-3 xl:columns-4 px-10">
+    <div className="columns-2 gap-5 px-10 sm:columns-3 xl:columns-4">
       {images.map((image) => (
         <Link
           key={image.id}

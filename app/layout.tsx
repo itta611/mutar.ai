@@ -75,22 +75,23 @@ export default function RootLayout({
       )}
     >
       <body>
-        <SidebarProvider style={
-          {
-            "--sidebar-width": "18.75rem",
-            "--sidebar-width-mobile": "18.75rem",
-          } as React.CSSProperties
-        }>
+        <SidebarProvider
+          style={
+            {
+              "--sidebar-width": "18.75rem",
+              "--sidebar-width-mobile": "18.75rem",
+            } as React.CSSProperties
+          }
+        >
           <AuthDialogProvider>
             <ThemeProvider>
               <AppSidebar />
-              <div className="bg-background h-svh w-full z-50">
-                <div className="overflow-y-auto rounded-tl-md h-full w-full bg-background overflow-hidden outline-1 outline-border">
+              <div className="z-50 h-svh w-full bg-background">
+                <div className="h-full w-full overflow-hidden overflow-y-auto rounded-tl-md bg-background outline-1 outline-border">
                   <Navbar />
-                  <div className="px-10 mx-auto">
-                    {children}
-                  </div>
-                </div></div>
+                  <div className="mx-auto px-10">{children}</div>
+                </div>
+              </div>
               <AuthDialog />
             </ThemeProvider>
           </AuthDialogProvider>

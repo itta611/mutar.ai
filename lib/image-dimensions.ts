@@ -13,10 +13,8 @@ export function getImageDimensions(bytes: Uint8Array, mediaType: string) {
     const signature = String.fromCharCode(...bytes.slice(12, 16))
 
     if (signature === "VP8X") {
-      const width =
-        1 + (bytes[24] | (bytes[25] << 8) | (bytes[26] << 16))
-      const height =
-        1 + (bytes[27] | (bytes[28] << 8) | (bytes[29] << 16))
+      const width = 1 + (bytes[24] | (bytes[25] << 8) | (bytes[26] << 16))
+      const height = 1 + (bytes[27] | (bytes[28] << 8) | (bytes[29] << 16))
       return { width, height }
     }
   }
