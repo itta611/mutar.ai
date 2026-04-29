@@ -49,7 +49,7 @@ export function GeneratedImagesList({
   return (
     <div className="grid grid-cols-2 gap-x-7 gap-y-7 sm:grid-cols-3 xl:grid-cols-4">
       {images.map((image) => (
-        <div key={image.id} className="overflow-hidden rounded-xl bg-accent">
+        <div key={image.id} className="active:scale-99 transition duration-75">
           <Link href={`/editor/${image.id}`} className="block">
             <Image
               src={`/api/projects/${image.id}/image?variant=original`}
@@ -57,9 +57,9 @@ export function GeneratedImagesList({
               width={image.width}
               height={image.height}
               unoptimized
-              className="aspect-[16/9] w-full object-cover"
+              className="aspect-[16/9] w-full object-cover border rounded-t-xl"
             />
-            <div className="flex items-center justify-between px-4 py-2.5">
+            <div className="flex items-center justify-between px-4 py-2.5 rounded-b-xl bg-accent">
               <span className="text-sm">タイトル</span>
               <DropdownMenu>
                 <DropdownMenuTrigger
