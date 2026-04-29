@@ -59,27 +59,36 @@ export function GeneratedImagesList({
               unoptimized
               className="aspect-[16/9] w-full object-cover"
             />
+            <div className="flex items-center justify-between px-3 py-2.5">
+              <span className="text-sm">タイトル</span>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      size="icon-xs"
+                      variant="ghost"
+                      type="button"
+                      className="text-muted-foreground"
+                      onClick={(event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                      }}
+                    >
+                      <EllipsisIcon className="size-4.5" />
+                    </Button>
+                  }
+                />
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => deleteImage(image.id)}
+                  >
+                    削除
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </Link>
-          <div className="flex items-center justify-between px-3 py-2.5">
-            <span>タイトル</span>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button size="icon-xs" variant="ghost" type="button" className="text-muted-foreground">
-                    <EllipsisIcon className="size-4.5" />
-                  </Button>
-                }
-              />
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  variant="destructive"
-                  onClick={() => deleteImage(image.id)}
-                >
-                  削除
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
         </div>
       ))}
     </div>
