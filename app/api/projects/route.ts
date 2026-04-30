@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     id: projectId,
     userId: session.user.id,
     prompt: parsedBody.data.prompt,
-    status: "generating",
+    status: "loading",
     originalImageKey: "",
     width: 0,
     height: 0,

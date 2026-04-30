@@ -4,8 +4,9 @@ import { useMutation } from "@tanstack/react-query"
 import { useSetAtom } from "jotai"
 
 import {
-  generatedProjectImagesAtom,
-  projectGenerationStatusAtom,
+  editorProjectStatusAtom,
+  editorPmageSizeAtom,
+  editorProjectIdAtom,
 } from "@/atom/generate"
 import { apiRequest } from "@/lib/api-request"
 
@@ -41,8 +42,9 @@ async function generateProjectImage({
 }
 
 export function useGenerateProject() {
-  const setGeneratedProjectImages = useSetAtom(generatedProjectImagesAtom)
-  const setProjectGenerationStatus = useSetAtom(projectGenerationStatusAtom)
+  const setEditorProjectStatus = useSetAtom(editorProjectStatusAtom)
+  const setImageSize = useSetAtom(editorPmageSizeAtom)
+  const setProjectId = useSetAtom(editorProjectIdAtom)
   const createProjectMutation = useMutation({ mutationFn: createProject })
   const generateProjectMutation = useMutation({
     mutationFn: generateProjectImage,
@@ -51,7 +53,8 @@ export function useGenerateProject() {
   return async function generateProject(input: GenerateProjectInput) {
     const data = await createProjectMutation.mutateAsync(input)
 
-    setProjectGenerationStatus((status) => ({
+    setProjectId(data.projectId)
+    setEditorProjectStatus((status) => ({
       ...status,
       [data.projectId]: "generating",
     }))
@@ -61,21 +64,17 @@ export function useGenerateProject() {
         ...input,
       })
       .then((image) => {
-        setGeneratedProjectImages((images) => ({
-          ...images,
-          [data.projectId]: {
-            height: image.height,
-            imageData: `/api/projects/${data.projectId}/image`,
-            width: image.width,
-          },
+        setImageSize((sizes) => ({
+          ...sizes,
+          [data.projectId]: [image.width, image.height],
         }))
-        setProjectGenerationStatus((status) => ({
+        setEditorProjectStatus((status) => ({
           ...status,
           [data.projectId]: "ready",
         }))
       })
       .catch(() => {
-        setProjectGenerationStatus((status) => ({
+        setEditorProjectStatus((status) => ({
           ...status,
           [data.projectId]: "error",
         }))

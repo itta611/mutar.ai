@@ -1,29 +1,61 @@
 "use client"
 
-import { useAtomValue } from "jotai"
+import { useAtomValue, useSetAtom } from "jotai"
 import Image from "next/image"
+import { useEffect } from "react"
 
 import {
-  generatedProjectImagesAtom,
-  projectGenerationStatusAtom,
+  editorProjectStatusAtom,
+  type ImageSize,
+  editorPmageSizeAtom,
+  editorProjectIdAtom,
 } from "@/atom/generate"
 
-export function EditorContent({ projectId }: { projectId: string }) {
-  const generatedProjectImages = useAtomValue(generatedProjectImagesAtom)
-  const projectGenerationStatus = useAtomValue(projectGenerationStatusAtom)
-  const image = generatedProjectImages[projectId]
-  const status = projectGenerationStatus[projectId]
+export function EditorContent({
+  initialImageSize,
+  projectId,
+}: {
+  initialImageSize: ImageSize
+  projectId: string
+}) {
+  const editorProjectStatus = useAtomValue(editorProjectStatusAtom)
+  const imageSizes = useAtomValue(editorPmageSizeAtom)
+  const setEditorProjectStatus = useSetAtom(editorProjectStatusAtom)
+  const setImageSize = useSetAtom(editorPmageSizeAtom)
+  const setProjectId = useSetAtom(editorProjectIdAtom)
+  const imageSize = imageSizes[projectId]
+  const status = editorProjectStatus[projectId]
 
-  if (status === "generating" || !image) {
+  useEffect(() => {
+    setProjectId(projectId)
+    setImageSize((sizes) => ({
+      ...sizes,
+      [projectId]: initialImageSize,
+    }))
+    setEditorProjectStatus((status) => ({
+      ...status,
+      [projectId]: "ready",
+    }))
+  }, [
+    initialImageSize,
+    projectId,
+    setEditorProjectStatus,
+    setImageSize,
+    setProjectId,
+  ])
+
+  if (status === "loading" || !imageSize) {
     return null
   }
 
+  const [width, height] = imageSize
+
   return (
     <Image
-      src={image.imageData}
+      src={`/api/projects/${projectId}/image`}
       alt=""
-      width={image.width}
-      height={image.height}
+      width={width}
+      height={height}
       unoptimized
       className="max-h-full w-auto max-w-full object-contain"
     />
