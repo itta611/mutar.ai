@@ -1,20 +1,19 @@
-import { randomUUID } from "node:crypto"
-
+import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import { generateImage } from "ai"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
-import { createProject, findProjectDimensionsByUserId } from "@/db/repo"
-import { getImageDimensions } from "@/lib/image-dimensions"
+import { updateProjectImageByUserId } from "@/db/repo"
 import { auth } from "@/lib/auth"
-import { uploadImageToR2 } from "@/lib/r2"
 import { env } from "@/lib/env"
-import { createOpenRouter } from "@openrouter/ai-sdk-provider"
+import { getImageDimensions } from "@/lib/image-dimensions"
+import { uploadImageToR2 } from "@/lib/r2"
 
 export const runtime = "nodejs"
 export const maxDuration = 120
 
 const requestSchema = z.object({
+  projectId: z.string().min(1),
   prompt: z.string().trim().min(12).max(1200),
   aspectRatio: z.enum(["16:9", "4:3", "3:4", "1:1"]),
   model: z.enum(["google/gemini-2.5-flash-image", "openai/gpt-5.4-image-2"]),
@@ -82,9 +81,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Invalid request" }, { status: 400 })
   }
 
-  const { prompt, aspectRatio, model } = parsedBody.data
-
-  const projectId = randomUUID()
+  const { projectId, prompt, aspectRatio, model } = parsedBody.data
 
   try {
     const generated = await generatePresentationImage(
@@ -93,31 +90,27 @@ export async function POST(request: Request) {
       model
     )
     const originalImageKey = await uploadImageToR2({
-      keyPrefix: `projects/${randomUUID()}`,
+      keyPrefix: `projects/${projectId}`,
       bytes: generated.image.uint8Array,
       mediaType: generated.image.mediaType,
     })
 
-    await createProject({
-      id: projectId,
+    const project = await updateProjectImageByUserId({
+      projectId,
       userId: session.user.id,
-      prompt,
-      status: "ready",
       originalImageKey,
       width: generated.dimensions.width,
       height: generated.dimensions.height,
-      analysis: { summary: "", boxes: [] },
     })
 
-    const project = await findProjectDimensionsByUserId({
-      projectId,
-      userId: session.user.id,
-    })
+    if (!project) {
+      return NextResponse.json({ message: "Not found" }, { status: 404 })
+    }
 
     return NextResponse.json({
-      projectId: project?.id ?? projectId,
-      width: project?.width ?? generated.dimensions.width,
-      height: project?.height ?? generated.dimensions.height,
+      projectId,
+      width: generated.dimensions.width,
+      height: generated.dimensions.height,
     })
   } catch (error) {
     console.error("[hengen] failed to generate project", error)

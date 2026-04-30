@@ -18,6 +18,34 @@ export async function createProject(input: CreateProjectInput) {
   await db.insert(projects).values(input)
 }
 
+export async function updateProjectImageByUserId({
+  height,
+  originalImageKey,
+  projectId,
+  userId,
+  width,
+}: {
+  height: number
+  originalImageKey: string
+  projectId: string
+  userId: string
+  width: number
+}) {
+  const [project] = await db
+    .update(projects)
+    .set({
+      height,
+      originalImageKey,
+      status: "ready",
+      width,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .returning({ id: projects.id })
+
+  return project
+}
+
 export async function findProjectDimensionsByUserId({
   projectId,
   userId,
@@ -87,7 +115,7 @@ export async function listGeneratedImagesByUserId(userId: string) {
       height: projects.height,
     })
     .from(projects)
-    .where(eq(projects.userId, userId))
+    .where(and(eq(projects.userId, userId), eq(projects.status, "ready")))
     .orderBy(desc(projects.createdAt))
 }
 

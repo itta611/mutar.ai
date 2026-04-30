@@ -2,9 +2,13 @@
 
 import { useSetAtom } from "jotai"
 import { SparklesIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
-import { generatedImageIdsAtom } from "@/components/generated-images/atoms"
+import {
+  generatedImageIdsAtom,
+  generatingProjectIdsAtom,
+} from "@/components/generated-images/atoms"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuthDialog } from "@/hooks/use-auth-dialog"
@@ -15,30 +19,30 @@ import { ModelSelect } from "./model-select"
 const defaultPrompt =
   "SaaSの料金プラン比較を、落ち着いたベージュと黒でまとめた横長スライド。大見出し、3カラム比較表、右下にCTA、洗練されたエディトリアルデザイン。"
 
-type PromptForm = {
-  prompt: string
-  aspect: string
-  model: string
-}
-
 export function PromptInput() {
   const setImageIds = useSetAtom(generatedImageIdsAtom)
+  const setGeneratingProjectIds = useSetAtom(generatingProjectIdsAtom)
   const { openAuthDialog } = useAuthDialog()
+  const router = useRouter()
   const session = authClient.useSession()
   const user = session.data?.user
-  const { control, handleSubmit, register, setValue } = useForm<PromptForm>({
+  const { control, handleSubmit, register, setValue } = useForm({
     defaultValues: {
       prompt: defaultPrompt,
-      aspect: "4:3",
+      aspectRatio: "4:3",
       model: "openai/gpt-5.4-image-2",
     },
   })
   const prompt = useWatch({ control, name: "prompt" })
-  const aspect = useWatch({ control, name: "aspect" })
+  const aspect = useWatch({ control, name: "aspectRatio" })
   const model = useWatch({ control, name: "model" })
   const [isGenerating, setIsGenerating] = useState(false)
 
-  async function handleGenerate({ prompt, aspect, model }: PromptForm) {
+  async function handleGenerate(options: {
+    prompt: string
+    aspectRatio: string
+    model: string
+  }) {
     if (!user) {
       openAuthDialog()
       return
@@ -47,27 +51,47 @@ export function PromptInput() {
     setIsGenerating(true)
 
     try {
-      const response = await fetch("/api/generate", {
+      const createResponse = await fetch("/api/projects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(options),
+      })
+
+      if (!createResponse.ok) {
+        throw new Error("create_failed")
+      }
+
+      const data = (await createResponse.json()) as { projectId: string }
+
+      setGeneratingProjectIds((ids) => [data.projectId, ...ids])
+      void fetch("/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          prompt,
-          aspectRatio: aspect,
-          model,
+          projectId: data.projectId,
+          ...options,
         }),
       })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("generate_failed")
+          }
 
-      if (!response.ok) {
-        throw new Error("generate_failed")
-      }
-
-      const data = (await response.json()) as { projectId: string }
-
-      setImageIds((images) => [data.projectId, ...images])
+          setImageIds((images) => [data.projectId, ...images])
+          router.refresh()
+        })
+        .catch(() => {})
+        .finally(() => {
+          setGeneratingProjectIds((ids) =>
+            ids.filter((id) => id !== data.projectId)
+          )
+        })
+      router.push(`/editor/${data.projectId}`)
     } catch {
-    } finally {
       setIsGenerating(false)
     }
   }
@@ -86,7 +110,7 @@ export function PromptInput() {
         <div className="flex gap-2">
           <AspectSelect
             selectedAspect={aspect}
-            onAspectChange={(aspect) => setValue("aspect", aspect)}
+            onAspectChange={(aspect) => setValue("aspectRatio", aspect)}
           />
           <ModelSelect
             selectedModel={model}

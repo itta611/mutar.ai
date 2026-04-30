@@ -1,6 +1,5 @@
 "use client"
 
-import { Provider } from "jotai"
 import { useHydrateAtoms } from "jotai/utils"
 import { GeneratedImages } from "@/components/generated-images"
 import { generatedImageIdsAtom } from "@/components/generated-images/atoms"
@@ -8,11 +7,7 @@ import LogoIcon from "@/components/logo-icon"
 import { PromptInput } from "@/components/prompt-input"
 
 export function HomeContent({ initialImages }: { initialImages: string[] }) {
-  return (
-    <Provider>
-      <Home initialImages={initialImages} />
-    </Provider>
-  )
+  return <Home initialImages={initialImages} />
 }
 
 function Home({ initialImages }: { initialImages: string[] }) {
