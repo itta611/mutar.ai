@@ -3,7 +3,6 @@
 import { EllipsisIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useAtom } from "jotai"
 
 import {
   DropdownMenu,
@@ -11,14 +10,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { generatedImageIdsAtom } from "./atoms"
 import { Button } from "../ui/button"
 
-export function GeneratedImages() {
-  const [images, setImages] = useAtom(generatedImageIdsAtom)
-
+export function GeneratedImages({ images }: { images: string[] }) {
   function deleteImage(id: string) {
-    setImages((images) => images.filter((image) => image !== id))
     fetch(`/api/projects/${id}`, { method: "DELETE" })
   }
 

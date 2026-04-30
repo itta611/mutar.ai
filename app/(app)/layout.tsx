@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { AppJotaiProvider } from "@/components/app-jotai-provider"
+import { Provider } from "jotai"
 import { AppSidebar } from "@/components/app-sidebar"
 import { Navbar } from "@/components/navbar"
 
@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <AppJotaiProvider>
+    <Provider>
       <AppSidebar />
       <div className="overflow-visible h-dvh w-full overflow-y-auto flex flex-col">
         <Navbar />
@@ -23,6 +23,6 @@ export default function RootLayout({
           {children}
         </div>
       </div>
-    </AppJotaiProvider>
+    </Provider>
   )
 }

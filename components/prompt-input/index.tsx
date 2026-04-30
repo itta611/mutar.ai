@@ -1,17 +1,13 @@
 "use client"
 
-import { useSetAtom } from "jotai"
 import { SparklesIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
-import {
-  generatedImageIdsAtom,
-  generatingProjectIdsAtom,
-} from "@/components/generated-images/atoms"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuthDialog } from "@/hooks/use-auth-dialog"
+import { useGenerateProject } from "@/hooks/use-generate-project"
 import { authClient } from "@/lib/auth-client"
 import { AspectSelect } from "./aspect-select"
 import { ModelSelect } from "./model-select"
@@ -20,8 +16,7 @@ const defaultPrompt =
   "SaaSの料金プラン比較を、落ち着いたベージュと黒でまとめた横長スライド。大見出し、3カラム比較表、右下にCTA、洗練されたエディトリアルデザイン。"
 
 export function PromptInput() {
-  const setImageIds = useSetAtom(generatedImageIdsAtom)
-  const setGeneratingProjectIds = useSetAtom(generatingProjectIdsAtom)
+  const generateProject = useGenerateProject()
   const { openAuthDialog } = useAuthDialog()
   const router = useRouter()
   const session = authClient.useSession()
@@ -51,46 +46,8 @@ export function PromptInput() {
     setIsGenerating(true)
 
     try {
-      const createResponse = await fetch("/api/projects", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(options),
-      })
-
-      if (!createResponse.ok) {
-        throw new Error("create_failed")
-      }
-
-      const data = (await createResponse.json()) as { projectId: string }
-
-      setGeneratingProjectIds((ids) => [data.projectId, ...ids])
-      void fetch("/api/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          projectId: data.projectId,
-          ...options,
-        }),
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("generate_failed")
-          }
-
-          setImageIds((images) => [data.projectId, ...images])
-          router.refresh()
-        })
-        .catch(() => {})
-        .finally(() => {
-          setGeneratingProjectIds((ids) =>
-            ids.filter((id) => id !== data.projectId)
-          )
-        })
-      router.push(`/editor/${data.projectId}`)
+      const projectId = await generateProject(options)
+      router.push(`/editor/${projectId}`)
     } catch {
       setIsGenerating(false)
     }

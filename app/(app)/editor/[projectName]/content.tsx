@@ -3,7 +3,7 @@
 import { useAtomValue } from "jotai"
 import Image from "next/image"
 
-import { generatingProjectIdsAtom } from "@/components/generated-images/atoms"
+import { generatingProjectIdsAtom } from "@/atom/generate"
 
 export function EditorContent({
   height,
