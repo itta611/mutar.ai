@@ -3,12 +3,36 @@
 import { useMutation } from "@tanstack/react-query"
 import { useSetAtom } from "jotai"
 
-import {
-  createProject,
-  type GenerateProjectInput,
-  generateProjectImage,
-} from "@/api/projects"
 import { generatingProjectIdsAtom } from "@/atom/generate"
+import { apiRequest } from "@/lib/api-request"
+
+type GenerateProjectInput = {
+  aspectRatio: string
+  model: string
+  prompt: string
+}
+
+async function createProject(input: GenerateProjectInput) {
+  return apiRequest<{ projectId: string }>("/api/projects", {
+    errorMessage: "create_failed",
+    method: "POST",
+    json: input,
+  })
+}
+
+async function generateProjectImage({
+  projectId,
+  ...input
+}: GenerateProjectInput & { projectId: string }) {
+  return apiRequest("/api/generate", {
+    errorMessage: "generate_failed",
+    method: "POST",
+    json: {
+      projectId,
+      ...input,
+    },
+  })
+}
 
 export function useGenerateProject() {
   const setGeneratingProjectIds = useSetAtom(generatingProjectIdsAtom)

@@ -5,14 +5,31 @@ import { EllipsisIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
-import { deleteProject, listProjects, projectKeys } from "@/api/projects"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { apiRequest } from "@/lib/api-request"
 import { Button } from "../ui/button"
+
+const projectKeys = {
+  list: ["projects"] as const,
+}
+
+async function listProjects() {
+  const data = await apiRequest<{ projects: string[] }>("/api/projects")
+
+  return data.projects
+}
+
+async function deleteProject(id: string) {
+  return apiRequest(`/api/projects/${id}`, {
+    errorMessage: "delete_failed",
+    method: "DELETE",
+  })
+}
 
 export function GeneratedImages({
   initialImages,
