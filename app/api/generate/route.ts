@@ -108,9 +108,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      projectId,
-      width: generated.dimensions.width,
-      height: generated.dimensions.height,
+      ok: true,
     })
   } catch (error) {
     console.error("[hengen] failed to generate project", error)

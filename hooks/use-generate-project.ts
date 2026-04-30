@@ -28,7 +28,7 @@ async function generateProjectImage({
   projectId,
   ...input
 }: GenerateProjectInput & { projectId: string }) {
-  return apiRequest<{ height: number; projectId: string; width: number }>(
+  return apiRequest<{ height: number; ok: boolean; width: number }>(
     "/api/generate",
     {
       errorMessage: "generate_failed",
@@ -54,30 +54,18 @@ export function useGenerateProject() {
     const data = await createProjectMutation.mutateAsync(input)
 
     setProjectId(data.projectId)
-    setEditorProjectStatus((status) => ({
-      ...status,
-      [data.projectId]: "generating",
-    }))
+    setImageSize(null)
+    setEditorProjectStatus("generating")
     void generateProjectMutation
       .mutateAsync({
         projectId: data.projectId,
         ...input,
       })
-      .then((image) => {
-        setImageSize((sizes) => ({
-          ...sizes,
-          [data.projectId]: [image.width, image.height],
-        }))
-        setEditorProjectStatus((status) => ({
-          ...status,
-          [data.projectId]: "ready",
-        }))
+      .then(() => {
+        setEditorProjectStatus("ready")
       })
       .catch(() => {
-        setEditorProjectStatus((status) => ({
-          ...status,
-          [data.projectId]: "error",
-        }))
+        setEditorProjectStatus("error")
       })
 
     return data.projectId
