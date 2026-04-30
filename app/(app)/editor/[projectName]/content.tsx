@@ -7,7 +7,7 @@ import { useEffect } from "react"
 import {
   editorProjectStatusAtom,
   type ImageSize,
-  editorPmageSizeAtom,
+  editorImageSizeAtom,
   editorProjectIdAtom,
 } from "@/atom/generate"
 
@@ -19,9 +19,9 @@ export function EditorContent({
   projectId: string
 }) {
   const editorProjectStatus = useAtomValue(editorProjectStatusAtom)
-  const imageSizes = useAtomValue(editorPmageSizeAtom)
+  const imageSizes = useAtomValue(editorImageSizeAtom)
   const setEditorProjectStatus = useSetAtom(editorProjectStatusAtom)
-  const setImageSize = useSetAtom(editorPmageSizeAtom)
+  const setImageSize = useSetAtom(editorImageSizeAtom)
   const setProjectId = useSetAtom(editorProjectIdAtom)
   const imageSize = imageSizes[projectId]
   const status = editorProjectStatus[projectId]

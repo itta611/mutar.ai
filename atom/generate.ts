@@ -7,4 +7,4 @@ export const editorProjectIdAtom = atom<string | null>(null)
 export const editorProjectStatusAtom = atom<Record<string, EditorProjectStatus>>(
   {}
 )
-export const editorPmageSizeAtom = atom<Record<string, ImageSize>>({})
+export const editorImageSizeAtom = atom<Record<string, ImageSize>>({})
