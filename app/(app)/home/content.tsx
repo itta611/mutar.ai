@@ -18,7 +18,7 @@ function Home({ initialImages }: { initialImages: string[] }) {
         </div>
         <PromptInput />
       </div>
-      <GeneratedImages images={initialImages} />
+      <GeneratedImages initialImages={initialImages} />
     </>
   )
 }

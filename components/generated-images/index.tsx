@@ -1,9 +1,11 @@
 "use client"
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { EllipsisIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
+import { deleteProject, listProjects, projectKeys } from "@/api/projects"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,10 +14,25 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "../ui/button"
 
-export function GeneratedImages({ images }: { images: string[] }) {
-  function deleteImage(id: string) {
-    fetch(`/api/projects/${id}`, { method: "DELETE" })
-  }
+export function GeneratedImages({
+  initialImages,
+}: {
+  initialImages: string[]
+}) {
+  const queryClient = useQueryClient()
+  const { data: images = initialImages } = useQuery({
+    queryKey: projectKeys.list,
+    queryFn: listProjects,
+    initialData: initialImages,
+  })
+  const deleteProjectMutation = useMutation({
+    mutationFn: deleteProject,
+    onSuccess: (_data, id) => {
+      queryClient.setQueryData<string[]>(projectKeys.list, (images) =>
+        images?.filter((image) => image !== id)
+      )
+    },
+  })
 
   return (
     <div className="grid grid-cols-2 gap-x-7 gap-y-7 sm:grid-cols-3 xl:grid-cols-4">
@@ -52,7 +69,7 @@ export function GeneratedImages({ images }: { images: string[] }) {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
                     variant="destructive"
-                    onClick={() => deleteImage(image)}
+                    onClick={() => deleteProjectMutation.mutate(image)}
                   >
                     削除
                   </DropdownMenuItem>

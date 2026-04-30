@@ -3,12 +3,26 @@ import { randomUUID } from "node:crypto"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
-import { createProject } from "@/db/repo"
+import { createProject, listGeneratedImagesByUserId } from "@/db/repo"
 import { auth } from "@/lib/auth"
 
 const requestSchema = z.object({
   prompt: z.string().trim().min(12).max(1200),
 })
+
+export async function GET(request: Request) {
+  const session = await auth.api.getSession({
+    headers: request.headers,
+  })
+
+  if (!session) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+  }
+
+  const projects = await listGeneratedImagesByUserId(session.user.id)
+
+  return NextResponse.json({ projects: projects.map(({ id }) => id) })
+}
 
 export async function POST(request: Request) {
   const session = await auth.api.getSession({

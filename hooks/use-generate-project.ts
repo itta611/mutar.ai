@@ -1,44 +1,31 @@
 "use client"
 
+import { useMutation } from "@tanstack/react-query"
 import { useSetAtom } from "jotai"
 
+import {
+  createProject,
+  type GenerateProjectInput,
+  generateProjectImage,
+} from "@/api/projects"
 import { generatingProjectIdsAtom } from "@/atom/generate"
-
-type GenerateProjectInput = {
-  aspectRatio: string
-  model: string
-  prompt: string
-}
 
 export function useGenerateProject() {
   const setGeneratingProjectIds = useSetAtom(generatingProjectIdsAtom)
+  const createProjectMutation = useMutation({ mutationFn: createProject })
+  const generateProjectMutation = useMutation({
+    mutationFn: generateProjectImage,
+  })
 
   return async function generateProject(input: GenerateProjectInput) {
-    const createResponse = await fetch("/api/projects", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(input),
-    })
-
-    if (!createResponse.ok) {
-      throw new Error("create_failed")
-    }
-
-    const data = (await createResponse.json()) as { projectId: string }
+    const data = await createProjectMutation.mutateAsync(input)
 
     setGeneratingProjectIds((ids) => [data.projectId, ...ids])
-    void fetch("/api/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    void generateProjectMutation
+      .mutateAsync({
         projectId: data.projectId,
         ...input,
-      }),
-    })
+      })
       .catch(() => {})
       .finally(() => {
         setGeneratingProjectIds((ids) =>
