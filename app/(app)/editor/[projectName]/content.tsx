@@ -3,29 +3,27 @@
 import { useAtomValue } from "jotai"
 import Image from "next/image"
 
-import { generatingProjectIdsAtom } from "@/atom/generate"
+import {
+  generatedProjectImagesAtom,
+  projectGenerationStatusAtom,
+} from "@/atom/generate"
 
-export function EditorContent({
-  height,
-  projectId,
-  width,
-}: {
-  height: number
-  projectId: string
-  width: number
-}) {
-  const generatingProjectIds = useAtomValue(generatingProjectIdsAtom)
+export function EditorContent({ projectId }: { projectId: string }) {
+  const generatedProjectImages = useAtomValue(generatedProjectImagesAtom)
+  const projectGenerationStatus = useAtomValue(projectGenerationStatusAtom)
+  const image = generatedProjectImages[projectId]
+  const status = projectGenerationStatus[projectId]
 
-  if (generatingProjectIds.includes(projectId) || width === 0 || height === 0) {
+  if (status === "generating" || !image) {
     return null
   }
 
   return (
     <Image
-      src={`/api/projects/${projectId}/image`}
+      src={image.imageData}
       alt=""
-      width={width}
-      height={height}
+      width={image.width}
+      height={image.height}
       unoptimized
       className="max-h-full w-auto max-w-full object-contain"
     />

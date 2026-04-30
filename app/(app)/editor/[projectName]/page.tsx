@@ -27,11 +27,7 @@ export default async function Page({
 
   return (
     <div className="flex h-full items-center justify-center bg-zinc-50 p-8">
-      <EditorContent
-        projectId={project.id}
-        width={project.width}
-        height={project.height}
-      />
+      <EditorContent projectId={project.id} />
     </div>
   )
 }
