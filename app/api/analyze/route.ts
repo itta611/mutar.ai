@@ -125,9 +125,8 @@ function blocksFromFullText(
 ) {
   let index = 0
   const blocks =
-    fullTextAnnotation?.pages?.flatMap((page, pageIndex) =>
-      (page.blocks ?? []).map((block, blockIndex) => ({
-        id: `b${pageIndex}-${blockIndex}`,
+    fullTextAnnotation?.pages?.flatMap((page) =>
+      (page.blocks ?? []).map((block) => ({
         words: Object.fromEntries(
           block.paragraphs?.flatMap(
             (paragraph) =>
@@ -152,7 +151,6 @@ function blocksFromFullText(
     ? nonEmptyBlocks
     : [
         {
-          id: "b0",
           words: Object.fromEntries(words.map(({ id, label }) => [id, label])),
         },
       ]
@@ -176,7 +174,7 @@ function bboxFromBoxes(boxes: VisionVertex[][]) {
 }
 
 async function mergeWordsWithAi(options: {
-  blocks: { id: string; words: Record<string, string> }[]
+  blocks: { words: Record<string, string> }[]
   image: Buffer
 }) {
   const result = await generateObject({
@@ -192,6 +190,8 @@ async function mergeWordsWithAi(options: {
             type: "text",
             text: [
               "Merge OCR words into semantically meaningful labels.",
+              "Select text only. Omit decorative fragments, even if OCR detected them as text.",
+              "You may also omit words whose surrounding context is unclear or whose position cannot be confidently matched against the image.",
               "Use only the provided word IDs. Do not invent IDs.",
               "Return groups in reading order. Each word ID should appear at most once.",
               "The image shows the OCR word boxes for visual reference.",
@@ -231,6 +231,7 @@ function mergedBoxesFromGroups(
 }
 
 function createOverlaySvg(options: {
+  boxes?: VisionVertex[][]
   height: number
   wordBoxes: VisionVertex[][]
   width: number
@@ -248,7 +249,16 @@ function createOverlaySvg(options: {
     })
     .join("")
 
-  return `<svg width="${options.width}" height="${options.height}" viewBox="0 0 ${options.width} ${options.height}" xmlns="http://www.w3.org/2000/svg">${wordRects}</svg>`
+  const mergedRects =
+    options.boxes
+      ?.filter((box) => box.length > 0)
+      .map((box) => {
+        const rect = rectFromVertices(box)
+        return `<rect x="${rect.left}" y="${rect.top}" width="${rect.width}" height="${rect.height}" fill="rgba(255, 77, 141, 0.08)" stroke="#ff4d8d" stroke-width="4"/>`
+      })
+      .join("") ?? ""
+
+  return `<svg width="${options.width}" height="${options.height}" viewBox="0 0 ${options.width} ${options.height}" xmlns="http://www.w3.org/2000/svg">${mergedRects}${wordRects}</svg>`
 }
 
 export async function POST(request: Request) {
