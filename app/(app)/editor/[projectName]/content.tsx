@@ -1,50 +1,24 @@
 "use client"
 
-import { useAtomValue, useSetAtom } from "jotai"
+import { useAtomValue } from "jotai"
 import Image from "next/image"
 import { useEffect } from "react"
 
-import {
-  editorProjectStatusAtom,
-  type ImageSize,
-  editorImageSizeAtom,
-  editorProjectIdAtom,
-} from "@/atom/generate"
+import { editorProjectStatusAtom, editorImageSizeAtom } from "@/atom/generate"
+import { useEditorProject } from "@/hooks/use-editor-project"
 
-export function EditorContent({
-  initialImageSize,
-  projectId,
-}: {
-  initialImageSize: ImageSize
-  projectId: string
-}) {
-  const editorProjectStatus = useAtomValue(editorProjectStatusAtom)
-  const imageSizes = useAtomValue(editorImageSizeAtom)
-  const setEditorProjectStatus = useSetAtom(editorProjectStatusAtom)
-  const setImageSize = useSetAtom(editorImageSizeAtom)
-  const setProjectId = useSetAtom(editorProjectIdAtom)
-  const imageSize = imageSizes[projectId]
-  const status = editorProjectStatus[projectId]
+export function EditorContent({ projectId }: { projectId: string }) {
+  const status = useAtomValue(editorProjectStatusAtom)
+  const imageSize = useAtomValue(editorImageSizeAtom)
+  const fetchProject = useEditorProject()
 
   useEffect(() => {
-    setProjectId(projectId)
-    setImageSize((sizes) => ({
-      ...sizes,
-      [projectId]: initialImageSize,
-    }))
-    setEditorProjectStatus((status) => ({
-      ...status,
-      [projectId]: "ready",
-    }))
-  }, [
-    initialImageSize,
-    projectId,
-    setEditorProjectStatus,
-    setImageSize,
-    setProjectId,
-  ])
+    if (status === null) {
+      fetchProject(projectId)
+    }
+  }, [fetchProject, projectId, status])
 
-  if (status === "loading" || !imageSize) {
+  if (status !== "ready" || !imageSize) {
     return null
   }
 
@@ -52,7 +26,7 @@ export function EditorContent({
 
   return (
     <Image
-      src={`/api/projects/${projectId}/image`}
+      src={`/api/projects/${projectId}/image?variant=original`}
       alt=""
       width={width}
       height={height}

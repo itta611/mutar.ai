@@ -56,6 +56,7 @@ export async function findProjectDimensionsByUserId({
   const [project] = await db
     .select({
       id: projects.id,
+      status: projects.status,
       width: projects.width,
       height: projects.height,
     })
