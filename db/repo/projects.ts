@@ -46,6 +46,24 @@ export async function updateProjectImageByUserId({
   return project
 }
 
+export async function updateProjectAnalysisByUserId({
+  boxes,
+  projectId,
+  userId,
+}: {
+  boxes: unknown[]
+  projectId: string
+  userId: string
+}) {
+  await db
+    .update(projects)
+    .set({
+      analysis: { boxes, summary: "" },
+      updatedAt: new Date(),
+    })
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+}
+
 export async function findProjectDimensionsByUserId({
   projectId,
   userId,
@@ -56,6 +74,7 @@ export async function findProjectDimensionsByUserId({
   const [project] = await db
     .select({
       id: projects.id,
+      analysis: projects.analysis,
       status: projects.status,
       width: projects.width,
       height: projects.height,

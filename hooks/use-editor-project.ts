@@ -4,7 +4,9 @@ import { useSetAtom } from "jotai"
 import { useCallback } from "react"
 
 import {
+  type EditorBox,
   type EditorProjectStatus,
+  editorBoxesAtom,
   editorImageSizeAtom,
   editorProjectIdAtom,
   editorProjectStatusAtom,
@@ -13,6 +15,7 @@ import { apiRequest } from "@/lib/api-request"
 
 async function getProject(projectId: string) {
   return apiRequest<{
+    analysis: { boxes: EditorBox[]; summary: string }
     height: number
     id: string
     status: EditorProjectStatus
@@ -22,6 +25,7 @@ async function getProject(projectId: string) {
 
 export function useEditorProject() {
   const setEditorProjectStatus = useSetAtom(editorProjectStatusAtom)
+  const setBoxes = useSetAtom(editorBoxesAtom)
   const setImageSize = useSetAtom(editorImageSizeAtom)
   const setProjectId = useSetAtom(editorProjectIdAtom)
 
@@ -34,11 +38,12 @@ export function useEditorProject() {
         const project = await getProject(projectId)
 
         setImageSize([project.width, project.height])
+        setBoxes(project.analysis.boxes)
         setEditorProjectStatus(project.status)
       } catch {
         setEditorProjectStatus("error")
       }
     },
-    [setEditorProjectStatus, setImageSize, setProjectId]
+    [setBoxes, setEditorProjectStatus, setImageSize, setProjectId]
   )
 }

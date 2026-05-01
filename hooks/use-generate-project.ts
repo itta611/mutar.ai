@@ -42,6 +42,14 @@ async function generateProjectImage({
   )
 }
 
+async function analyzeProjectImage(projectId: string) {
+  return apiRequest<{ boxes: unknown[] }>("/api/analyze", {
+    errorMessage: "analyze_failed",
+    method: "POST",
+    json: { imageId: projectId },
+  })
+}
+
 export function useGenerateProject() {
   const setEditorProjectStatus = useSetAtom(editorProjectStatusAtom)
   const setImageSize = useSetAtom(editorImageSizeAtom)
@@ -63,9 +71,9 @@ export function useGenerateProject() {
         projectId: data.projectId,
         ...input,
       })
-      .then(() => {
-        setEditorProjectStatus("ready")
-        fetchProject(data.projectId)
+      .then(async () => {
+        await analyzeProjectImage(data.projectId)
+        await fetchProject(data.projectId)
       })
       .catch(() => {
         setEditorProjectStatus("error")

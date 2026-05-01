@@ -5,7 +5,10 @@ import { NextResponse } from "next/server"
 import sharp from "sharp"
 import { z } from "zod"
 
-import { findProjectImageKeysByUserId } from "@/db/repo"
+import {
+  findProjectImageKeysByUserId,
+  updateProjectAnalysisByUserId,
+} from "@/db/repo"
 import { env } from "@/lib/env"
 import { getImageDimensions } from "@/lib/image-dimensions"
 import { readImageFromR2 } from "@/lib/r2"
@@ -322,7 +325,15 @@ export async function POST(request: Request) {
       image: rendered,
     })
 
-    return NextResponse.json({ boxes: mergedBoxesFromGroups(groups, words) })
+    const boxes = mergedBoxesFromGroups(groups, words)
+
+    await updateProjectAnalysisByUserId({
+      boxes,
+      projectId: parsedBody.data.imageId,
+      userId: session.user.id,
+    })
+
+    return NextResponse.json({ boxes })
   } catch (error) {
     console.error("[hengen] failed to analyze image", error)
     return NextResponse.json(
