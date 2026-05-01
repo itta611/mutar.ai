@@ -1,8 +1,8 @@
 "use client"
 
+import { useEffect } from "react"
 import { useAtomValue } from "jotai"
 import Image from "next/image"
-import { useEffect } from "react"
 
 import {
   editorBoxesAtom,
@@ -45,6 +45,7 @@ export function EditorContent({ projectId }: { projectId: string }) {
         className="pointer-events-none absolute inset-0 size-full"
         viewBox={`0 0 ${width} ${height}`}
       >
+        <title>Editor Overlay</title>
         {boxes.map((box, index) => {
           const xs = box.bbox.map((point) => point.x ?? 0)
           const ys = box.bbox.map((point) => point.y ?? 0)

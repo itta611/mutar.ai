@@ -1,21 +1,12 @@
 import vision from "@google-cloud/vision"
-import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import { generateObject } from "ai"
-import { NextResponse } from "next/server"
 import sharp from "sharp"
 import { z } from "zod"
 
-import {
-  findProjectImageKeysByUserId,
-  updateProjectAnalysisByUserId,
-} from "@/db/repo"
+import { updateProjectAnalysisByUserId } from "@/db/repo"
 import { env } from "@/lib/env"
-import { getImageDimensions } from "@/lib/image-dimensions"
-import { readImageFromR2 } from "@/lib/r2"
-import { getServerSession } from "@/lib/session"
 
-export const runtime = "nodejs"
-export const maxDuration = 120
+import { openrouter } from "./openrouter"
 
 const visionClient = new vision.ImageAnnotatorClient({
   fallback: true,
@@ -26,26 +17,12 @@ const visionClient = new vision.ImageAnnotatorClient({
   },
 })
 
-const requestSchema = z.object({
-  imageId: z.string().min(1),
-})
-
-const openrouter = createOpenRouter({
-  apiKey: env.OPENROUTER_API_KEY,
-  appName: "Hengen",
-  appUrl: env.NEXT_PUBLIC_BETTER_AUTH_URL,
-  compatibility: "strict",
-})
-
 type VisionVertex = {
   x?: number
   y?: number
 }
 
 type VisionWord = {
-  boundingBox?: {
-    vertices?: VisionVertex[]
-  }
   symbols?: {
     text?: string
   }[]
@@ -68,6 +45,12 @@ type Rect = {
   width: number
 }
 
+type OcrWord = {
+  bbox: VisionVertex[]
+  id: string
+  label: string
+}
+
 const wordStrokeWidth = 3
 
 const mergeSchema = z.object({
@@ -78,12 +61,6 @@ const mergeSchema = z.object({
     })
   ),
 })
-
-type OcrWord = {
-  bbox: VisionVertex[]
-  id: string
-  label: string
-}
 
 function rectFromVertices(vertices: VisionVertex[]) {
   const xs = vertices.map((vertex) => vertex.x ?? 0)
@@ -234,7 +211,6 @@ function mergedBoxesFromGroups(
 }
 
 function createOverlaySvg(options: {
-  boxes?: VisionVertex[][]
   height: number
   wordBoxes: VisionVertex[][]
   width: number
@@ -252,93 +228,49 @@ function createOverlaySvg(options: {
     })
     .join("")
 
-  const mergedRects =
-    options.boxes
-      ?.filter((box) => box.length > 0)
-      .map((box) => {
-        const rect = rectFromVertices(box)
-        return `<rect x="${rect.left}" y="${rect.top}" width="${rect.width}" height="${rect.height}" fill="rgba(255, 77, 141, 0.08)" stroke="#ff4d8d" stroke-width="4"/>`
-      })
-      .join("") ?? ""
-
-  return `<svg width="${options.width}" height="${options.height}" viewBox="0 0 ${options.width} ${options.height}" xmlns="http://www.w3.org/2000/svg">${mergedRects}${wordRects}</svg>`
+  return `<svg width="${options.width}" height="${options.height}" viewBox="0 0 ${options.width} ${options.height}" xmlns="http://www.w3.org/2000/svg">${wordRects}</svg>`
 }
 
-export async function POST(request: Request) {
-  const session = await getServerSession()
-
-  if (!session) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
-  }
-
-  let body: unknown
-
-  try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json({ message: "Invalid JSON" }, { status: 400 })
-  }
-
-  const parsedBody = requestSchema.safeParse(body)
-
-  if (!parsedBody.success) {
-    return NextResponse.json({ message: "Invalid request" }, { status: 400 })
-  }
-
-  const project = await findProjectImageKeysByUserId({
-    projectId: parsedBody.data.imageId,
-    userId: session.user.id,
+export async function analyzeGeneratedImage({
+  bytes,
+  height,
+  projectId,
+  userId,
+  width,
+}: {
+  bytes: Uint8Array
+  height: number
+  projectId: string
+  userId: string
+  width: number
+}) {
+  const image = Buffer.from(bytes)
+  const [result] = await visionClient.textDetection({
+    image: { content: image.toString("base64") },
   })
+  const words: OcrWord[] =
+    result.textAnnotations?.slice(1).map((annotation, index) => ({
+      bbox: (annotation.boundingPoly?.vertices ?? []) as VisionVertex[],
+      id: `w${index}`,
+      label: annotation.description ?? "",
+    })) ?? []
+  const overlay = createOverlaySvg({
+    height,
+    wordBoxes: words.map((word) => word.bbox),
+    width,
+  })
+  const rendered = await sharp(image)
+    .composite([{ input: Buffer.from(overlay) }])
+    .png()
+    .toBuffer()
+  const groups = await mergeWordsWithAi({
+    blocks: blocksFromFullText(
+      words,
+      result.fullTextAnnotation as VisionFullTextAnnotation | undefined
+    ),
+    image: rendered,
+  })
+  const boxes = mergedBoxesFromGroups(groups, words)
 
-  if (!project) {
-    return NextResponse.json({ message: "Not found" }, { status: 404 })
-  }
-
-  try {
-    const image = await readImageFromR2(project.originalImageKey)
-    const [result] = await visionClient.textDetection({
-      image: { content: Buffer.from(image.bytes).toString("base64") },
-    })
-
-    const words: OcrWord[] =
-      result.textAnnotations?.slice(1).map((annotation, index) => ({
-        bbox: (annotation.boundingPoly?.vertices ?? []) as VisionVertex[],
-        id: `w${index}`,
-        label: annotation.description ?? "",
-      })) ?? []
-
-    const dimensions = getImageDimensions(image.bytes, image.mediaType)
-    const overlay = createOverlaySvg({
-      height: dimensions.height,
-      wordBoxes: words.map((word) => word.bbox),
-      width: dimensions.width,
-    })
-    const rendered = await sharp(Buffer.from(image.bytes))
-      .composite([{ input: Buffer.from(overlay) }])
-      .png()
-      .toBuffer()
-    const groups = await mergeWordsWithAi({
-      blocks: blocksFromFullText(
-        words,
-        result.fullTextAnnotation as VisionFullTextAnnotation | undefined
-      ),
-      image: rendered,
-    })
-
-    const boxes = mergedBoxesFromGroups(groups, words)
-
-    await updateProjectAnalysisByUserId({
-      boxes,
-      projectId: parsedBody.data.imageId,
-      userId: session.user.id,
-    })
-
-    return NextResponse.json({ boxes })
-  } catch (error) {
-    console.error("[hengen] failed to analyze image", error)
-    return NextResponse.json(
-      { message: "Failed to analyze image" },
-      { status: 500 }
-    )
-  }
+  await updateProjectAnalysisByUserId({ boxes, projectId, userId })
 }
