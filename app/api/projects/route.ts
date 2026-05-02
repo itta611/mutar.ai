@@ -7,7 +7,6 @@ import { createProject, listGeneratedImagesByUserId } from "@/db/repo"
 import { auth } from "@/lib/auth"
 
 const requestSchema = z.object({
-  aspectRatio: z.enum(["16:9", "4:3", "3:4", "1:1"]),
   prompt: z.string().trim().min(12).max(1200),
 })
 
@@ -43,7 +42,6 @@ export async function POST(request: Request) {
   const projectId = randomUUID()
 
   await createProject({
-    aspectRatio: parsedBody.data.aspectRatio,
     id: projectId,
     userId: session.user.id,
     prompt: parsedBody.data.prompt,

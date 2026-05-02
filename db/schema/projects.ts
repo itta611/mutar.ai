@@ -18,7 +18,6 @@ export const projects = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     prompt: text("prompt").notNull(),
-    aspectRatio: text("aspectRatio").notNull().default("4:3"),
     status: text("status").notNull().default("ready"),
     originalImageKey: text("originalImageKey").notNull(),
     cleanedImageKey: text("cleanedImageKey"),

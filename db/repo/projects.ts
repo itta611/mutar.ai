@@ -4,7 +4,6 @@ import { db } from "@/db"
 import { projects } from "@/db/schema"
 
 type CreateProjectInput = {
-  aspectRatio: string
   id: string
   userId: string
   prompt: string
@@ -111,7 +110,6 @@ export async function findProjectDimensionsByUserId({
     .select({
       id: projects.id,
       analysis: projects.analysis,
-      aspectRatio: projects.aspectRatio,
       status: projects.status,
       width: projects.width,
       height: projects.height,

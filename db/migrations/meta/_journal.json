@@ -15,6 +15,13 @@
       "when": 1777707972805,
       "tag": "0001_abnormal_enchantress",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1777725522270,
+      "tag": "0002_fat_thing",
+      "breakpoints": true
     }
   ]
 }
