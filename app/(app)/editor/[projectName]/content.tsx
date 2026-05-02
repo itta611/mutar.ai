@@ -1,8 +1,13 @@
 "use client"
 
 import { useAtomValue, useSetAtom } from "jotai"
-import Image from "next/image"
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import {
+  type WheelEvent,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react"
 
 import {
   editorAspectRatioAtom,
@@ -12,6 +17,14 @@ import {
   editorProjectStatusAtom,
 } from "@/atom/generate"
 import { useEditorProject } from "@/hooks/use-editor-project"
+
+type ViewBox = {
+  height: number
+  key: string
+  width: number
+  x: number
+  y: number
+}
 
 export function EditorContent({ projectId }: { projectId: string }) {
   const currentProjectId = useAtomValue(editorProjectIdAtom)
@@ -23,6 +36,7 @@ export function EditorContent({ projectId }: { projectId: string }) {
   const fetchProject = useEditorProject()
   const svgRef = useRef<SVGSVGElement>(null)
   const [fontSizes, setFontSizes] = useState<number[]>([])
+  const [viewBox, setViewBox] = useState<ViewBox | null>(null)
 
   useEffect(() => {
     if (currentProjectId !== projectId || status === null) {
@@ -87,94 +101,127 @@ export function EditorContent({ projectId }: { projectId: string }) {
   }
 
   const [width, height] = imageSize
+  const viewBoxKey = `${projectId}:${width}:${height}`
+  const activeViewBox =
+    viewBox?.key === viewBoxKey
+      ? viewBox
+      : { height, key: viewBoxKey, width, x: 0, y: 0 }
+
+  function handleWheel(event: WheelEvent<SVGSVGElement>) {
+    event.preventDefault()
+
+    const rect = event.currentTarget.getBoundingClientRect()
+    const nextScale = event.deltaY < 0 ? 0.9 : 1.1
+    const nextWidth = Math.min(
+      width,
+      Math.max(width / 8, activeViewBox.width * nextScale)
+    )
+    const nextHeight = Math.min(
+      height,
+      Math.max(height / 8, activeViewBox.height * nextScale)
+    )
+    const pointerX =
+      activeViewBox.x +
+      ((event.clientX - rect.left) / rect.width) * activeViewBox.width
+    const pointerY =
+      activeViewBox.y +
+      ((event.clientY - rect.top) / rect.height) * activeViewBox.height
+    const ratioX = (pointerX - activeViewBox.x) / activeViewBox.width
+    const ratioY = (pointerY - activeViewBox.y) / activeViewBox.height
+    const x = Math.min(
+      Math.max(pointerX - ratioX * nextWidth, 0),
+      width - nextWidth
+    )
+    const y = Math.min(
+      Math.max(pointerY - ratioY * nextHeight, 0),
+      height - nextHeight
+    )
+
+    setViewBox({ height: nextHeight, key: viewBoxKey, width: nextWidth, x, y })
+  }
 
   return (
-    <div
-      className="relative max-h-full max-w-full"
-      style={{ aspectRatio: `${width} / ${height}`, width }}
+    <svg
+      ref={svgRef}
+      className="size-full"
+      onWheel={handleWheel}
+      viewBox={`${activeViewBox.x} ${activeViewBox.y} ${activeViewBox.width} ${activeViewBox.height}`}
     >
-      <Image
-        src={`/api/projects/${projectId}/image`}
-        alt=""
-        fill
-        unoptimized
-        className="object-contain"
+      <title>Editor Overlay</title>
+      <image
+        href={`/api/projects/${projectId}/image`}
+        height={height}
+        preserveAspectRatio="none"
+        width={width}
       />
-      <svg
-        ref={svgRef}
-        className="absolute inset-0 size-full"
-        viewBox={`0 0 ${width} ${height}`}
-      >
-        <title>Editor Overlay</title>
-        {boxes.map((box, index) => {
-          if (!box.bbox) {
-            return null
-          }
+      {boxes.map((box, index) => {
+        if (!box.bbox) {
+          return null
+        }
 
-          const xs = box.bbox.map((point) => point.x ?? 0)
-          const ys = box.bbox.map((point) => point.y ?? 0)
-          const left = Math.min(...xs)
-          const top = Math.min(...ys)
-          const boxWidth = Math.max(...xs) - left
-          const boxHeight = Math.max(...ys) - top
-          const fontSize = boxWidth / Math.max([...box.label].length, 1)
-          const displayFontSize = fontSizes[index] ?? fontSize
-          const editableHeight = displayFontSize * 1.4
+        const xs = box.bbox.map((point) => point.x ?? 0)
+        const ys = box.bbox.map((point) => point.y ?? 0)
+        const left = Math.min(...xs)
+        const top = Math.min(...ys)
+        const boxWidth = Math.max(...xs) - left
+        const boxHeight = Math.max(...ys) - top
+        const fontSize = boxWidth / Math.max([...box.label].length, 1)
+        const displayFontSize = fontSizes[index] ?? fontSize
+        const editableHeight = displayFontSize * 1.4
 
-          return (
-            <g key={`${box.label}-${index}`}>
-              <text
-                x={left + boxWidth / 2}
-                y={top + boxHeight / 2}
-                data-box-width={boxWidth}
-                data-index={index}
-                fill={box.color ?? "rgba(0,0,0,0.75)"}
-                dominantBaseline="middle"
-                fontSize={fontSize}
-                opacity="0"
-                pointerEvents="none"
-                textAnchor="middle"
+        return (
+          <g key={`${box.label}-${index}`}>
+            <text
+              x={left + boxWidth / 2}
+              y={top + boxHeight / 2}
+              data-box-width={boxWidth}
+              data-index={index}
+              fill={box.color ?? "rgba(0,0,0,0.75)"}
+              dominantBaseline="middle"
+              fontSize={fontSize}
+              opacity="0"
+              pointerEvents="none"
+              textAnchor="middle"
+            >
+              {box.label}
+            </text>
+            <foreignObject
+              x={left}
+              y={top + boxHeight / 2 - editableHeight / 2}
+              width={boxWidth}
+              height={editableHeight}
+            >
+              {/* biome-ignore lint/a11y/useSemanticElements: contentEditable is required here. */}
+              <div
+                aria-label="Edit text"
+                contentEditable
+                role="textbox"
+                suppressContentEditableWarning
+                tabIndex={0}
+                onBlur={(event) => {
+                  const label = event.currentTarget.textContent ?? ""
+
+                  setBoxes((current) =>
+                    current.map((item, itemIndex) =>
+                      itemIndex === index ? { ...item, label } : item
+                    )
+                  )
+                }}
+                style={{
+                  color: box.color ?? "rgba(0,0,0,0.75)",
+                  fontSize: displayFontSize,
+                  lineHeight: `${editableHeight}px`,
+                  outline: "none",
+                  textAlign: "center",
+                  whiteSpace: "nowrap",
+                }}
               >
                 {box.label}
-              </text>
-              <foreignObject
-                x={left}
-                y={top + boxHeight / 2 - editableHeight / 2}
-                width={boxWidth}
-                height={editableHeight}
-              >
-                {/* biome-ignore lint/a11y/useSemanticElements: contentEditable is required here. */}
-                <div
-                  aria-label="Edit text"
-                  contentEditable
-                  role="textbox"
-                  suppressContentEditableWarning
-                  tabIndex={0}
-                  onBlur={(event) => {
-                    const label = event.currentTarget.textContent ?? ""
-
-                    setBoxes((current) =>
-                      current.map((item, itemIndex) =>
-                        itemIndex === index ? { ...item, label } : item
-                      )
-                    )
-                  }}
-                  style={{
-                    color: box.color ?? "rgba(0,0,0,0.75)",
-                    fontSize: displayFontSize,
-                    lineHeight: `${editableHeight}px`,
-                    outline: "none",
-                    textAlign: "center",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {box.label}
-                </div>
-              </foreignObject>
-            </g>
-          )
-        })}
-      </svg>
-    </div>
+              </div>
+            </foreignObject>
+          </g>
+        )
+      })}
+    </svg>
   )
 }
