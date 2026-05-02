@@ -4,6 +4,8 @@ import { useMutation } from "@tanstack/react-query"
 import { useSetAtom } from "jotai"
 
 import {
+  type EditorAspectRatio,
+  editorAspectRatioAtom,
   editorImageSizeAtom,
   editorProjectIdAtom,
   editorProjectStatusAtom,
@@ -12,7 +14,7 @@ import { apiRequest } from "@/lib/api-request"
 import { useEditorProject } from "./use-editor-project"
 
 type GenerateProjectInput = {
-  aspectRatio: string
+  aspectRatio: EditorAspectRatio
   model: string
   prompt: string
 }
@@ -41,6 +43,7 @@ async function generateProjectImage({
 
 export function useGenerateProject() {
   const setEditorProjectStatus = useSetAtom(editorProjectStatusAtom)
+  const setAspectRatio = useSetAtom(editorAspectRatioAtom)
   const setImageSize = useSetAtom(editorImageSizeAtom)
   const setProjectId = useSetAtom(editorProjectIdAtom)
   const fetchProject = useEditorProject()
@@ -53,6 +56,7 @@ export function useGenerateProject() {
     const data = await createProjectMutation.mutateAsync(input)
 
     setProjectId(data.projectId)
+    setAspectRatio(input.aspectRatio)
     setImageSize(null)
     setEditorProjectStatus("loading")
     void generateProjectMutation

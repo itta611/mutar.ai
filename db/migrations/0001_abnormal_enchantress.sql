@@ -1,0 +1,1 @@
+ALTER TABLE "project" ADD COLUMN "aspectRatio" text DEFAULT '4:3' NOT NULL;

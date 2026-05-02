@@ -1,4 +1,5 @@
 import { ProportionsIcon } from "lucide-react"
+import type { EditorAspectRatio } from "@/atom/generate"
 import { Button } from "../ui/button"
 import {
   DropdownMenu,
@@ -18,8 +19,8 @@ export function AspectSelect({
   selectedAspect,
   onAspectChange,
 }: {
-  selectedAspect: string
-  onAspectChange: (aspect: string) => void
+  selectedAspect: EditorAspectRatio
+  onAspectChange: (aspect: EditorAspectRatio) => void
 }) {
   return (
     <DropdownMenu>

@@ -4,6 +4,7 @@ import { SparklesIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
+import type { EditorAspectRatio } from "@/atom/generate"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuthDialog } from "@/hooks/use-auth-dialog"
@@ -21,7 +22,11 @@ export function PromptInput() {
   const router = useRouter()
   const session = authClient.useSession()
   const user = session.data?.user
-  const { control, handleSubmit, register, setValue } = useForm({
+  const { control, handleSubmit, register, setValue } = useForm<{
+    aspectRatio: EditorAspectRatio
+    model: string
+    prompt: string
+  }>({
     defaultValues: {
       prompt: defaultPrompt,
       aspectRatio: "4:3",
@@ -35,7 +40,7 @@ export function PromptInput() {
 
   async function handleGenerate(options: {
     prompt: string
-    aspectRatio: string
+    aspectRatio: EditorAspectRatio
     model: string
   }) {
     if (!user) {

@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
 import {
+  editorAspectRatioAtom,
   editorBoxesAtom,
   editorImageSizeAtom,
   editorProjectIdAtom,
@@ -15,6 +16,7 @@ import { useEditorProject } from "@/hooks/use-editor-project"
 export function EditorContent({ projectId }: { projectId: string }) {
   const currentProjectId = useAtomValue(editorProjectIdAtom)
   const status = useAtomValue(editorProjectStatusAtom)
+  const aspectRatio = useAtomValue(editorAspectRatioAtom)
   const imageSize = useAtomValue(editorImageSizeAtom)
   const boxes = useAtomValue(editorBoxesAtom)
   const setBoxes = useSetAtom(editorBoxesAtom)
@@ -67,6 +69,18 @@ export function EditorContent({ projectId }: { projectId: string }) {
 
     setFontSizes(nextFontSizes)
   }, [boxes.length, imageSize, projectId, status])
+
+  if (status === "loading" && aspectRatio) {
+    return (
+      <div
+        className="max-h-full max-w-full animate-pulse bg-muted"
+        style={{
+          aspectRatio: aspectRatio.replace(":", " / "),
+          width: aspectRatio === "3:4" ? 864 : 1152,
+        }}
+      />
+    )
+  }
 
   if (status !== "ready" || !imageSize) {
     return null
