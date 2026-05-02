@@ -19,6 +19,7 @@ import {
 } from "@/atom/generate"
 import { useEditorProject } from "@/hooks/use-editor-project"
 import LogoIcon from "@/components/logo-icon"
+import ShimmerText from "@/components/ui/shimmer-text"
 
 type ViewBox = {
   height: number
@@ -126,22 +127,13 @@ export default function Page({
     return () => resizeObserver.disconnect()
   }, [])
 
-  if (status === "loading" && aspectRatio) {
-    return <div className="min-h-full"></div>
-  }
-  return (
-    <div className="min-h-full">
-      <LogoIcon
-        className="animate-[spin_2.5s_linear_infinite]"
-        width={40}
-        height={40}
-      />
-      生成中です
-    </div>
-  )
-
-  if (status !== "ready" || !imageSize) {
-    return <div className="min-h-full" />
+  if (status !== "ready" || !imageSize || !aspectRatio) {
+    return (
+      <div className="min-h-full flex flex-col items-center justify-center">
+        <LogoIcon className="mb-4 h-12 w-12 animate-[spin_2.5s_linear_infinite] fill-primary dark:fill-zinc-100" />
+        <ShimmerText>生成しています...</ShimmerText>
+      </div>
+    )
   }
 
   const [width, height] = imageSize
