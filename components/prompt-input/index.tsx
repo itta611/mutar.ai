@@ -55,12 +55,12 @@ export function PromptInput() {
   return (
     <form
       onSubmit={handleSubmit(handleGenerate)}
-      className="mx-auto max-w-200 rounded-2xl border-2 border-indigo-400 p-3.5 shadow-lg/6 bg-background"
+      className="mx-auto max-w-200 rounded-2xl border-2 border-primary p-3.5 shadow-lg/6 bg-background dark:bg-secondary"
     >
       <Textarea
         id="generation-prompt"
         {...register("prompt")}
-        className="min-h-10 resize-none rounded-none border-none px-2 pt-0 pb-2 shadow-none ring-0! outline-none leading-relaxed"
+        className="min-h-10 resize-none rounded-none border-none px-2 pt-0 pb-2 shadow-none ring-0! outline-none leading-relaxed bg-transparent!"
         placeholder="作りたい資料画像を自然文で書いてください。"
       />
       <div className="flex items-end justify-between">

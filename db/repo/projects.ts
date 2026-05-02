@@ -36,7 +36,7 @@ export async function updateProjectImageByUserId({
     .set({
       height,
       originalImageKey,
-      status: "ready",
+      status: "generating",
       width,
       updatedAt: new Date(),
     })
@@ -44,6 +44,24 @@ export async function updateProjectImageByUserId({
     .returning({ id: projects.id })
 
   return project
+}
+
+export async function updateProjectStatusByUserId({
+  projectId,
+  status,
+  userId,
+}: {
+  projectId: string
+  status: string
+  userId: string
+}) {
+  await db
+    .update(projects)
+    .set({
+      status,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
 }
 
 export async function updateProjectCleanedImageByUserId({
@@ -104,7 +122,7 @@ export async function findProjectDimensionsByUserId({
   return project
 }
 
-export async function findProjectImageKeysByUserId({
+export async function findProjectCleanedImageKeyByUserId({
   projectId,
   userId,
 }: {
@@ -113,7 +131,6 @@ export async function findProjectImageKeysByUserId({
 }) {
   const [project] = await db
     .select({
-      originalImageKey: projects.originalImageKey,
       cleanedImageKey: projects.cleanedImageKey,
     })
     .from(projects)

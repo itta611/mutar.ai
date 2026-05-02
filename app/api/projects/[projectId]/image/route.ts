@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-import { findProjectImageKeysByUserId } from "@/db/repo"
+import { findProjectCleanedImageKeyByUserId } from "@/db/repo"
 import { auth } from "@/lib/auth"
 import { readImageFromR2 } from "@/lib/r2"
 
@@ -19,13 +19,7 @@ export async function GET(
   }
 
   const { projectId } = await params
-  const variant = new URL(request.url).searchParams.get("variant") ?? "cleaned"
-
-  if (variant !== "cleaned" && variant !== "original") {
-    return NextResponse.json({ message: "Invalid variant" }, { status: 400 })
-  }
-
-  const project = await findProjectImageKeysByUserId({
+  const project = await findProjectCleanedImageKeyByUserId({
     projectId,
     userId: session.user.id,
   })
@@ -34,15 +28,17 @@ export async function GET(
     return NextResponse.json({ message: "Not found" }, { status: 404 })
   }
 
-  const key =
-    variant === "original"
-      ? project.originalImageKey
-      : (project.cleanedImageKey ?? project.originalImageKey)
+  if (!project.cleanedImageKey) {
+    return NextResponse.json(
+      { message: "Image not available" },
+      { status: 404, headers: { "Cache-Control": "private, no-store" } }
+    )
+  }
 
   let asset: Awaited<ReturnType<typeof readImageFromR2>>
 
   try {
-    asset = await readImageFromR2(key)
+    asset = await readImageFromR2(project.cleanedImageKey)
   } catch (error) {
     console.error("[hengen] failed to read project image", error)
     return NextResponse.json(
@@ -57,7 +53,7 @@ export async function GET(
   return new Response(body, {
     headers: {
       "Content-Type": asset.mediaType,
-      "Cache-Control": "private, max-age=3600",
+      "Cache-Control": "private, no-store",
     },
   })
 }

@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 
-import { updateProjectImageByUserId } from "@/db/repo"
+import {
+  updateProjectImageByUserId,
+  updateProjectStatusByUserId,
+} from "@/db/repo"
 import { auth } from "@/lib/auth"
 import { uploadImageToR2 } from "@/lib/r2"
 
@@ -84,8 +87,19 @@ export async function POST(request: Request) {
       }),
     ])
 
+    await updateProjectStatusByUserId({
+      projectId,
+      status: "ready",
+      userId: session.user.id,
+    })
+
     return NextResponse.json({ ok: true })
   } catch (error) {
+    await updateProjectStatusByUserId({
+      projectId,
+      status: "error",
+      userId: session.user.id,
+    })
     console.error("[hengen] failed to generate project", error)
     return NextResponse.json(
       { message: "Failed to generate project" },
