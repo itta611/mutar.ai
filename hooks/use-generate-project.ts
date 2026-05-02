@@ -5,7 +5,6 @@ import { useSetAtom } from "jotai"
 
 import {
   type EditorAspectRatio,
-  editorAspectRatioAtom,
   editorImageSizeAtom,
   editorProjectIdAtom,
   editorProjectStatusAtom,
@@ -43,7 +42,6 @@ async function generateProjectImage({
 
 export function useGenerateProject() {
   const setEditorProjectStatus = useSetAtom(editorProjectStatusAtom)
-  const setAspectRatio = useSetAtom(editorAspectRatioAtom)
   const setImageSize = useSetAtom(editorImageSizeAtom)
   const setProjectId = useSetAtom(editorProjectIdAtom)
   const fetchProject = useEditorProject()
@@ -56,7 +54,6 @@ export function useGenerateProject() {
     const data = await createProjectMutation.mutateAsync(input)
 
     setProjectId(data.projectId)
-    setAspectRatio(input.aspectRatio)
     setImageSize(null)
     setEditorProjectStatus("loading")
     void generateProjectMutation

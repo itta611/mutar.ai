@@ -11,6 +11,5 @@ export type EditorBox = {
 
 export const editorProjectIdAtom = atom<string | null>(null)
 export const editorProjectStatusAtom = atom<EditorProjectStatus | null>(null)
-export const editorAspectRatioAtom = atom<EditorAspectRatio | null>(null)
 export const editorImageSizeAtom = atom<ImageSize | null>(null)
 export const editorBoxesAtom = atom<EditorBox[]>([])

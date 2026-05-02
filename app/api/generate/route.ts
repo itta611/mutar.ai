@@ -10,7 +10,7 @@ import { auth } from "@/lib/auth"
 import { uploadImageToR2 } from "@/lib/r2"
 
 import { analyzeGeneratedImage } from "./analyze-generated-image"
-import { generatePresentationImage } from "./generate-presentation-image"
+import { generateImage } from "./generate-image"
 import { removeTextFromImage } from "./remove-text-from-image"
 
 export const runtime = "nodejs"
@@ -31,11 +31,7 @@ async function runGenerateJob({
   userId,
 }: z.infer<typeof requestSchema> & { userId: string }) {
   try {
-    const generated = await generatePresentationImage(
-      prompt,
-      aspectRatio,
-      model
-    )
+    const generated = await generateImage(prompt, aspectRatio, model)
     const originalImageKey = await uploadImageToR2({
       keyPrefix: `projects/${projectId}-original`,
       bytes: generated.image.uint8Array,
