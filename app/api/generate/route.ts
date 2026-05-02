@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server"
+import { after, NextResponse } from "next/server"
 import { z } from "zod"
 
 import {
+  findProjectDimensionsByUserId,
   updateProjectImageByUserId,
   updateProjectStatusByUserId,
 } from "@/db/repo"
@@ -21,6 +22,68 @@ const requestSchema = z.object({
   aspectRatio: z.enum(["16:9", "4:3", "3:4", "1:1"]),
   model: z.enum(["google/gemini-2.5-flash-image", "openai/gpt-5.4-image-2"]),
 })
+
+async function runGenerateJob({
+  aspectRatio,
+  model,
+  projectId,
+  prompt,
+  userId,
+}: z.infer<typeof requestSchema> & { userId: string }) {
+  try {
+    const generated = await generatePresentationImage(
+      prompt,
+      aspectRatio,
+      model
+    )
+    const originalImageKey = await uploadImageToR2({
+      keyPrefix: `projects/${projectId}-original`,
+      bytes: generated.image.uint8Array,
+      mediaType: generated.image.mediaType,
+    })
+
+    const project = await updateProjectImageByUserId({
+      projectId,
+      userId,
+      originalImageKey,
+      width: generated.dimensions.width,
+      height: generated.dimensions.height,
+    })
+
+    if (!project) {
+      return
+    }
+
+    await Promise.all([
+      analyzeGeneratedImage({
+        bytes: generated.image.uint8Array,
+        height: generated.dimensions.height,
+        projectId,
+        userId,
+        width: generated.dimensions.width,
+      }),
+      removeTextFromImage({
+        bytes: generated.image.uint8Array,
+        mediaType: generated.image.mediaType,
+        projectId,
+        userId,
+      }),
+    ])
+
+    await updateProjectStatusByUserId({
+      projectId,
+      status: "ready",
+      userId,
+    })
+  } catch (error) {
+    await updateProjectStatusByUserId({
+      projectId,
+      status: "error",
+      userId,
+    })
+    console.error("[hengen] failed to generate project", error)
+  }
+}
 
 export async function POST(request: Request) {
   const session = await auth.api.getSession({
@@ -46,64 +109,24 @@ export async function POST(request: Request) {
   }
 
   const { projectId, prompt, aspectRatio, model } = parsedBody.data
+  const project = await findProjectDimensionsByUserId({
+    projectId,
+    userId: session.user.id,
+  })
 
-  try {
-    const generated = await generatePresentationImage(
+  if (!project) {
+    return NextResponse.json({ message: "Not found" }, { status: 404 })
+  }
+
+  after(() =>
+    runGenerateJob({
       prompt,
       aspectRatio,
-      model
-    )
-    const originalImageKey = await uploadImageToR2({
-      keyPrefix: `projects/${projectId}-original`,
-      bytes: generated.image.uint8Array,
-      mediaType: generated.image.mediaType,
-    })
-
-    const project = await updateProjectImageByUserId({
       projectId,
-      userId: session.user.id,
-      originalImageKey,
-      width: generated.dimensions.width,
-      height: generated.dimensions.height,
-    })
-
-    if (!project) {
-      return NextResponse.json({ message: "Not found" }, { status: 404 })
-    }
-
-    await Promise.all([
-      analyzeGeneratedImage({
-        bytes: generated.image.uint8Array,
-        height: generated.dimensions.height,
-        projectId,
-        userId: session.user.id,
-        width: generated.dimensions.width,
-      }),
-      removeTextFromImage({
-        bytes: generated.image.uint8Array,
-        mediaType: generated.image.mediaType,
-        projectId,
-        userId: session.user.id,
-      }),
-    ])
-
-    await updateProjectStatusByUserId({
-      projectId,
-      status: "ready",
+      model,
       userId: session.user.id,
     })
+  )
 
-    return NextResponse.json({ ok: true })
-  } catch (error) {
-    await updateProjectStatusByUserId({
-      projectId,
-      status: "error",
-      userId: session.user.id,
-    })
-    console.error("[hengen] failed to generate project", error)
-    return NextResponse.json(
-      { message: "Failed to generate project" },
-      { status: 500 }
-    )
-  }
+  return NextResponse.json({ ok: true })
 }

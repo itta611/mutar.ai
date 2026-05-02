@@ -1,6 +1,6 @@
 import { atom } from "jotai"
 
-export type EditorProjectStatus = "loading" | "generating" | "ready" | "error"
+export type EditorProjectStatus = "loading" | "ready" | "error"
 export type ImageSize = [width: number, height: number]
 export type EditorBox = {
   bbox: { x?: number; y?: number }[]

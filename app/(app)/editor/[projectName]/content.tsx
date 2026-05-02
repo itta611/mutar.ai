@@ -28,6 +28,18 @@ export function EditorContent({ projectId }: { projectId: string }) {
     }
   }, [currentProjectId, fetchProject, projectId, status])
 
+  useEffect(() => {
+    if (status !== "loading") {
+      return
+    }
+
+    const id = window.setInterval(() => {
+      fetchProject(projectId)
+    }, 5000)
+
+    return () => window.clearInterval(id)
+  }, [fetchProject, projectId, status])
+
   useLayoutEffect(() => {
     if (!projectId || status !== "ready" || !imageSize || boxes.length === 0) {
       return

@@ -36,7 +36,6 @@ export async function updateProjectImageByUserId({
     .set({
       height,
       originalImageKey,
-      status: "generating",
       width,
       updatedAt: new Date(),
     })

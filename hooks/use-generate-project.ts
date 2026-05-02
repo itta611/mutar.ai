@@ -4,9 +4,9 @@ import { useMutation } from "@tanstack/react-query"
 import { useSetAtom } from "jotai"
 
 import {
-  editorProjectStatusAtom,
   editorImageSizeAtom,
   editorProjectIdAtom,
+  editorProjectStatusAtom,
 } from "@/atom/generate"
 import { apiRequest } from "@/lib/api-request"
 import { useEditorProject } from "./use-editor-project"
@@ -29,17 +29,14 @@ async function generateProjectImage({
   projectId,
   ...input
 }: GenerateProjectInput & { projectId: string }) {
-  return apiRequest<{ ok: boolean }>(
-    "/api/generate",
-    {
-      errorMessage: "generate_failed",
-      method: "POST",
-      json: {
-        projectId,
-        ...input,
-      },
-    }
-  )
+  return apiRequest<{ ok: boolean }>("/api/generate", {
+    errorMessage: "generate_failed",
+    method: "POST",
+    json: {
+      projectId,
+      ...input,
+    },
+  })
 }
 
 export function useGenerateProject() {
@@ -57,7 +54,7 @@ export function useGenerateProject() {
 
     setProjectId(data.projectId)
     setImageSize(null)
-    setEditorProjectStatus("generating")
+    setEditorProjectStatus("loading")
     void generateProjectMutation
       .mutateAsync({
         projectId: data.projectId,
