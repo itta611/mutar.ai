@@ -19,7 +19,7 @@ export default function RootLayout({
       <AppSidebar />
       <div className="h-dvh w-full flex flex-col">
         <Navbar />
-        <div className="grow overflow-y-auto rounded-tl-md border border-border/70">
+        <div className="grow overflow-y-auto rounded-tl-md border border-border/70 bg-zinc-50">
           {children}
         </div>
       </div>

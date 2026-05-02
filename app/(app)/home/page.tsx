@@ -9,7 +9,7 @@ export default async function Page() {
     : []
 
   return (
-    <div className="pt-10 bg-zinc-50 min-h-full px-20 pb-10">
+    <div className="pt-10 min-h-full px-20 pb-10">
       <HomeContent initialImages={images} />
     </div>
   )
