@@ -1,6 +1,6 @@
 "use client"
 
-import { useAtomValue } from "jotai"
+import { useAtomValue, useSetAtom } from "jotai"
 import Image from "next/image"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
@@ -17,6 +17,7 @@ export function EditorContent({ projectId }: { projectId: string }) {
   const status = useAtomValue(editorProjectStatusAtom)
   const imageSize = useAtomValue(editorImageSizeAtom)
   const boxes = useAtomValue(editorBoxesAtom)
+  const setBoxes = useSetAtom(editorBoxesAtom)
   const fetchProject = useEditorProject()
   const svgRef = useRef<SVGSVGElement>(null)
   const [fontSizes, setFontSizes] = useState<number[]>([])
@@ -28,6 +29,10 @@ export function EditorContent({ projectId }: { projectId: string }) {
   }, [currentProjectId, fetchProject, projectId, status])
 
   useLayoutEffect(() => {
+    if (!projectId || status !== "ready" || !imageSize || boxes.length === 0) {
+      return
+    }
+
     const svg = svgRef.current
 
     if (!svg) {
@@ -49,7 +54,7 @@ export function EditorContent({ projectId }: { projectId: string }) {
     }
 
     setFontSizes(nextFontSizes)
-  }, [boxes])
+  }, [boxes.length, imageSize, projectId, status])
 
   if (status !== "ready" || !imageSize) {
     return null
@@ -71,7 +76,7 @@ export function EditorContent({ projectId }: { projectId: string }) {
       />
       <svg
         ref={svgRef}
-        className="pointer-events-none absolute inset-0 size-full"
+        className="absolute inset-0 size-full"
         viewBox={`0 0 ${width} ${height}`}
       >
         <title>Editor Overlay</title>
@@ -87,18 +92,11 @@ export function EditorContent({ projectId }: { projectId: string }) {
           const boxWidth = Math.max(...xs) - left
           const boxHeight = Math.max(...ys) - top
           const fontSize = boxWidth / Math.max([...box.label].length, 1)
+          const displayFontSize = fontSizes[index] ?? fontSize
+          const editableHeight = displayFontSize * 1.4
 
           return (
             <g key={`${box.label}-${index}`}>
-              <rect
-                x={left}
-                y={top}
-                width={boxWidth}
-                height={boxHeight}
-                fill="none"
-                stroke="rgba(0,0,0,0.35)"
-                strokeWidth="2"
-              />
               <text
                 x={left + boxWidth / 2}
                 y={top + boxHeight / 2}
@@ -106,11 +104,47 @@ export function EditorContent({ projectId }: { projectId: string }) {
                 data-index={index}
                 fill="rgba(0,0,0,0.75)"
                 dominantBaseline="middle"
-                fontSize={fontSizes[index] ?? fontSize}
+                fontSize={fontSize}
+                opacity="0"
+                pointerEvents="none"
                 textAnchor="middle"
               >
                 {box.label}
               </text>
+              <foreignObject
+                x={left}
+                y={top + boxHeight / 2 - editableHeight / 2}
+                width={boxWidth}
+                height={editableHeight}
+              >
+                {/* biome-ignore lint/a11y/useSemanticElements: contentEditable is required here. */}
+                <div
+                  aria-label="Edit text"
+                  contentEditable
+                  role="textbox"
+                  suppressContentEditableWarning
+                  tabIndex={0}
+                  onBlur={(event) => {
+                    const label = event.currentTarget.textContent ?? ""
+
+                    setBoxes((current) =>
+                      current.map((item, itemIndex) =>
+                        itemIndex === index ? { ...item, label } : item
+                      )
+                    )
+                  }}
+                  style={{
+                    color: "rgba(0,0,0,0.75)",
+                    fontSize: displayFontSize,
+                    lineHeight: `${editableHeight}px`,
+                    outline: "none",
+                    textAlign: "center",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {box.label}
+                </div>
+              </foreignObject>
             </g>
           )
         })}
