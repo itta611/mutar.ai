@@ -2,7 +2,7 @@
 
 import { useAtomValue } from "jotai"
 import Image from "next/image"
-import { useEffect } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
 import {
   editorBoxesAtom,
@@ -18,12 +18,38 @@ export function EditorContent({ projectId }: { projectId: string }) {
   const imageSize = useAtomValue(editorImageSizeAtom)
   const boxes = useAtomValue(editorBoxesAtom)
   const fetchProject = useEditorProject()
+  const svgRef = useRef<SVGSVGElement>(null)
+  const [fontSizes, setFontSizes] = useState<number[]>([])
 
   useEffect(() => {
     if (currentProjectId !== projectId || status === null) {
       fetchProject(projectId)
     }
   }, [currentProjectId, fetchProject, projectId, status])
+
+  useLayoutEffect(() => {
+    const svg = svgRef.current
+
+    if (!svg) {
+      return
+    }
+
+    const nextFontSizes: number[] = []
+
+    for (const text of Array.from(
+      svg.querySelectorAll<SVGTextElement>("text[data-box-width]")
+    )) {
+      const index = Number(text.dataset.index)
+      const boxWidth = Number(text.dataset.boxWidth)
+      const fontSize = Number(text.getAttribute("font-size"))
+      const textWidth = text.getComputedTextLength()
+
+      nextFontSizes[index] =
+        textWidth > 0 ? fontSize * (boxWidth / textWidth) : fontSize
+    }
+
+    setFontSizes(nextFontSizes)
+  }, [boxes])
 
   if (status !== "ready" || !imageSize) {
     return null
@@ -44,6 +70,7 @@ export function EditorContent({ projectId }: { projectId: string }) {
         className="object-contain"
       />
       <svg
+        ref={svgRef}
         className="pointer-events-none absolute inset-0 size-full"
         viewBox={`0 0 ${width} ${height}`}
       >
@@ -59,6 +86,7 @@ export function EditorContent({ projectId }: { projectId: string }) {
           const top = Math.min(...ys)
           const boxWidth = Math.max(...xs) - left
           const boxHeight = Math.max(...ys) - top
+          const fontSize = boxWidth / Math.max([...box.label].length, 1)
 
           return (
             <g key={`${box.label}-${index}`}>
@@ -74,12 +102,12 @@ export function EditorContent({ projectId }: { projectId: string }) {
               <text
                 x={left + boxWidth / 2}
                 y={top + boxHeight / 2}
+                data-box-width={boxWidth}
+                data-index={index}
                 fill="rgba(0,0,0,0.75)"
                 dominantBaseline="middle"
-                fontSize={boxHeight * 0.8}
-                lengthAdjust="spacingAndGlyphs"
+                fontSize={fontSizes[index] ?? fontSize}
                 textAnchor="middle"
-                textLength={boxWidth}
               >
                 {box.label}
               </text>
