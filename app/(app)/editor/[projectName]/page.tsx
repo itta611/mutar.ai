@@ -8,7 +8,7 @@ export default async function Page({
   const { projectName } = await params
 
   return (
-    <div className="flex h-full items-center justify-center bg-zinc-50 p-8">
+    <div className="flex min-h-full items-center justify-center bg-zinc-50 p-8">
       <EditorContent projectId={projectName} />
     </div>
   )

@@ -33,12 +33,13 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-none">
       <SidebarHeader className="h-13 py-0">
-        <div className="flex items-center border-b border-border/70 h-full">
+        <div className="flex items-center h-full">
           <Link href="/" className="ml-2">
             <Logo width={120} />
           </Link>
         </div>
       </SidebarHeader>
+      <div className="h-px mx-3 bg-border/70" />
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>一般</SidebarGroupLabel>
