@@ -18,6 +18,7 @@ import {
   editorProjectStatusAtom,
 } from "@/atom/generate"
 import { useEditorProject } from "@/hooks/use-editor-project"
+import LogoIcon from "@/components/logo-icon"
 
 type ViewBox = {
   height: number
@@ -105,10 +106,6 @@ export default function Page({
   }, [boxes.length, imageSize, projectId, status])
 
   useLayoutEffect(() => {
-    if (status !== "ready" || !imageSize) {
-      return
-    }
-
     const container = containerRef.current
 
     if (!container) {
@@ -127,21 +124,21 @@ export default function Page({
     resizeObserver.observe(container)
 
     return () => resizeObserver.disconnect()
-  }, [imageSize, status])
+  }, [])
 
   if (status === "loading" && aspectRatio) {
-    return (
-      <div className="min-h-full">
-        <div
-          className="max-h-full max-w-full animate-pulse bg-muted"
-          style={{
-            aspectRatio: aspectRatio.replace(":", " / "),
-            width: aspectRatio === "3:4" ? 864 : 1152,
-          }}
-        />
-      </div>
-    )
+    return <div className="min-h-full"></div>
   }
+  return (
+    <div className="min-h-full">
+      <LogoIcon
+        className="animate-[spin_2.5s_linear_infinite]"
+        width={40}
+        height={40}
+      />
+      生成中です
+    </div>
+  )
 
   if (status !== "ready" || !imageSize) {
     return <div className="min-h-full" />
@@ -192,6 +189,7 @@ export default function Page({
 
   return (
     <div ref={containerRef} className="min-h-full">
+      {/** biome-ignore lint/a11y/noSvgWithoutTitle: ツールチップが邪魔だから */}
       <svg
         ref={svgRef}
         className="size-full overflow-hidden"
@@ -200,7 +198,6 @@ export default function Page({
         viewBox={`${activeViewBox.x} ${activeViewBox.y} ${activeViewBox.width} ${activeViewBox.height}`}
         style={{ height: containerSize.height, width: containerSize.width }}
       >
-        <title>Editor Overlay</title>
         <image
           href={`/api/projects/${projectId}/image`}
           height={height}
@@ -261,7 +258,7 @@ export default function Page({
                     )
                   }}
                   style={{
-                    color: box.color ?? "rgba(0,0,0,0.75)",
+                    color: box.color ?? "rgba(0,0,0,1)",
                     fontSize: displayFontSize,
                     lineHeight: `${editableHeight}px`,
                     outline: "none",
