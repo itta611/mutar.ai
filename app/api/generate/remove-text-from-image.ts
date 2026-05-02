@@ -23,8 +23,10 @@ export async function removeTextFromImage({
     prompt: {
       images: [bytes],
       text: [
-        "Remove only the visible text from this image.",
+        "Remove all visible text, letters, numbers, currency symbols, labels, captions, headings, and button text from this image.",
+        "This includes text inside cards, tables, columns, and CTA buttons.",
         "Preserve the original layout, background, objects, colors, and composition.",
+        "Preserve non-text shapes such as card borders, divider lines, icons, and buttons.",
         "Do not add replacement text.",
       ].join(" "),
     },

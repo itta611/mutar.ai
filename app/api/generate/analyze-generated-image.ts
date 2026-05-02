@@ -47,6 +47,7 @@ type Rect = {
 
 type OcrWord = {
   bbox: VisionVertex[]
+  color: string
   id: string
   label: string
 }
@@ -153,6 +154,97 @@ function bboxFromBoxes(boxes: VisionVertex[][]) {
   ]
 }
 
+function hexFromRgb({ b, g, r }: { b: number; g: number; r: number }) {
+  return `#${[r, g, b]
+    .map((value) => Math.round(value).toString(16).padStart(2, "0"))
+    .join("")}`
+}
+
+function colorDistance(
+  a: { b: number; g: number; r: number },
+  b: { b: number; g: number; r: number }
+) {
+  return (a.r - b.r) ** 2 + (a.g - b.g) ** 2 + (a.b - b.b) ** 2
+}
+
+function textColorFromBox({
+  bbox,
+  data,
+  height,
+  width,
+}: {
+  bbox: VisionVertex[]
+  data: Buffer
+  height: number
+  width: number
+}) {
+  if (bbox.length === 0) {
+    return "#000000"
+  }
+
+  const rect = rectFromVertices(bbox)
+  const left = Math.max(0, Math.floor(rect.left))
+  const top = Math.max(0, Math.floor(rect.top))
+  const right = Math.min(width, Math.ceil(rect.left + rect.width))
+  const bottom = Math.min(height, Math.ceil(rect.top + rect.height))
+  const colors: { b: number; g: number; r: number }[] = []
+  const border: { b: number; g: number; r: number }[] = []
+
+  for (let y = top; y < bottom; y += 1) {
+    for (let x = left; x < right; x += 1) {
+      const index = (y * width + x) * 4
+      const color = {
+        r: data[index] ?? 0,
+        g: data[index + 1] ?? 0,
+        b: data[index + 2] ?? 0,
+      }
+
+      colors.push(color)
+
+      if (x === left || x === right - 1 || y === top || y === bottom - 1) {
+        border.push(color)
+      }
+    }
+  }
+
+  if (colors.length === 0) {
+    return "#000000"
+  }
+
+  const background = (border.length > 0 ? border : colors).reduce(
+    (sum, color) => ({
+      r: sum.r + color.r,
+      g: sum.g + color.g,
+      b: sum.b + color.b,
+    }),
+    { r: 0, g: 0, b: 0 }
+  )
+  background.r /= border.length || colors.length
+  background.g /= border.length || colors.length
+  background.b /= border.length || colors.length
+
+  const maxDistance = Math.max(
+    ...colors.map((color) => colorDistance(color, background))
+  )
+  const textColors = colors.filter(
+    (color) => colorDistance(color, background) >= maxDistance * 0.65
+  )
+  const textColor = (textColors.length > 0 ? textColors : colors).reduce(
+    (sum, color) => ({
+      r: sum.r + color.r,
+      g: sum.g + color.g,
+      b: sum.b + color.b,
+    }),
+    { r: 0, g: 0, b: 0 }
+  )
+
+  textColor.r /= textColors.length || colors.length
+  textColor.g /= textColors.length || colors.length
+  textColor.b /= textColors.length || colors.length
+
+  return hexFromRgb(textColor)
+}
+
 async function mergeWordsWithAi(options: {
   blocks: { words: Record<string, string> }[]
   image: Buffer
@@ -204,6 +296,7 @@ function mergedBoxesFromGroups(
 
       return {
         bbox: bboxFromBoxes(groupWords.map((word) => word.bbox)),
+        color: groupWords[0]?.color ?? "#000000",
         label: group.label,
       }
     })
@@ -245,12 +338,19 @@ export async function analyzeGeneratedImage({
   width: number
 }) {
   const image = Buffer.from(bytes)
+  const rawImage = await sharp(image).ensureAlpha().raw().toBuffer()
   const [result] = await visionClient.textDetection({
     image: { content: image.toString("base64") },
   })
   const words: OcrWord[] =
     result.textAnnotations?.slice(1).map((annotation, index) => ({
       bbox: (annotation.boundingPoly?.vertices ?? []) as VisionVertex[],
+      color: textColorFromBox({
+        bbox: (annotation.boundingPoly?.vertices ?? []) as VisionVertex[],
+        data: rawImage,
+        height,
+        width,
+      }),
       id: `w${index}`,
       label: annotation.description ?? "",
     })) ?? []

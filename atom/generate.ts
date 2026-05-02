@@ -4,6 +4,7 @@ export type EditorProjectStatus = "loading" | "generating" | "ready" | "error"
 export type ImageSize = [width: number, height: number]
 export type EditorBox = {
   bbox: { x?: number; y?: number }[]
+  color?: string
   label: string
 }
 

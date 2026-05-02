@@ -102,7 +102,7 @@ export function EditorContent({ projectId }: { projectId: string }) {
                 y={top + boxHeight / 2}
                 data-box-width={boxWidth}
                 data-index={index}
-                fill="rgba(0,0,0,0.75)"
+                fill={box.color ?? "rgba(0,0,0,0.75)"}
                 dominantBaseline="middle"
                 fontSize={fontSize}
                 opacity="0"
@@ -134,7 +134,7 @@ export function EditorContent({ projectId }: { projectId: string }) {
                     )
                   }}
                   style={{
-                    color: "rgba(0,0,0,0.75)",
+                    color: box.color ?? "rgba(0,0,0,0.75)",
                     fontSize: displayFontSize,
                     lineHeight: `${editableHeight}px`,
                     outline: "none",
