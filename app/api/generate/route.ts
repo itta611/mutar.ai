@@ -7,6 +7,7 @@ import { uploadImageToR2 } from "@/lib/r2"
 
 import { analyzeGeneratedImage } from "./analyze-generated-image"
 import { generatePresentationImage } from "./generate-presentation-image"
+import { removeTextFromImage } from "./remove-text-from-image"
 
 export const runtime = "nodejs"
 export const maxDuration = 120
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
       model
     )
     const originalImageKey = await uploadImageToR2({
-      keyPrefix: `projects/${projectId}`,
+      keyPrefix: `projects/${projectId}-original`,
       bytes: generated.image.uint8Array,
       mediaType: generated.image.mediaType,
     })
@@ -67,13 +68,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Not found" }, { status: 404 })
     }
 
-    await analyzeGeneratedImage({
-      bytes: generated.image.uint8Array,
-      height: generated.dimensions.height,
-      projectId,
-      userId: session.user.id,
-      width: generated.dimensions.width,
-    })
+    await Promise.all([
+      analyzeGeneratedImage({
+        bytes: generated.image.uint8Array,
+        height: generated.dimensions.height,
+        projectId,
+        userId: session.user.id,
+        width: generated.dimensions.width,
+      }),
+      removeTextFromImage({
+        bytes: generated.image.uint8Array,
+        mediaType: generated.image.mediaType,
+        projectId,
+        userId: session.user.id,
+      }),
+    ])
 
     return NextResponse.json({ ok: true })
   } catch (error) {

@@ -57,7 +57,7 @@ export function GeneratedImages({
         <div key={image} className="active:scale-99 transition duration-75">
           <Link href={`/editor/${image}`} className="block">
             <Image
-              src={`/api/projects/${image}/image?variant=original`}
+              src={`/api/projects/${image}/image`}
               alt=""
               width={300}
               height={300}

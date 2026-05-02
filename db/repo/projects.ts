@@ -46,6 +46,24 @@ export async function updateProjectImageByUserId({
   return project
 }
 
+export async function updateProjectCleanedImageByUserId({
+  cleanedImageKey,
+  projectId,
+  userId,
+}: {
+  cleanedImageKey: string
+  projectId: string
+  userId: string
+}) {
+  await db
+    .update(projects)
+    .set({
+      cleanedImageKey,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+}
+
 export async function updateProjectAnalysisByUserId({
   boxes,
   projectId,

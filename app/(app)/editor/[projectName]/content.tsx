@@ -35,7 +35,7 @@ export function EditorContent({ projectId }: { projectId: string }) {
       style={{ aspectRatio: `${width} / ${height}`, width }}
     >
       <Image
-        src={`/api/projects/${projectId}/image?variant=original`}
+        src={`/api/projects/${projectId}/image`}
         alt=""
         fill
         unoptimized
