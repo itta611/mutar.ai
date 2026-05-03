@@ -33,8 +33,25 @@ type Size = {
   width: number
 }
 
+let measureCanvas: HTMLCanvasElement | null = null
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
+}
+
+function measureTextWidth(element: HTMLElement) {
+  measureCanvas ??= document.createElement("canvas")
+
+  const context = measureCanvas.getContext("2d")
+
+  if (!context) {
+    return element.scrollWidth
+  }
+
+  const style = window.getComputedStyle(element)
+  context.font = `${style.fontStyle} ${style.fontVariant} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`
+
+  return context.measureText(element.textContent ?? "").width
 }
 
 export default function Page({
@@ -56,6 +73,7 @@ export default function Page({
     width: 0,
   })
   const [fontSizes, setFontSizes] = useState<number[]>([])
+  const [textWidths, setTextWidths] = useState<number[]>([])
   const [viewBox, setViewBox] = useState<ViewBox | null>(null)
 
   useEffect(() => {
@@ -189,6 +207,21 @@ export default function Page({
     })
   }
 
+  function updateTextWidth(index: number, width: number) {
+    const nextWidth = Math.max(1, Math.ceil(width))
+
+    setTextWidths((current) => {
+      if (current[index] === nextWidth) {
+        return current
+      }
+
+      const next = [...current]
+      next[index] = nextWidth
+
+      return next
+    })
+  }
+
   return (
     <div ref={containerRef} className="min-h-full">
       {/** biome-ignore lint/a11y/noSvgWithoutTitle: ツールチップが邪魔だから */}
@@ -217,14 +250,16 @@ export default function Page({
           const top = Math.min(...ys)
           const boxWidth = Math.max(...xs) - left
           const boxHeight = Math.max(...ys) - top
+          const centerX = left + boxWidth / 2
           const fontSize = boxWidth / Math.max([...box.label].length, 1)
           const displayFontSize = fontSizes[index] ?? fontSize
           const editableHeight = displayFontSize * 1.4
+          const editableWidth = textWidths[index] ?? boxWidth
 
           return (
             <g key={`${box.label}-${index}`}>
               <text
-                x={left + boxWidth / 2}
+                x={centerX}
                 y={top + boxHeight / 2}
                 data-box-width={boxWidth}
                 data-index={index}
@@ -238,9 +273,9 @@ export default function Page({
                 {box.label}
               </text>
               <foreignObject
-                x={left}
+                x={centerX - editableWidth / 2}
                 y={top + boxHeight / 2 - editableHeight / 2}
-                width={boxWidth}
+                width={editableWidth}
                 height={editableHeight}
               >
                 {/* biome-ignore lint/a11y/useSemanticElements: contentEditable is required here. */}
@@ -250,6 +285,12 @@ export default function Page({
                   role="textbox"
                   suppressContentEditableWarning
                   tabIndex={0}
+                  onInput={(event) => {
+                    updateTextWidth(
+                      index,
+                      measureTextWidth(event.currentTarget)
+                    )
+                  }}
                   onBlur={(event) => {
                     const label = event.currentTarget.textContent ?? ""
 
