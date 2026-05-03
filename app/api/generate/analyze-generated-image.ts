@@ -131,10 +131,10 @@ function blocksFromFullText(
   return nonEmptyBlocks.length > 0
     ? nonEmptyBlocks
     : [
-      {
-        words: Object.fromEntries(words.map(({ id, label }) => [id, label])),
-      },
-    ]
+        {
+          words: Object.fromEntries(words.map(({ id, label }) => [id, label])),
+        },
+      ]
 }
 
 function bboxFromBoxes(boxes: VisionVertex[][]) {
@@ -173,6 +173,8 @@ async function mergeWordsWithAi(options: {
               "Merge OCR words into semantically meaningful labels.",
               "Select text only. Omit decorative fragments, even if OCR detected them as text.",
               "You may also omit words whose surrounding context is unclear or whose position cannot be confidently matched against the image.",
+              "Each group must contain words from one visual line only.",
+              "If a paragraph has line breaks, split it into separate groups for each line.",
               "Use only the provided word IDs. Do not invent IDs.",
               "Return groups in reading order. Each word ID should appear at most once.",
               "The image shows the OCR word boxes for visual reference.",
