@@ -14,7 +14,7 @@ import { AspectSelect } from "./aspect-select"
 import { ModelSelect } from "./model-select"
 
 const defaultPrompt =
-  "SaaSの料金プラン比較を、落ち着いたベージュと黒でまとめた横長スライド。大見出し、3カラム比較表、右下にCTA、洗練されたエディトリアルデザイン。"
+  "スマホアプリのプロトタイプ紹介画像を作成。アプリ名は「TaskPilot」。キャッチコピーは「毎日のタスクを、もっと軽く」。スマホ画面、チェックリスト、カレンダー、通知アイコンを含めた、SaaS風の広告ビジュアル。文字は斜めにならないようにする。"
 
 export function PromptInput() {
   const generateProject = useGenerateProject()
