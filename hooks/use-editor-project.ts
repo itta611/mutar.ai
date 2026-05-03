@@ -32,7 +32,6 @@ export function useEditorProject() {
   return useCallback(
     async (projectId: string) => {
       setProjectId(projectId)
-      setEditorProjectStatus("loading")
 
       try {
         const project = await getProject(projectId)

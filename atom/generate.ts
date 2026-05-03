@@ -1,6 +1,11 @@
 import { atom } from "jotai"
 
-export type EditorProjectStatus = "loading" | "ready" | "error"
+export type EditorProjectStatus =
+  | "generating"
+  | "analyzing"
+  | "erasing"
+  | "ready"
+  | "error"
 export type EditorAspectRatio = "16:9" | "4:3" | "3:4" | "1:1"
 export type ImageSize = [width: number, height: number]
 export type EditorBox = {

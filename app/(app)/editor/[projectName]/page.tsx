@@ -65,7 +65,7 @@ export default function Page({
   }, [currentProjectId, fetchProject, projectId, status])
 
   useEffect(() => {
-    if (status !== "loading") {
+    if (status === "ready" || status === "error") {
       return
     }
 
@@ -126,13 +126,20 @@ export default function Page({
   }, [])
 
   if (status !== "ready" || !imageSize) {
+    const loadingText =
+      status === "analyzing"
+        ? "画像を分析中..."
+        : status === "erasing"
+          ? "画像を仕上げ中..."
+          : "画像を生成中..."
+
     return (
       <div
         className="min-h-full flex flex-col items-center justify-center"
         ref={containerRef}
       >
         <LogoIcon className="mb-4 h-12 w-12 animate-[spin_2.5s_linear_infinite] fill-primary dark:fill-zinc-100" />
-        <ShimmerText>生成しています...</ShimmerText>
+        <ShimmerText>{loadingText}</ShimmerText>
       </div>
     )
   }

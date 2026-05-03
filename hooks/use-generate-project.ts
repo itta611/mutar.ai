@@ -55,7 +55,7 @@ export function useGenerateProject() {
 
     setProjectId(data.projectId)
     setImageSize(null)
-    setEditorProjectStatus("loading")
+    setEditorProjectStatus("generating")
     void generateProjectMutation
       .mutateAsync({
         projectId: data.projectId,

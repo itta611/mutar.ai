@@ -50,21 +50,40 @@ async function runGenerateJob({
       return
     }
 
-    await Promise.all([
-      analyzeGeneratedImage({
-        bytes: generated.image.uint8Array,
-        height: generated.dimensions.height,
-        projectId,
-        userId,
-        width: generated.dimensions.width,
-      }),
-      removeTextFromImage({
-        bytes: generated.image.uint8Array,
-        mediaType: generated.image.mediaType,
-        projectId,
-        userId,
-      }),
-    ])
+    await updateProjectStatusByUserId({
+      projectId,
+      status: "analyzing",
+      userId,
+    })
+
+    const analyzePromise = analyzeGeneratedImage({
+      bytes: generated.image.uint8Array,
+      height: generated.dimensions.height,
+      projectId,
+      userId,
+      width: generated.dimensions.width,
+    })
+    const erasePromise = removeTextFromImage({
+      bytes: generated.image.uint8Array,
+      mediaType: generated.image.mediaType,
+      projectId,
+      userId,
+    }).then(
+      () => undefined,
+      (error) => error
+    )
+
+    await analyzePromise
+    await updateProjectStatusByUserId({
+      projectId,
+      status: "erasing",
+      userId,
+    })
+    const eraseError = await erasePromise
+
+    if (eraseError) {
+      throw eraseError
+    }
 
     await updateProjectStatusByUserId({
       projectId,
