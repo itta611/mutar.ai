@@ -20,7 +20,7 @@ export async function removeTextFromImage({
   userId: string
 }) {
   const result = await generateImage({
-    model: openrouter.imageModel("openai/gpt-5.4-image-2", {
+    model: openrouter.imageModel("google/gemini-3-pro-image-preview", {
       provider: { allow_fallbacks: true },
     }),
     aspectRatio,
@@ -32,7 +32,7 @@ export async function removeTextFromImage({
         "Preserve the original layout, background, objects, colors, and composition.",
         "Preserve non-text shapes such as card borders, divider lines, and icons.",
         "Do not add replacement text.",
-      ].join(" "),
+      ].join("\n"),
     },
   })
 

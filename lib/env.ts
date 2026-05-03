@@ -4,7 +4,6 @@ import { z } from "zod"
 export const env = createEnv({
   server: {
     OPENROUTER_API_KEY: z.string().min(1),
-    OPENROUTER_TEXT_MODEL: z.string().default("google/gemini-2.5-pro"),
     GOOGLE_CLOUD_PROJECT_ID: z.string().min(1),
     GOOGLE_CLOUD_CLIENT_EMAIL: z.string().min(1),
     GOOGLE_CLOUD_PRIVATE_KEY: z.string().min(1),
