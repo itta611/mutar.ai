@@ -6,6 +6,7 @@ export type EditorProjectStatus =
   | "erasing"
   | "ready"
   | "error"
+  | "none"
 export type EditorAspectRatio = "16:9" | "4:3" | "3:4" | "1:1"
 export type ImageSize = [width: number, height: number]
 export type EditorBox = {
@@ -15,6 +16,6 @@ export type EditorBox = {
 }
 
 export const editorProjectIdAtom = atom<string | null>(null)
-export const editorProjectStatusAtom = atom<EditorProjectStatus | null>(null)
+export const editorProjectStatusAtom = atom<EditorProjectStatus>("none")
 export const editorImageSizeAtom = atom<ImageSize | null>(null)
 export const editorBoxesAtom = atom<EditorBox[]>([])
