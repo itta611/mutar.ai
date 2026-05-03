@@ -128,10 +128,10 @@ export default function Page({
   if (status !== "ready" || !imageSize) {
     const loadingText =
       status === "analyzing"
-        ? "画像を分析中... (1/3)"
+        ? "画像を分析中... (3/3)"
         : status === "erasing"
           ? "画像を仕上げ中... (2/3)"
-          : "画像を生成中... (3/3)"
+          : "画像を生成中... (1/3)"
 
     return (
       <div
