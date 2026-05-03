@@ -17,7 +17,7 @@ export async function removeTextFromImage({
   userId: string
 }) {
   const result = await generateImage({
-    model: openrouter.imageModel("google/gemini-3-pro-image-preview", {
+    model: openrouter.imageModel("openai/gpt-5.4-image-2", {
       provider: { allow_fallbacks: true },
     }),
     prompt: {
