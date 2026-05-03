@@ -4,7 +4,7 @@ import { getImageDimensions } from "@/lib/image-dimensions"
 
 import { openrouter } from "./openrouter"
 
-type AspectRatio = "16:9" | "4:3" | "3:4" | "1:1"
+export type AspectRatio = "16:9" | "4:3" | "3:4" | "1:1"
 type ImageModel = "google/gemini-2.5-flash-image" | "openai/gpt-5.4-image-2"
 
 export async function generateImage(

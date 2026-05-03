@@ -64,6 +64,7 @@ async function runGenerateJob({
       width: generated.dimensions.width,
     })
     const erasePromise = removeTextFromImage({
+      aspectRatio,
       bytes: generated.image.uint8Array,
       mediaType: generated.image.mediaType,
       projectId,

@@ -3,14 +3,17 @@ import { generateImage } from "ai"
 import { updateProjectCleanedImageByUserId } from "@/db/repo"
 import { uploadImageToR2 } from "@/lib/r2"
 
+import type { AspectRatio } from "./generate-image"
 import { openrouter } from "./openrouter"
 
 export async function removeTextFromImage({
+  aspectRatio,
   bytes,
   mediaType,
   projectId,
   userId,
 }: {
+  aspectRatio: AspectRatio
   bytes: Uint8Array
   mediaType: string
   projectId: string
@@ -20,6 +23,7 @@ export async function removeTextFromImage({
     model: openrouter.imageModel("openai/gpt-5.4-image-2", {
       provider: { allow_fallbacks: true },
     }),
+    aspectRatio,
     prompt: {
       images: [bytes],
       text: [
