@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { apiClient } from "@hengen/api/client"
+import { apiClient } from "@/lib/api-client"
 import { Button } from "../ui/button"
 
 const projectKeys = {

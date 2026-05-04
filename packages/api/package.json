@@ -4,7 +4,6 @@
   "type": "module",
   "exports": {
     ".": "./index.ts",
-    "./auth": "./auth.ts",
-    "./client": "./client.ts"
+    "./auth": "./auth.ts"
   }
 }

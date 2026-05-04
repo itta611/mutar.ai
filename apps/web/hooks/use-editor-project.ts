@@ -11,7 +11,7 @@ import {
   editorProjectIdAtom,
   editorProjectStatusAtom,
 } from "@/atom/generate"
-import { apiClient } from "@hengen/api/client"
+import { apiClient } from "@/lib/api-client"
 
 async function getProject(projectId: string) {
   const response = await apiClient.projects[":projectId"].$get({

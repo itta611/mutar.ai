@@ -9,7 +9,7 @@ import {
   editorProjectIdAtom,
   editorProjectStatusAtom,
 } from "@/atom/generate"
-import { apiClient } from "@hengen/api/client"
+import { apiClient } from "@/lib/api-client"
 import { useEditorProject } from "./use-editor-project"
 
 export type GenerateProjectInput = Omit<
