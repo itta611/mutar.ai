@@ -23,6 +23,7 @@
       "@/*": ["./apps/web/*"],
       "@hengen/api": ["./packages/api/index.ts"],
       "@hengen/api/*": ["./packages/api/*"],
+      "@hengen/auth": ["./packages/auth/index.ts"],
       "@hengen/db": ["./packages/db/index.ts"],
       "@hengen/db/*": ["./packages/db/*"],
       "@hengen/email": ["./packages/email/index.ts"]

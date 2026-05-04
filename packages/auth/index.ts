@@ -6,8 +6,7 @@ import { magicLink } from "better-auth/plugins"
 import { db } from "@hengen/db"
 import * as schema from "@hengen/db/schema"
 import { sendMagicLinkEmail } from "@hengen/email"
-
-import { env } from "./env"
+import { env } from "@/lib/env"
 
 export const auth = betterAuth({
   secret: env.AUTH_SECRET,

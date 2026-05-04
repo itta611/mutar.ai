@@ -152,6 +152,8 @@ importers:
 
   packages/api: {}
 
+  packages/auth: {}
+
   packages/db: {}
 
   packages/email: {}

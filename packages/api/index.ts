@@ -14,7 +14,8 @@ import { Hono } from "hono"
 import { after } from "next/server"
 import { z } from "zod"
 
-import { auth } from "./auth"
+import { auth } from "@hengen/auth"
+
 import { analyzeGeneratedImage } from "./analyze-generated-image"
 import { generateImage } from "./generate-image"
 import { readImageFromR2, uploadImageToR2 } from "./r2"

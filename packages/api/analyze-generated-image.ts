@@ -3,8 +3,7 @@ import { generateObject } from "ai"
 import { z } from "zod"
 
 import { updateProjectAnalysisByUserId } from "@hengen/db/repo"
-
-import { env } from "./env"
+import { env } from "@/lib/env"
 import { getTextStyle } from "./get-text-style"
 import { openrouter } from "./openrouter"
 

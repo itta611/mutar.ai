@@ -12,7 +12,12 @@ const nextConfig = {
   images: {
     remotePatterns: [new URL("https://lh3.googleusercontent.com/**")],
   },
-  transpilePackages: ["@hengen/api", "@hengen/db", "@hengen/email"],
+  transpilePackages: [
+    "@hengen/api",
+    "@hengen/auth",
+    "@hengen/db",
+    "@hengen/email",
+  ],
   turbopack: {
     root,
   },
