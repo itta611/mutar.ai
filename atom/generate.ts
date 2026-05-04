@@ -10,6 +10,7 @@ export type EditorProjectStatus =
 export type EditorAspectRatio = "16:9" | "4:3" | "3:4" | "1:1"
 export type ImageSize = [width: number, height: number]
 export type EditorBox = {
+  align?: "left" | "center" | "right"
   bbox: { x?: number; y?: number }[]
   color?: string
   label: string

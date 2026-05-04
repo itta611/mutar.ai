@@ -5,6 +5,7 @@ import { z } from "zod"
 import { openrouter } from "./openrouter"
 
 type TextBox = {
+  align?: "left" | "center" | "right"
   bbox: { x?: number; y?: number }[]
   label: string
 }

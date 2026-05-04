@@ -250,11 +250,19 @@ export default function Page({
           const top = Math.min(...ys)
           const boxWidth = Math.max(...xs) - left
           const boxHeight = Math.max(...ys) - top
+          const align = box.align ?? "center"
           const centerX = left + boxWidth / 2
+          const right = left + boxWidth
           const fontSize = boxWidth / Math.max([...box.label].length, 1)
           const displayFontSize = fontSizes[index] ?? fontSize
           const editableHeight = displayFontSize * 1.4
           const editableWidth = textWidths[index] ?? boxWidth
+          const editableX =
+            align === "left"
+              ? left
+              : align === "right"
+                ? right - editableWidth
+                : centerX - editableWidth / 2
 
           return (
             <g key={`${box.label}-${index}`}>
@@ -273,7 +281,7 @@ export default function Page({
                 {box.label}
               </text>
               <foreignObject
-                x={centerX - editableWidth / 2}
+                x={editableX}
                 y={top + boxHeight / 2 - editableHeight / 2}
                 width={editableWidth}
                 height={editableHeight}
@@ -305,7 +313,7 @@ export default function Page({
                     fontSize: displayFontSize,
                     lineHeight: `${editableHeight}px`,
                     outline: "none",
-                    textAlign: "center",
+                    textAlign: align,
                     whiteSpace: "nowrap",
                   }}
                 >
