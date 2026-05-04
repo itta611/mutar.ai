@@ -8,16 +8,14 @@
   "files": {
     "ignoreUnknown": true,
     "includes": [
-      "app/**/*",
-      "components/**/*",
-      "db/**/*",
-      "email/**/*",
-      "hooks/**/*",
-      "lib/**/*",
+      "apps/web/**/*",
+      "packages/**/*",
       "*.json",
       "*.mjs",
       "*.ts",
       "!pnpm-lock.yaml",
+      "!**/.next",
+      "!**/.next/**",
       "!**/dist"
     ]
   },

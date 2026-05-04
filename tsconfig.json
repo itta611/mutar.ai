@@ -20,15 +20,22 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./apps/web/*"],
+      "@hengen/api": ["./packages/api/index.ts"],
+      "@hengen/api/*": ["./packages/api/*"],
+      "@hengen/db": ["./packages/db/index.ts"],
+      "@hengen/db/*": ["./packages/db/*"],
+      "@hengen/email": ["./packages/email/index.ts"]
     }
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    "apps/web/next-env.d.ts",
+    "apps/web/**/*.ts",
+    "apps/web/**/*.tsx",
+    "apps/web/.next/types/**/*.ts",
+    "apps/web/.next/dev/types/**/*.ts",
+    "packages/**/*.ts",
+    "drizzle.config.ts"
   ],
   "exclude": ["node_modules"]
 }
