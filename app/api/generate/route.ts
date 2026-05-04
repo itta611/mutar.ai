@@ -14,7 +14,7 @@ import { generateImage } from "./generate-image"
 import { removeTextFromImage } from "./remove-text-from-image"
 
 export const runtime = "nodejs"
-export const maxDuration = 120
+export const maxDuration = 300
 
 const requestSchema = z.object({
   projectId: z.string().min(1),
@@ -56,33 +56,20 @@ async function runGenerateJob({
       userId,
     })
 
-    const analyzePromise = analyzeGeneratedImage({
-      bytes: generated.image.uint8Array,
-      projectId,
-      userId,
-    })
-    const erasePromise = removeTextFromImage({
-      aspectRatio,
-      bytes: generated.image.uint8Array,
-      mediaType: generated.image.mediaType,
-      projectId,
-      userId,
-    }).then(
-      () => undefined,
-      (error) => error
-    )
-
-    await analyzePromise
-    await updateProjectStatusByUserId({
-      projectId,
-      status: "erasing",
-      userId,
-    })
-    const eraseError = await erasePromise
-
-    if (eraseError) {
-      throw eraseError
-    }
+    await Promise.all([
+      analyzeGeneratedImage({
+        bytes: generated.image.uint8Array,
+        projectId,
+        userId,
+      }),
+      removeTextFromImage({
+        aspectRatio,
+        bytes: generated.image.uint8Array,
+        mediaType: generated.image.mediaType,
+        projectId,
+        userId,
+      }),
+    ])
 
     await updateProjectStatusByUserId({
       projectId,
