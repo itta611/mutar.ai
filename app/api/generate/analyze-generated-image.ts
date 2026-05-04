@@ -1,6 +1,5 @@
 import vision from "@google-cloud/vision"
 import { generateObject } from "ai"
-import sharp from "sharp"
 import { z } from "zod"
 
 import { updateProjectAnalysisByUserId } from "@/db/repo"
@@ -39,20 +38,11 @@ type VisionFullTextAnnotation = {
   }[]
 }
 
-type Rect = {
-  height: number
-  left: number
-  top: number
-  width: number
-}
-
 type OcrWord = {
   bbox: VisionVertex[]
   id: string
   label: string
 }
-
-const wordStrokeWidth = 3
 
 const mergeSchema = z.object({
   groups: z.array(
@@ -75,25 +65,6 @@ function rectFromVertices(vertices: VisionVertex[]) {
     left,
     top,
     width: Math.max(...xs) - left,
-  }
-}
-
-function expandRect(
-  rect: Rect,
-  padding: number,
-  width: number,
-  height: number
-) {
-  const left = Math.max(0, rect.left - padding)
-  const top = Math.max(0, rect.top - padding)
-  const right = Math.min(width, rect.left + rect.width + padding)
-  const bottom = Math.min(height, rect.top + rect.height + padding)
-
-  return {
-    height: bottom - top,
-    left,
-    top,
-    width: right - left,
   }
 }
 
@@ -180,7 +151,7 @@ async function mergeWordsWithAi(options: {
               "Set align to the group's visual text alignment in the full image: left, center, or right.",
               "Use only the provided word IDs. Do not invent IDs.",
               "Return groups in reading order. Each word ID should appear at most once.",
-              "The image shows the OCR word boxes for visual reference.",
+              "The image is the original generated image for visual reference.",
               JSON.stringify({ blocks: options.blocks }),
             ].join("\n"),
           },
@@ -217,39 +188,14 @@ function mergedBoxesFromGroups(
     .filter((box) => box.bbox.length > 0)
 }
 
-function createOverlaySvg(options: {
-  height: number
-  wordBoxes: VisionVertex[][]
-  width: number
-}) {
-  const wordRects = options.wordBoxes
-    .filter((box) => box.length > 0)
-    .map((box) => {
-      const rect = expandRect(
-        rectFromVertices(box),
-        wordStrokeWidth,
-        options.width,
-        options.height
-      )
-      return `<rect x="${rect.left}" y="${rect.top}" width="${rect.width}" height="${rect.height}" fill="rgba(0, 209, 255, 0.12)" stroke="#00d1ff" stroke-width="${wordStrokeWidth}"/>`
-    })
-    .join("")
-
-  return `<svg width="${options.width}" height="${options.height}" viewBox="0 0 ${options.width} ${options.height}" xmlns="http://www.w3.org/2000/svg">${wordRects}</svg>`
-}
-
 export async function analyzeGeneratedImage({
   bytes,
-  height,
   projectId,
   userId,
-  width,
 }: {
   bytes: Uint8Array
-  height: number
   projectId: string
   userId: string
-  width: number
 }) {
   const image = Buffer.from(bytes)
   const [result] = await visionClient.textDetection({
@@ -261,21 +207,12 @@ export async function analyzeGeneratedImage({
       id: `w${index}`,
       label: annotation.description ?? "",
     })) ?? []
-  const overlay = createOverlaySvg({
-    height,
-    wordBoxes: words.map((word) => word.bbox),
-    width,
-  })
-  const rendered = await sharp(image)
-    .composite([{ input: Buffer.from(overlay) }])
-    .png()
-    .toBuffer()
   const groups = await mergeWordsWithAi({
     blocks: blocksFromFullText(
       words,
       result.fullTextAnnotation as VisionFullTextAnnotation | undefined
     ),
-    image: rendered,
+    image,
   })
   const boxes = mergedBoxesFromGroups(groups, words)
   const styledBoxes = await getTextStyle({ boxes, image })

@@ -58,10 +58,8 @@ async function runGenerateJob({
 
     const analyzePromise = analyzeGeneratedImage({
       bytes: generated.image.uint8Array,
-      height: generated.dimensions.height,
       projectId,
       userId,
-      width: generated.dimensions.width,
     })
     const erasePromise = removeTextFromImage({
       aspectRatio,
