@@ -23,6 +23,7 @@ type Variant =
   | "emerald"
   | "sky"
   | "slate"
+  | "zinc"
   | "fuchsia"
 
 interface ShimmerTextProps {
@@ -54,6 +55,7 @@ const variantMap: Record<Variant, string> = {
   emerald: "text-emerald-600 dark:text-emerald-400",
   sky: "text-sky-600 dark:text-sky-400",
   slate: "text-slate-600 dark:text-slate-400",
+  zinc: "text-zinc-600 dark:text-zinc-400",
   fuchsia: "text-fuchsia-600 dark:text-fuchsia-400",
 }
 

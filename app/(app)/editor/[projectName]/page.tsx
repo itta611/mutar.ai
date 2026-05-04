@@ -159,7 +159,7 @@ export default function Page({
         ref={containerRef}
       >
         <LogoIcon className="mb-4 h-12 w-12 animate-[spin_2.5s_linear_infinite] fill-primary dark:fill-zinc-100" />
-        <ShimmerText>{loadingText}</ShimmerText>
+        <ShimmerText variant="zinc">{loadingText}</ShimmerText>
       </div>
     )
   }
