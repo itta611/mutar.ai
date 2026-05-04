@@ -11,6 +11,7 @@ import {
 } from "react"
 
 import {
+  type EditorBox,
   editorBoxesAtom,
   editorImageSizeAtom,
   editorProjectIdAtom,
@@ -31,6 +32,12 @@ type ViewBox = {
 type Size = {
   height: number
   width: number
+}
+
+const fontFamilyMap: Record<NonNullable<EditorBox["fontFamily"]>, string> = {
+  gothic: '"Hiragino Sans", "Yu Gothic", "YuGothic", sans-serif',
+  mincho: '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif',
+  pop: '"Hiragino Maru Gothic ProN", "Yu Gothic", "YuGothic", sans-serif',
 }
 
 let measureCanvas: HTMLCanvasElement | null = null
@@ -251,6 +258,8 @@ export default function Page({
           const boxWidth = Math.max(...xs) - left
           const boxHeight = Math.max(...ys) - top
           const align = box.align ?? "center"
+          const fontFamily = fontFamilyMap[box.fontFamily ?? "gothic"]
+          const fontWeight = box.bold ? 700 : 400
           const centerX = left + boxWidth / 2
           const right = left + boxWidth
           const fontSize = boxWidth / Math.max([...box.label].length, 1)
@@ -273,7 +282,9 @@ export default function Page({
                 data-index={index}
                 fill={box.color ?? "rgba(0,0,0,0.75)"}
                 dominantBaseline="middle"
+                fontFamily={fontFamily}
                 fontSize={fontSize}
+                fontWeight={fontWeight}
                 opacity="0"
                 pointerEvents="none"
                 textAnchor="middle"
@@ -310,7 +321,9 @@ export default function Page({
                   }}
                   style={{
                     color: box.color ?? "rgba(0,0,0,1)",
+                    fontFamily,
                     fontSize: displayFontSize,
+                    fontWeight,
                     lineHeight: `${editableHeight}px`,
                     outline: "none",
                     textAlign: align,

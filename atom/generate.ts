@@ -12,7 +12,9 @@ export type ImageSize = [width: number, height: number]
 export type EditorBox = {
   align?: "left" | "center" | "right"
   bbox: { x?: number; y?: number }[]
+  bold?: boolean
   color?: string
+  fontFamily?: "mincho" | "pop" | "gothic"
   label: string
 }
 

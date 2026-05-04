@@ -175,6 +175,7 @@ async function mergeWordsWithAi(options: {
               "Select text only. Omit decorative fragments, even if OCR detected them as text.",
               "You may also omit words whose surrounding context is unclear or whose position cannot be confidently matched against the image.",
               "Each group must contain words from one visual line only.",
+              "Never merge words from different visual lines, even if they form one sentence.",
               "If a paragraph has line breaks, split it into separate groups for each line.",
               "Set align to the group's visual text alignment in the full image: left, center, or right.",
               "Use only the provided word IDs. Do not invent IDs.",

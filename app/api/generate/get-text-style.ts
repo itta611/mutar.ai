@@ -20,7 +20,9 @@ type Rect = {
 const textStyleSchema = z.object({
   styles: z.array(
     z.object({
+      bold: z.boolean(),
       color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+      fontFamily: z.enum(["mincho", "pop", "gothic"]),
       index: z.number().int().nonnegative(),
     })
   ),
@@ -179,6 +181,8 @@ export async function getTextStyle({
             type: "text",
             text: [
               "Return the visible text color for each indexed crop as a hex RGB value.",
+              "Choose the closest typeface for each crop from mincho, pop, or gothic.",
+              "Set bold to true only when the text appears visually bold or heavy.",
               "Ignore the black index labels, white headers, and tile borders.",
               "Return one style for every index.",
               "Use #000000 for black text or when the color cannot be determined.",
@@ -199,11 +203,13 @@ export async function getTextStyle({
     ],
   })
   const styles = new Map(
-    result.object.styles.map((style) => [style.index, style.color])
+    result.object.styles.map((style) => [style.index, style])
   )
 
   return boxes.map((box, index) => ({
     ...box,
-    color: styles.get(index) ?? "#000000",
+    bold: styles.get(index)?.bold ?? false,
+    color: styles.get(index)?.color ?? "#000000",
+    fontFamily: styles.get(index)?.fontFamily ?? "gothic",
   }))
 }
