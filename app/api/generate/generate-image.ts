@@ -20,11 +20,8 @@ export async function generateImage(
     }),
     aspectRatio,
     prompt: [
-      "Create a polished informational material, such as a slide or poster.",
-      "Use a calm, premium, editorial style with strong layout discipline.",
-      "Include clear, realistic typography and hierarchy directly in the image.",
       "The output should feel like it was made by a senior designer, not clip art.",
-      `User brief: ${prompt}`,
+      `User prompt: ${prompt}`,
     ].join(" "),
   })
 
