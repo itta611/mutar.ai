@@ -7,6 +7,8 @@ type CreateProjectInput = {
   id: string
   userId: string
   prompt: string
+  aspectRatio: string
+  model: string
   status: string
   originalImageKey: string
   width: number

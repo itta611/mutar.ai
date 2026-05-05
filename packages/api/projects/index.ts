@@ -9,6 +9,8 @@ import { getSession } from "../session"
 
 const createProjectSchema = z.object({
   prompt: z.string().trim().min(12).max(1200),
+  aspectRatio: z.enum(["16:9", "4:3", "3:4", "1:1"]),
+  model: z.enum(["google/gemini-2.5-flash-image", "openai/gpt-5.4-image-2"]),
 })
 
 export const projectsRoutes = new Hono()
@@ -31,12 +33,14 @@ export const projectsRoutes = new Hono()
     }
 
     const projectId = randomUUID()
-    const { prompt } = c.req.valid("json")
+    const { aspectRatio, model, prompt } = c.req.valid("json")
 
     await createProject({
       id: projectId,
       userId: session.user.id,
       prompt,
+      aspectRatio,
+      model,
       status: "generating",
       originalImageKey: "",
       width: 0,
