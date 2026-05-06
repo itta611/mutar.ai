@@ -40,6 +40,7 @@ export function PromptInput() {
   const aspect = useWatch({ control, name: "aspectRatio" })
   const model = useWatch({ control, name: "model" })
   const [isGenerating, setIsGenerating] = useState(false)
+  const canGenerate = !isGenerating && prompt.trim().length > 0
 
   async function handleGenerate(options: GenerateProjectInput) {
     if (!user) {
@@ -64,6 +65,14 @@ export function PromptInput() {
       <Textarea
         id="generation-prompt"
         {...register("prompt")}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+            event.preventDefault()
+            if (canGenerate) {
+              event.currentTarget.form?.requestSubmit()
+            }
+          }
+        }}
         className="min-h-10 resize-none rounded-none border-none px-2 pt-0 pb-2 shadow-none ring-0! outline-none leading-relaxed bg-transparent!"
         placeholder="作りたい資料画像を自然文で書いてください。"
       />
@@ -81,7 +90,7 @@ export function PromptInput() {
         <Button
           type="submit"
           size="lg"
-          disabled={isGenerating || prompt.trim().length === 0}
+          disabled={!canGenerate}
         >
           <SparklesIcon data-icon="inline-end" />
           {isGenerating ? "生成中" : "生成"}
