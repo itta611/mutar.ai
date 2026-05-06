@@ -1,3 +1,4 @@
+import { env } from "@/lib/env"
 import { Resend } from "resend"
 
 type MagicLinkEmailInput = {
@@ -5,7 +6,7 @@ type MagicLinkEmailInput = {
   url: string
 }
 
-const resend = new Resend(process.env.RESEND_SECRET)
+const resend = new Resend(env.RESEND_SECRET)
 
 function escapeHtml(value: string) {
   return value
@@ -21,7 +22,7 @@ export async function sendMagicLinkEmail({ email, url }: MagicLinkEmailInput) {
   const safeEmail = escapeHtml(email)
 
   const { error } = await resend.emails.send({
-    from: process.env.RESEND_FROM ?? "",
+    from: env.RESEND_FROM ?? "",
     to: email,
     subject: "Hengen login link",
     text: `Open this link to log in to Hengen:\n\n${url}\n\nIf you did not request this email, you can ignore it.`,
