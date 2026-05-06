@@ -5,6 +5,7 @@ import { createProject, listGeneratedImagesByUserId } from "@hengen/db/repo"
 import { Hono } from "hono"
 import { z } from "zod"
 
+import { env } from "@/lib/env"
 import { getSession } from "../session"
 
 const createProjectSchema = z.object({
@@ -46,6 +47,12 @@ export const projectsRoutes = new Hono()
       width: 0,
       height: 0,
       analysis: { summary: "", boxes: [] },
+    })
+
+    await fetch(env.HENGEN_WORKER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ projectId }),
     })
 
     return c.json({ projectId }, 200)
