@@ -49,7 +49,7 @@ export const projectsRoutes = new Hono()
       analysis: { summary: "", boxes: [] },
     })
 
-    await fetch(env.HENGEN_WORKER_URL, {
+    await fetch(new URL("/generate", env.HENGEN_WORKER_URL), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ projectId }),
