@@ -55,7 +55,7 @@ export const projectsRoutes = new Hono()
         "Content-Type": "application/json",
         Authorization: `Bearer ${env.HENGEN_WORKER_SECRET}`,
       },
-      body: JSON.stringify({ projectId, prompt, aspectRatio }),
+      body: JSON.stringify({ projectId, prompt, aspectRatio, model }),
     })
 
     return c.json({ projectId }, 200)
