@@ -12,7 +12,7 @@ import {
 import { apiClient } from "@/lib/api-client"
 
 export type GenerateProjectInput = Omit<
-  NonNullable<Parameters<typeof apiClient.generate.$post>[0]>["json"],
+  NonNullable<Parameters<typeof apiClient.projects.$post>[0]>["json"],
   "projectId"
 > & {
   aspectRatio: EditorAspectRatio
