@@ -4,19 +4,13 @@ import { useMutation } from "@tanstack/react-query"
 import { useSetAtom } from "jotai"
 
 import {
-  type EditorAspectRatio,
   editorImageSizeAtom,
   editorProjectIdAtom,
   editorProjectStatusAtom,
 } from "@/atom/generate"
 import { apiClient } from "@/lib/api-client"
 
-export type GenerateProjectInput = Omit<
-  NonNullable<Parameters<typeof apiClient.projects.$post>[0]>["json"],
-  "projectId"
-> & {
-  aspectRatio: EditorAspectRatio
-}
+export type GenerateProjectInput = NonNullable<Parameters<typeof apiClient.projects.$post>[0]>["json"]
 
 async function createProject(input: GenerateProjectInput) {
   const response = await apiClient.projects.$post({
