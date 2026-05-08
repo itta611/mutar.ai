@@ -12,10 +12,6 @@ export function HomeContent({
 }: {
   initialImages: GeneratedImage[]
 }) {
-  return <Home initialImages={initialImages} />
-}
-
-function Home({ initialImages }: { initialImages: GeneratedImage[] }) {
   return (
     <>
       <div className="mb-20 md:px-5 max-w-200 mx-auto">

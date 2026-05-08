@@ -17,6 +17,7 @@ import { Button } from "../ui/button"
 
 export type GeneratedImage = {
   id: string
+  prompt: string
   status: string
   title: string
 }
@@ -107,10 +108,23 @@ export function GeneratedImages({
                     </Button>
                   }
                 />
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="start" className="w-40">
+                  <DropdownMenuItem
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      navigator.clipboard.writeText(image.prompt)
+                    }}
+                  >
+                    プロンプトをコピー
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     variant="destructive"
-                    onClick={() => deleteProjectMutation.mutate(image.id)}
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      deleteProjectMutation.mutate(image.id)
+                    }}
                   >
                     削除
                   </DropdownMenuItem>

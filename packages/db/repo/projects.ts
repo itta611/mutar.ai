@@ -168,6 +168,7 @@ export async function listGeneratedImagesByUserId(userId: string) {
   return db
     .select({
       id: projects.id,
+      prompt: projects.prompt,
       status: projects.status,
       title: projects.title,
     })
