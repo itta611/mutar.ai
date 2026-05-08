@@ -17,7 +17,7 @@ import { AspectSelect } from "./aspect-select"
 import { ModelSelect } from "./model-select"
 
 const defaultPrompt =
-  "スマホアプリのプロトタイプ紹介画像を作成。アプリ名は「TaskPilot」。キャッチコピーは「毎日のタスクを、もっと軽く」。スマホ画面、チェックリスト、カレンダー、通知アイコンを含めた、SaaS風の広告ビジュアル。文字は斜めにならないようにする。"
+  "企業の請求書処理を説明する業務フロー図の入った１枚のスライドを作成。「受領」「OCR読み取り」「承認」「支払い」「保存」の5ステップを左から右に配置。各ステップにアイコンを付け、スタイリッシュなデザイン。"
 
 export function PromptInput() {
   const generateProject = useGenerateProject()
@@ -74,6 +74,7 @@ export function PromptInput() {
             }
           }
         }}
+        defaultValue={defaultPrompt}
         className="min-h-10 resize-none rounded-none border-none px-1 pt-0 pb-2 shadow-none ring-0! outline-none leading-relaxed bg-transparent!"
         placeholder="作りたい資料画像を自然文で書いてください。"
       />
