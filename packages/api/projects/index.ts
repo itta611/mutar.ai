@@ -50,14 +50,25 @@ export const projectsRoutes = new Hono()
       analysis: { summary: "", boxes: [] },
     })
 
-    await fetch(new URL("/generate", env.HENGEN_WORKER_URL), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${env.HENGEN_WORKER_SECRET}`,
-      },
-      body: JSON.stringify({ projectId, prompt, aspectRatio, model }),
-    })
+    try {
+      const response = await fetch(
+        new URL("/generate", env.HENGEN_WORKER_URL),
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${env.HENGEN_WORKER_SECRET}`,
+          },
+          body: JSON.stringify({ projectId, prompt, aspectRatio, model }),
+        }
+      )
+
+      if (!response.ok) {
+        return c.json({ message: "Generation failed" }, 502)
+      }
+    } catch {
+      return c.json({ message: "Generation failed" }, 502)
+    }
 
     return c.json({ projectId }, 200)
   })

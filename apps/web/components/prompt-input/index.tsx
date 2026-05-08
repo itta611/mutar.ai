@@ -54,6 +54,7 @@ export function PromptInput() {
       const projectId = await generateProject(options)
       router.push(`/editor/${projectId}`)
     } catch {
+      alert("生成に失敗しました。")
       setIsGenerating(false)
     }
   }
