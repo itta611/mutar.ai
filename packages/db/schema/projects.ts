@@ -18,6 +18,7 @@ export const projects = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     prompt: text("prompt").notNull(),
+    title: text("title").notNull(),
     aspectRatio: text("aspectRatio").notNull().default("4:3"),
     model: text("model").notNull().default("openai/gpt-5.4-image-2"),
     status: text("status").notNull().default("ready"),

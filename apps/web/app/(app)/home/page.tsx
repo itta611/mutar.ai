@@ -5,7 +5,7 @@ import { HomeContent } from "./content"
 export default async function Page() {
   const session = await getServerSession()
   const images = session
-    ? (await listGeneratedImagesByUserId(session.user.id)).map(({ id }) => id)
+    ? await listGeneratedImagesByUserId(session.user.id)
     : []
 
   return (

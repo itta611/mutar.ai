@@ -29,6 +29,13 @@
       "when": 1777961032278,
       "tag": "0003_striped_northstar",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778156859070,
+      "tag": "0004_lame_whiplash",
+      "breakpoints": true
     }
   ]
 }

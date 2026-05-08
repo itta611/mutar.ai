@@ -7,6 +7,7 @@ type CreateProjectInput = {
   id: string
   userId: string
   prompt: string
+  title: string
   aspectRatio: string
   model: string
   status: string
@@ -167,6 +168,7 @@ export async function listGeneratedImagesByUserId(userId: string) {
   return db
     .select({
       id: projects.id,
+      title: projects.title,
       width: projects.width,
       height: projects.height,
     })

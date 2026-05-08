@@ -1,14 +1,21 @@
 "use client"
 
-import { GeneratedImages } from "@/components/generated-images"
+import {
+  type GeneratedImage,
+  GeneratedImages,
+} from "@/components/generated-images"
 import LogoIcon from "@/components/logo-icon"
 import { PromptInput } from "@/components/prompt-input"
 
-export function HomeContent({ initialImages }: { initialImages: string[] }) {
+export function HomeContent({
+  initialImages,
+}: {
+  initialImages: GeneratedImage[]
+}) {
   return <Home initialImages={initialImages} />
 }
 
-function Home({ initialImages }: { initialImages: string[] }) {
+function Home({ initialImages }: { initialImages: GeneratedImage[] }) {
   return (
     <>
       <div className="mb-20">

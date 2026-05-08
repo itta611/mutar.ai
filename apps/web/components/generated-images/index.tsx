@@ -14,6 +14,8 @@ import {
 import { apiClient } from "@/lib/api-client"
 import { Button } from "../ui/button"
 
+export type GeneratedImage = { id: string; title: string }
+
 const projectKeys = {
   list: ["projects"] as const,
 }
@@ -45,7 +47,7 @@ async function deleteProject(id: string) {
 export function GeneratedImages({
   initialImages,
 }: {
-  initialImages: string[]
+  initialImages: GeneratedImage[]
 }) {
   const queryClient = useQueryClient()
   const { data: images = initialImages } = useQuery({
@@ -56,8 +58,8 @@ export function GeneratedImages({
   const deleteProjectMutation = useMutation({
     mutationFn: deleteProject,
     onSuccess: (_data, id) => {
-      queryClient.setQueryData<string[]>(projectKeys.list, (images) =>
-        images?.filter((image) => image !== id)
+      queryClient.setQueryData<GeneratedImage[]>(projectKeys.list, (images) =>
+        images?.filter((image) => image.id !== id)
       )
     },
   })
@@ -65,10 +67,10 @@ export function GeneratedImages({
   return (
     <div className="grid grid-cols-2 gap-x-7 gap-y-7 sm:grid-cols-3 xl:grid-cols-4">
       {images.map((image) => (
-        <div key={image} className="active:scale-99 transition duration-75">
-          <Link href={`/editor/${image}`} className="block">
+        <div key={image.id} className="active:scale-99 transition duration-75">
+          <Link href={`/editor/${image.id}`} className="block">
             <Image
-              src={`/api/projects/${image}/image`}
+              src={`/api/projects/${image.id}/image`}
               alt=""
               width={300}
               height={300}
@@ -76,7 +78,7 @@ export function GeneratedImages({
               className="aspect-[16/9] w-full object-cover border rounded-t-xl"
             />
             <div className="flex items-center justify-between px-4 py-2.5 rounded-b-xl bg-accent">
-              <span className="text-sm">タイトル</span>
+              <span className="text-sm">{image.title}</span>
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={
@@ -97,7 +99,7 @@ export function GeneratedImages({
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
                     variant="destructive"
-                    onClick={() => deleteProjectMutation.mutate(image)}
+                    onClick={() => deleteProjectMutation.mutate(image.id)}
                   >
                     削除
                   </DropdownMenuItem>

@@ -24,7 +24,7 @@ export const projectsRoutes = new Hono()
 
     const projects = await listGeneratedImagesByUserId(session.user.id)
 
-    return c.json({ projects: projects.map(({ id }) => id) }, 200)
+    return c.json({ projects }, 200)
   })
   .post("/", zValidator("json", createProjectSchema), async (c) => {
     const session = await getSession(c.req.raw.headers)
@@ -40,6 +40,7 @@ export const projectsRoutes = new Hono()
       id: projectId,
       userId: session.user.id,
       prompt,
+      title: prompt,
       aspectRatio,
       model,
       status: "generating",
