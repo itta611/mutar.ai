@@ -88,7 +88,7 @@ export function GeneratedImages({
               <Skeleton className="aspect-[16/9] w-full rounded-t-xl rounded-b-none border" />
             )}
             <div className="flex items-center justify-between px-4 py-2.5 rounded-b-xl bg-accent">
-              <span className="min-w-0 flex-1 truncate text-sm">
+              <span className="min-w-0 flex-1 truncate text-sm mr-1">
                 {image.title}
               </span>
               <DropdownMenu>
