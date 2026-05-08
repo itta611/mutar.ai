@@ -78,7 +78,9 @@ export function GeneratedImages({
               className="aspect-[16/9] w-full object-cover border rounded-t-xl"
             />
             <div className="flex items-center justify-between px-4 py-2.5 rounded-b-xl bg-accent">
-              <span className="text-sm">{image.title}</span>
+              <span className="min-w-0 flex-1 truncate text-sm">
+                {image.title}
+              </span>
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={

@@ -18,8 +18,8 @@ export function HomeContent({
 function Home({ initialImages }: { initialImages: GeneratedImage[] }) {
   return (
     <>
-      <div className="mb-20">
-        <div className="flex w-200 mx-auto mb-5 px-3 items-center gap-3">
+      <div className="mb-20 md:px-5 max-w-200 mx-auto">
+        <div className="flex mx-auto mb-5 px-1.5 items-center gap-3">
           <LogoIcon width={30} />
           <div className="text-xl">何を作りますか？</div>
         </div>
