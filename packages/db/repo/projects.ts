@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm"
+import { and, desc, eq, inArray } from "drizzle-orm"
 
 import { db } from ".."
 import { projects } from "../schema"
@@ -168,12 +168,21 @@ export async function listGeneratedImagesByUserId(userId: string) {
   return db
     .select({
       id: projects.id,
+      status: projects.status,
       title: projects.title,
-      width: projects.width,
-      height: projects.height,
     })
     .from(projects)
-    .where(and(eq(projects.userId, userId), eq(projects.status, "ready")))
+    .where(
+      and(
+        eq(projects.userId, userId),
+        inArray(projects.status, [
+          "ready",
+          "generating",
+          "analyzing",
+          "erasing",
+        ])
+      )
+    )
     .orderBy(desc(projects.createdAt))
 }
 

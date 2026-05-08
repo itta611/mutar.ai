@@ -11,10 +11,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Skeleton } from "@/components/ui/skeleton"
 import { apiClient } from "@/lib/api-client"
 import { Button } from "../ui/button"
 
-export type GeneratedImage = { id: string; title: string }
+export type GeneratedImage = {
+  id: string
+  status: string
+  title: string
+}
 
 const projectKeys = {
   list: ["projects"] as const,
@@ -69,14 +74,18 @@ export function GeneratedImages({
       {images.map((image) => (
         <div key={image.id} className="active:scale-99 transition duration-75">
           <Link href={`/editor/${image.id}`} className="block">
-            <Image
-              src={`/api/projects/${image.id}/image`}
-              alt=""
-              width={300}
-              height={300}
-              unoptimized
-              className="aspect-[16/9] w-full object-cover border rounded-t-xl"
-            />
+            {image.status === "ready" ? (
+              <Image
+                src={`/api/projects/${image.id}/image`}
+                alt=""
+                width={300}
+                height={300}
+                unoptimized
+                className="aspect-[16/9] w-full object-cover border rounded-t-xl"
+              />
+            ) : (
+              <Skeleton className="aspect-[16/9] w-full rounded-t-xl rounded-b-none border" />
+            )}
             <div className="flex items-center justify-between px-4 py-2.5 rounded-b-xl bg-accent">
               <span className="min-w-0 flex-1 truncate text-sm">
                 {image.title}
