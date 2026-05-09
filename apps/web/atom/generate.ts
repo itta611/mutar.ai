@@ -17,6 +17,7 @@ export type EditorBox = {
   fontFamily?: "mincho" | "pop" | "gothic"
   fontSize: number
   label: string
+  wrapText?: boolean
 }
 
 export const editorProjectIdAtom = atom<string | null>(null)

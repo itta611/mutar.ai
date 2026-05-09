@@ -66,6 +66,80 @@ function measureTextWidth(element: HTMLElement) {
   )
 }
 
+function measureTextHeight(element: HTMLElement, lineHeight: number) {
+  const range = document.createRange()
+  range.selectNodeContents(element)
+
+  const lineCount = new Set(
+    Array.from(range.getClientRects()).map((rect) => Math.round(rect.top))
+  ).size
+  range.detach()
+
+  return (
+    Math.max(
+      1,
+      lineCount,
+      (element.innerText || element.textContent || "").split("\n").length
+    ) * lineHeight
+  )
+}
+
+function resizeBboxWidth(box: EditorBox, width: number): EditorBox {
+  const xs = box.bbox.map((point) => point.x ?? 0)
+  const left = Math.min(...xs)
+  const right = Math.max(...xs)
+  const currentWidth = right - left
+  const nextWidth = Math.max(1, Math.ceil(width))
+
+  if (Math.ceil(currentWidth) === nextWidth) {
+    return box
+  }
+
+  const align = box.align ?? "center"
+  const nextLeft =
+    align === "left"
+      ? left
+      : align === "right"
+        ? right - nextWidth
+        : left + currentWidth / 2 - nextWidth / 2
+
+  return {
+    ...box,
+    bbox: box.bbox.map((point) => ({
+      ...point,
+      x:
+        nextLeft +
+        (currentWidth > 0
+          ? (((point.x ?? left) - left) / currentWidth) * nextWidth
+          : 0),
+    })),
+  }
+}
+
+function resizeBboxHeight(box: EditorBox, height: number): EditorBox {
+  const ys = box.bbox.map((point) => point.y ?? 0)
+  const top = Math.min(...ys)
+  const bottom = Math.max(...ys)
+  const currentHeight = bottom - top
+  const nextHeight = Math.max(1, Math.ceil(height))
+
+  if (Math.ceil(currentHeight) === nextHeight) {
+    return box
+  }
+
+  return {
+    ...box,
+    bbox: box.bbox.map((point) => ({
+      ...point,
+      y:
+        top +
+        (currentHeight > 0
+          ? (((point.y ?? top) - top) / currentHeight) * nextHeight
+          : 0),
+    })),
+  }
+}
+
 export default function Page({
   params,
 }: {
@@ -83,7 +157,8 @@ export default function Page({
     height: 0,
     width: 0,
   })
-  const [textWidths, setTextWidths] = useState<number[]>([])
+  const textRefs = useRef<(HTMLDivElement | null)[]>([])
+  const [textWidths, setTextWidths] = useState<Array<number | undefined>>([])
   const [viewBox, setViewBox] = useState<ViewBox | null>(null)
 
   useEffect(() => {
@@ -124,6 +199,43 @@ export default function Page({
 
     return () => resizeObserver.disconnect()
   }, [])
+
+  useLayoutEffect(() => {
+    if (status !== "ready") {
+      return
+    }
+
+    const nextTextWidths = boxes.map((box, index) => {
+      if (box.wrapText) {
+        return undefined
+      }
+
+      const element = textRefs.current[index]
+
+      return element
+        ? Math.max(1, Math.ceil(measureTextWidth(element)))
+        : undefined
+    })
+
+    setTextWidths((current) =>
+      current.length === nextTextWidths.length &&
+      current.every((width, index) => width === nextTextWidths[index])
+        ? current
+        : nextTextWidths
+    )
+
+    const nextBoxes = boxes.map((box, index) => {
+      const element = textRefs.current[index]
+
+      return element
+        ? resizeBboxHeight(box, measureTextHeight(element, box.fontSize * 1.4))
+        : box
+    })
+
+    if (nextBoxes.some((box, index) => box !== boxes[index])) {
+      setBoxes(nextBoxes)
+    }
+  }, [boxes, setBoxes, status])
 
   if (status !== "ready" || !imageSize) {
     const loadingText = {
@@ -204,6 +316,22 @@ export default function Page({
     })
   }
 
+  function updateBboxWidth(index: number, width: number) {
+    setBoxes((current) =>
+      current.map((box, boxIndex) =>
+        boxIndex === index ? resizeBboxWidth(box, width) : box
+      )
+    )
+  }
+
+  function updateBboxHeight(index: number, height: number) {
+    setBoxes((current) =>
+      current.map((box, boxIndex) =>
+        boxIndex === index ? resizeBboxHeight(box, height) : box
+      )
+    )
+  }
+
   return (
     <div ref={containerRef} className="min-h-full">
       {/** biome-ignore lint/a11y/noSvgWithoutTitle: ツールチップが邪魔だから */}
@@ -236,9 +364,12 @@ export default function Page({
           const fontWeight = box.bold ? 700 : 400
           const centerX = left + boxWidth / 2
           const right = left + boxWidth
+          const wrapText = box.wrapText ?? false
           const lineHeight = box.fontSize * 1.4
-          const editableHeight = lineHeight * box.label.split("\n").length
-          const editableWidth = textWidths[index] ?? boxWidth
+          const editableHeight = boxHeight
+          const editableWidth = wrapText
+            ? boxWidth
+            : (textWidths[index] ?? boxWidth)
           const editableX =
             align === "left"
               ? left
@@ -257,15 +388,27 @@ export default function Page({
                 {/* biome-ignore lint/a11y/useSemanticElements: contentEditable is required here. */}
                 <div
                   aria-label="Edit text"
+                  className="border border-transparent hover:border-violet-500 focus:border-violet-500"
                   contentEditable
+                  ref={(element) => {
+                    textRefs.current[index] = element
+                  }}
                   role="textbox"
                   suppressContentEditableWarning
                   tabIndex={0}
                   onInput={(event) => {
-                    updateTextWidth(
-                      index,
-                      measureTextWidth(event.currentTarget)
+                    const width = measureTextWidth(event.currentTarget)
+                    const height = measureTextHeight(
+                      event.currentTarget,
+                      lineHeight
                     )
+
+                    updateTextWidth(index, width)
+                    updateBboxHeight(index, height)
+
+                    if (!wrapText) {
+                      updateBboxWidth(index, width)
+                    }
                   }}
                   onBlur={(event) => {
                     const label = event.currentTarget.innerText
@@ -278,13 +421,17 @@ export default function Page({
                   }}
                   style={{
                     color: box.color ?? "rgba(0,0,0,1)",
+                    boxSizing: "border-box",
                     fontFamily,
                     fontSize: box.fontSize,
                     fontWeight,
+                    height: "100%",
                     lineHeight: `${lineHeight}px`,
                     outline: "none",
+                    overflowWrap: wrapText ? "anywhere" : "normal",
                     textAlign: align,
-                    whiteSpace: "pre",
+                    whiteSpace: wrapText ? "pre-wrap" : "pre",
+                    width: "100%",
                   }}
                 >
                   {box.label}
