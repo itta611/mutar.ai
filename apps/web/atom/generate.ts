@@ -15,6 +15,7 @@ export type EditorBox = {
   bold?: boolean
   color?: string
   fontFamily?: "mincho" | "pop" | "gothic"
+  fontSize: number
   label: string
 }
 

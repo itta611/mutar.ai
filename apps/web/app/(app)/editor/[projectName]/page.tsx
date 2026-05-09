@@ -58,7 +58,12 @@ function measureTextWidth(element: HTMLElement) {
   const style = window.getComputedStyle(element)
   context.font = `${style.fontStyle} ${style.fontVariant} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`
 
-  return context.measureText(element.textContent ?? "").width
+  return Math.max(
+    ...(element.innerText || element.textContent || "")
+      .split("\n")
+      .map((line) => context.measureText(line).width),
+    0
+  )
 }
 
 export default function Page({
@@ -74,12 +79,10 @@ export default function Page({
   const setBoxes = useSetAtom(editorBoxesAtom)
   const fetchProject = useEditorProject()
   const containerRef = useRef<HTMLDivElement>(null)
-  const svgRef = useRef<SVGSVGElement>(null)
   const [containerSize, setContainerSize] = useState<Size>({
     height: 0,
     width: 0,
   })
-  const [fontSizes, setFontSizes] = useState<number[]>([])
   const [textWidths, setTextWidths] = useState<number[]>([])
   const [viewBox, setViewBox] = useState<ViewBox | null>(null)
 
@@ -100,34 +103,6 @@ export default function Page({
 
     return () => window.clearInterval(id)
   }, [fetchProject, projectId, status])
-
-  useLayoutEffect(() => {
-    if (!projectId || status !== "ready" || !imageSize || boxes.length === 0) {
-      return
-    }
-
-    const svg = svgRef.current
-
-    if (!svg) {
-      return
-    }
-
-    const nextFontSizes: number[] = []
-
-    for (const text of Array.from(
-      svg.querySelectorAll<SVGTextElement>("text[data-box-width]")
-    )) {
-      const index = Number(text.dataset.index)
-      const boxWidth = Number(text.dataset.boxWidth)
-      const fontSize = Number(text.getAttribute("font-size"))
-      const textWidth = text.getComputedTextLength()
-
-      nextFontSizes[index] =
-        textWidth > 0 ? fontSize * (boxWidth / textWidth) : fontSize
-    }
-
-    setFontSizes(nextFontSizes)
-  }, [boxes.length, imageSize, projectId, status])
 
   useLayoutEffect(() => {
     const container = containerRef.current
@@ -233,7 +208,6 @@ export default function Page({
     <div ref={containerRef} className="min-h-full">
       {/** biome-ignore lint/a11y/noSvgWithoutTitle: ツールチップが邪魔だから */}
       <svg
-        ref={svgRef}
         className="size-full overflow-hidden"
         onWheel={handleWheel}
         preserveAspectRatio="xMidYMid meet"
@@ -262,9 +236,8 @@ export default function Page({
           const fontWeight = box.bold ? 700 : 400
           const centerX = left + boxWidth / 2
           const right = left + boxWidth
-          const fontSize = boxWidth / Math.max([...box.label].length, 1)
-          const displayFontSize = fontSizes[index] ?? fontSize
-          const editableHeight = displayFontSize * 1.4
+          const lineHeight = box.fontSize * 1.4
+          const editableHeight = lineHeight * box.label.split("\n").length
           const editableWidth = textWidths[index] ?? boxWidth
           const editableX =
             align === "left"
@@ -275,22 +248,6 @@ export default function Page({
 
           return (
             <g key={`${box.label}-${index}`}>
-              <text
-                x={centerX}
-                y={top + boxHeight / 2}
-                data-box-width={boxWidth}
-                data-index={index}
-                fill={box.color ?? "rgba(0,0,0,0.75)"}
-                dominantBaseline="middle"
-                fontFamily={fontFamily}
-                fontSize={fontSize}
-                fontWeight={fontWeight}
-                opacity="0"
-                pointerEvents="none"
-                textAnchor="middle"
-              >
-                {box.label}
-              </text>
               <foreignObject
                 x={editableX}
                 y={top + boxHeight / 2 - editableHeight / 2}
@@ -311,7 +268,7 @@ export default function Page({
                     )
                   }}
                   onBlur={(event) => {
-                    const label = event.currentTarget.textContent ?? ""
+                    const label = event.currentTarget.innerText
 
                     setBoxes((current) =>
                       current.map((item, itemIndex) =>
@@ -322,12 +279,12 @@ export default function Page({
                   style={{
                     color: box.color ?? "rgba(0,0,0,1)",
                     fontFamily,
-                    fontSize: displayFontSize,
+                    fontSize: box.fontSize,
                     fontWeight,
-                    lineHeight: `${editableHeight}px`,
+                    lineHeight: `${lineHeight}px`,
                     outline: "none",
                     textAlign: align,
-                    whiteSpace: "nowrap",
+                    whiteSpace: "pre",
                   }}
                 >
                   {box.label}
