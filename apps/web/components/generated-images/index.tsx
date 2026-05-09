@@ -92,7 +92,7 @@ export function GeneratedImages({
                 <LoaderCircleIcon className="mr-2 size-4 shrink-0 animate-spin text-muted-foreground" />
               ) : null}
               <span className="min-w-0 flex-1 truncate text-sm mr-1.5">
-                {image.title}
+                {image.title.replace(/\\n|\r?\n/g, " ")}
               </span>
               <DropdownMenu>
                 <DropdownMenuTrigger
@@ -107,7 +107,7 @@ export function GeneratedImages({
                         event.stopPropagation()
                       }}
                     >
-                      <EllipsisIcon className="size-4.5" />
+                      <EllipsisIcon className="size-4" />
                     </Button>
                   }
                 />

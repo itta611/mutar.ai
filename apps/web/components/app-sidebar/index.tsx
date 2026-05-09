@@ -31,15 +31,15 @@ export function AppSidebar() {
   const user = session.data?.user
 
   return (
-    <Sidebar className="border-none">
-      <SidebarHeader className="h-13 py-0">
+    <Sidebar className="border-r border-border/70">
+      <SidebarHeader className="h-13 py-0 gap-0">
         <div className="flex items-center h-full">
           <Link href="/" className="ml-2">
             <Logo width={120} />
           </Link>
         </div>
+        <div className="h-px mx-1 bg-border/70" />
       </SidebarHeader>
-      <div className="h-px mx-3 bg-border/70" />
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>一般</SidebarGroupLabel>
