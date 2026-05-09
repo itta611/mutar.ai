@@ -1,7 +1,7 @@
 "use client"
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { EllipsisIcon } from "lucide-react"
+import { EllipsisIcon, LoaderCircleIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -88,7 +88,10 @@ export function GeneratedImages({
               <Skeleton className="aspect-[16/9] w-full rounded-t-xl rounded-b-none border" />
             )}
             <div className="flex items-center justify-between px-4 py-2.5 rounded-b-xl bg-accent">
-              <span className="min-w-0 flex-1 truncate text-sm mr-1">
+              {image.status !== "ready" ? (
+                <LoaderCircleIcon className="mr-2 size-4 shrink-0 animate-spin text-muted-foreground" />
+              ) : null}
+              <span className="min-w-0 flex-1 truncate text-sm mr-1.5">
                 {image.title}
               </span>
               <DropdownMenu>
