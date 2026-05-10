@@ -388,7 +388,7 @@ export default function Page({
                 {/* biome-ignore lint/a11y/useSemanticElements: contentEditable is required here. */}
                 <div
                   aria-label="Edit text"
-                  className="border border-transparent hover:border-violet-500 focus:border-violet-500"
+                  className="border-2 border-transparent hover:border-indigo-500 focus:border-indigo-500"
                   contentEditable
                   ref={(element) => {
                     textRefs.current[index] = element
