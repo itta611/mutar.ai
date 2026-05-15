@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "r2:migrate-project-keys": "node scripts/migrate-r2-project-keys.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1037.0",

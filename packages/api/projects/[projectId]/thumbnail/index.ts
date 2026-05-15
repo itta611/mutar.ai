@@ -45,7 +45,7 @@ export async function renderAndSaveProjectThumbnail({
     .toBuffer()
   const thumbnailImageKey = await uploadImageToR2({
     bytes,
-    keyPrefix: `projects/${projectId}/thumbnail/${Date.now()}`,
+    keyPrefix: `projects/${projectId}/thumbnail`,
     mediaType: "image/webp",
   })
 

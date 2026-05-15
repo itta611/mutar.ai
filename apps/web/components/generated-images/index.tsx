@@ -76,7 +76,7 @@ export function GeneratedImages({
       {images.map((image) => (
         <div
           key={image.id}
-          className="transition-transform duration-150 ease-out active:scale-[0.96]"
+          className="transition-transform duration-150 ease-out active:scale-[0.98]"
         >
           <Link href={`/editor/${image.id}`} className="block">
             {image.status === "ready" ? (
