@@ -74,7 +74,10 @@ export function GeneratedImages({
   return (
     <div className="grid grid-cols-2 gap-x-7 gap-y-7 sm:grid-cols-3 xl:grid-cols-4">
       {images.map((image) => (
-        <div key={image.id} className="active:scale-99 transition duration-75">
+        <div
+          key={image.id}
+          className="transition-transform duration-150 ease-out active:scale-[0.97]"
+        >
           <Link href={`/editor/${image.id}`} className="block">
             {image.status === "ready" ? (
               <Image
