@@ -67,7 +67,8 @@ export default function RootLayout({
         editorSans.variable,
         editorDisplay.variable,
         ibmPlexSans.variable,
-        sourceSerif.variable
+        sourceSerif.variable,
+        "antialiased"
       )}
     >
       <body>

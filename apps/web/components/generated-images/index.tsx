@@ -76,7 +76,7 @@ export function GeneratedImages({
       {images.map((image) => (
         <div
           key={image.id}
-          className="transition-transform duration-150 ease-out active:scale-[0.97]"
+          className="transition-transform duration-150 ease-out active:scale-[0.96]"
         >
           <Link href={`/editor/${image.id}`} className="block">
             {image.status === "ready" ? (
@@ -86,7 +86,7 @@ export function GeneratedImages({
                 width={300}
                 height={300}
                 unoptimized
-                className="aspect-[16/9] w-full object-cover border rounded-t-xl"
+                className="aspect-[16/9] w-full rounded-t-xl object-cover outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
               />
             ) : (
               <Skeleton className="aspect-[16/9] w-full rounded-t-xl rounded-b-none border" />
