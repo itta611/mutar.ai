@@ -26,7 +26,8 @@
       "@hengen/auth": ["./packages/auth/index.ts"],
       "@hengen/db": ["./packages/db/index.ts"],
       "@hengen/db/*": ["./packages/db/*"],
-      "@hengen/email": ["./packages/email/index.ts"]
+      "@hengen/email": ["./packages/email/index.ts"],
+      "@hengen/svg-renderer": ["./packages/svg-renderer/index.ts"]
     }
   },
   "include": [

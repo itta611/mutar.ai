@@ -1,4 +1,5 @@
 import { atom } from "jotai"
+import type { SvgBox } from "@hengen/svg-renderer"
 
 export type EditorProjectStatus =
   | "generating"
@@ -9,16 +10,7 @@ export type EditorProjectStatus =
   | "none"
 export type EditorAspectRatio = "16:9" | "4:3" | "3:4" | "1:1"
 export type ImageSize = [width: number, height: number]
-export type EditorBox = {
-  align?: "left" | "center" | "right"
-  bbox: { x?: number; y?: number }[]
-  bold?: boolean
-  color?: string
-  fontFamily?: "mincho" | "pop" | "gothic"
-  fontSize: number
-  label: string
-  wrapText?: boolean
-}
+export type EditorBox = SvgBox
 
 export const editorProjectIdAtom = atom<string | null>(null)
 export const editorProjectStatusAtom = atom<EditorProjectStatus>("none")

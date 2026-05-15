@@ -84,6 +84,24 @@ export async function updateProjectCleanedImageByUserId({
     .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
 }
 
+export async function updateProjectThumbnailImageByUserId({
+  projectId,
+  thumbnailImageKey,
+  userId,
+}: {
+  projectId: string
+  thumbnailImageKey: string
+  userId: string
+}) {
+  await db
+    .update(projects)
+    .set({
+      thumbnailImageKey,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+}
+
 export async function updateProjectAnalysisByUserId({
   boxes,
   projectId,
@@ -142,6 +160,45 @@ export async function findProjectCleanedImageKeyByUserId({
   return project
 }
 
+export async function findProjectThumbnailImageKeyByUserId({
+  projectId,
+  userId,
+}: {
+  projectId: string
+  userId: string
+}) {
+  const [project] = await db
+    .select({
+      thumbnailImageKey: projects.thumbnailImageKey,
+    })
+    .from(projects)
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .limit(1)
+
+  return project
+}
+
+export async function findProjectThumbnailSourceByUserId({
+  projectId,
+  userId,
+}: {
+  projectId: string
+  userId: string
+}) {
+  const [project] = await db
+    .select({
+      cleanedImageKey: projects.cleanedImageKey,
+      width: projects.width,
+      height: projects.height,
+      analysis: projects.analysis,
+    })
+    .from(projects)
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .limit(1)
+
+  return project
+}
+
 export async function findProjectForEditorByUserId({
   projectId,
   userId,
@@ -170,6 +227,7 @@ export async function listGeneratedImagesByUserId(userId: string) {
       id: projects.id,
       prompt: projects.prompt,
       status: projects.status,
+      thumbnailImageKey: projects.thumbnailImageKey,
       title: projects.title,
     })
     .from(projects)

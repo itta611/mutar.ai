@@ -24,6 +24,7 @@ export const projects = pgTable(
     status: text("status").notNull().default("ready"),
     originalImageKey: text("originalImageKey").notNull(),
     cleanedImageKey: text("cleanedImageKey"),
+    thumbnailImageKey: text("thumbnailImageKey"),
     width: integer("width").notNull(),
     height: integer("height").notNull(),
     analysis: jsonb("analysis")

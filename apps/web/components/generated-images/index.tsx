@@ -19,6 +19,7 @@ export type GeneratedImage = {
   id: string
   prompt: string
   status: string
+  thumbnailImageKey: string | null
   title: string
 }
 
@@ -77,7 +78,7 @@ export function GeneratedImages({
           <Link href={`/editor/${image.id}`} className="block">
             {image.status === "ready" ? (
               <Image
-                src={`/api/projects/${image.id}/image`}
+                src={`/api/projects/${image.id}/${image.thumbnailImageKey ? "thumbnail" : "image"}`}
                 alt=""
                 width={300}
                 height={300}

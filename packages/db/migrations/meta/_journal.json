@@ -36,6 +36,13 @@
       "when": 1778156859070,
       "tag": "0004_lame_whiplash",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1778744040783,
+      "tag": "0005_omniscient_star_brand",
+      "breakpoints": true
     }
   ]
 }

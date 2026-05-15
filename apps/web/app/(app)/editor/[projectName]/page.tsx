@@ -1,6 +1,7 @@
 "use client"
 
 import { useAtomValue, useSetAtom } from "jotai"
+import { fontFamilyMap } from "@hengen/svg-renderer"
 import {
   use,
   useEffect,
@@ -32,12 +33,6 @@ type ViewBox = {
 type Size = {
   height: number
   width: number
-}
-
-const fontFamilyMap: Record<NonNullable<EditorBox["fontFamily"]>, string> = {
-  gothic: '"Hiragino Sans", "Yu Gothic", "YuGothic", sans-serif',
-  mincho: '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif',
-  pop: '"Hiragino Maru Gothic ProN", "Yu Gothic", "YuGothic", sans-serif',
 }
 
 let measureCanvas: HTMLCanvasElement | null = null
