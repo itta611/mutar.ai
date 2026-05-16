@@ -75,6 +75,31 @@ function getBoxRect(box: SvgBox | DetectedTextBox, project: SvgProject) {
   }
 }
 
+function textWidth(text: string, fontSize: number) {
+  return Array.from(text).reduce(
+    (width, char) => width + fontSize * (char.charCodeAt(0) <= 0x7f ? 0.55 : 1),
+    0
+  )
+}
+
+function wrapLine(line: string, maxWidth: number, fontSize: number) {
+  const lines: string[] = []
+  let current = ""
+
+  for (const char of Array.from(line)) {
+    const next = current + char
+
+    if (current && textWidth(next, fontSize) > maxWidth) {
+      lines.push(current)
+      current = char
+    } else {
+      current = next
+    }
+  }
+
+  return current ? [...lines, current] : lines
+}
+
 function createTextElement(box: SvgBox | DetectedTextBox, project: SvgProject) {
   const label = "label" in box ? box.label : box.text
 
@@ -93,7 +118,12 @@ function createTextElement(box: SvgBox | DetectedTextBox, project: SvgProject) {
       ? box.fontSize
       : 16
   const lineHeight = fontSize * 1.4
-  const lines = label.split("\n")
+  const lines =
+    "wrapText" in box && box.wrapText
+      ? label
+          .split("\n")
+          .flatMap((line) => wrapLine(line, rect.right - rect.left, fontSize))
+      : label.split("\n")
   const fontFamily =
     "fontFamily" in box && box.fontFamily && box.fontFamily in fontFamilyMap
       ? fontFamilyMap[box.fontFamily]
@@ -112,12 +142,12 @@ function createTextElement(box: SvgBox | DetectedTextBox, project: SvgProject) {
   const textAnchor =
     align === "left" ? "start" : align === "right" ? "end" : "middle"
 
-  return `<text x="${x}" y="${y}" fill="${escapeXml(color)}" font-family="${escapeXml(fontFamily)}" font-size="${fontSize}" font-weight="${"bold" in box && box.bold ? 700 : 400}" text-anchor="${textAnchor}" dominant-baseline="middle" xml:space="preserve">${lines
+  return lines
     .map(
       (line, index) =>
-        `<tspan x="${x}" dy="${index === 0 ? 0 : lineHeight}">${escapeXml(line)}</tspan>`
+        `<text x="${x}" y="${y + index * lineHeight}" fill="${escapeXml(color)}" font-family="${escapeXml(fontFamily)}" font-size="${fontSize}" font-weight="${"bold" in box && box.bold ? 700 : 400}" text-anchor="${textAnchor}" dominant-baseline="middle" xml:space="preserve">${escapeXml(line)}</text>`
     )
-    .join("")}</text>`
+    .join("")
 }
 
 export function createProjectSvg({

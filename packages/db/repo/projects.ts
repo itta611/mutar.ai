@@ -11,7 +11,6 @@ type CreateProjectInput = {
   aspectRatio: string
   model: string
   status: string
-  originalImageKey: string
   width: number
   height: number
   analysis: { boxes: unknown[]; summary: string }
@@ -23,13 +22,11 @@ export async function createProject(input: CreateProjectInput) {
 
 export async function updateProjectImageByUserId({
   height,
-  originalImageKey,
   projectId,
   userId,
   width,
 }: {
   height: number
-  originalImageKey: string
   projectId: string
   userId: string
   width: number
@@ -38,7 +35,6 @@ export async function updateProjectImageByUserId({
     .update(projects)
     .set({
       height,
-      originalImageKey,
       width,
       updatedAt: new Date(),
     })
@@ -67,36 +63,15 @@ export async function updateProjectStatusByUserId({
 }
 
 export async function updateProjectCleanedImageByUserId({
-  cleanedImageKey,
   projectId,
   userId,
 }: {
-  cleanedImageKey: string
   projectId: string
   userId: string
 }) {
   await db
     .update(projects)
     .set({
-      cleanedImageKey,
-      updatedAt: new Date(),
-    })
-    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
-}
-
-export async function updateProjectThumbnailImageByUserId({
-  projectId,
-  thumbnailImageKey,
-  userId,
-}: {
-  projectId: string
-  thumbnailImageKey: string
-  userId: string
-}) {
-  await db
-    .update(projects)
-    .set({
-      thumbnailImageKey,
       updatedAt: new Date(),
     })
     .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
@@ -142,7 +117,7 @@ export async function findProjectDimensionsByUserId({
   return project
 }
 
-export async function findProjectCleanedImageKeyByUserId({
+export async function findProjectByUserId({
   projectId,
   userId,
 }: {
@@ -151,25 +126,7 @@ export async function findProjectCleanedImageKeyByUserId({
 }) {
   const [project] = await db
     .select({
-      cleanedImageKey: projects.cleanedImageKey,
-    })
-    .from(projects)
-    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
-    .limit(1)
-
-  return project
-}
-
-export async function findProjectThumbnailImageKeyByUserId({
-  projectId,
-  userId,
-}: {
-  projectId: string
-  userId: string
-}) {
-  const [project] = await db
-    .select({
-      thumbnailImageKey: projects.thumbnailImageKey,
+      id: projects.id,
     })
     .from(projects)
     .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
@@ -187,7 +144,7 @@ export async function findProjectThumbnailSourceByUserId({
 }) {
   const [project] = await db
     .select({
-      cleanedImageKey: projects.cleanedImageKey,
+      id: projects.id,
       width: projects.width,
       height: projects.height,
       analysis: projects.analysis,
@@ -227,7 +184,6 @@ export async function listGeneratedImagesByUserId(userId: string) {
       id: projects.id,
       prompt: projects.prompt,
       status: projects.status,
-      thumbnailImageKey: projects.thumbnailImageKey,
       title: projects.title,
     })
     .from(projects)

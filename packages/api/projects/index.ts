@@ -44,7 +44,6 @@ export const projectsRoutes = new Hono()
       aspectRatio,
       model,
       status: "generating",
-      originalImageKey: "",
       width: 0,
       height: 0,
       analysis: { summary: "", boxes: [] },

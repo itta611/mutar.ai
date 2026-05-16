@@ -1,8 +1,8 @@
 import { zValidator } from "@hono/zod-validator"
-import { findProjectCleanedImageKeyByUserId } from "@hengen/db/repo"
+import { findProjectByUserId } from "@hengen/db/repo"
 import { Hono } from "hono"
 
-import { readImageFromR2 } from "../../../r2"
+import { projectImageKey, readImageFromR2 } from "../../../r2"
 import { getSession } from "../../../session"
 import { projectParamsSchema } from "../../schema"
 
@@ -17,12 +17,12 @@ export const projectImageRoutes = new Hono().get(
     }
 
     const { projectId } = c.req.valid("param")
-    const project = await findProjectCleanedImageKeyByUserId({
+    const project = await findProjectByUserId({
       projectId,
       userId: session.user.id,
     })
 
-    if (!project?.cleanedImageKey) {
+    if (!project) {
       return c.json({ message: "Image not available" }, 404, {
         "Cache-Control": "private, no-store",
       })
@@ -31,10 +31,12 @@ export const projectImageRoutes = new Hono().get(
     let asset: Awaited<ReturnType<typeof readImageFromR2>>
 
     try {
-      asset = await readImageFromR2(project.cleanedImageKey)
+      asset = await readImageFromR2(projectImageKey(projectId, "cleaned"))
     } catch (error) {
       console.error("[hengen] failed to read project image", error)
-      return c.json({ message: "Image not available" }, 502)
+      return c.json({ message: "Image not available" }, 404, {
+        "Cache-Control": "private, no-store",
+      })
     }
 
     const body = new ArrayBuffer(asset.bytes.byteLength)

@@ -1,14 +1,13 @@
 import { zValidator } from "@hono/zod-validator"
 import {
-  findProjectThumbnailImageKeyByUserId,
+  findProjectByUserId,
   findProjectThumbnailSourceByUserId,
-  updateProjectThumbnailImageByUserId,
 } from "@hengen/db/repo"
 import { createProjectSvg, type SvgProject } from "@hengen/svg-renderer"
 import { Hono } from "hono"
 import sharp from "sharp"
 
-import { readImageFromR2, uploadImageToR2 } from "../../../r2"
+import { projectImageKey, readImageFromR2, uploadImageToR2 } from "../../../r2"
 import { getSession } from "../../../session"
 import { projectParamsSchema } from "../../schema"
 
@@ -26,11 +25,11 @@ export async function renderAndSaveProjectThumbnail({
     userId,
   })
 
-  if (!project?.cleanedImageKey) {
+  if (!project) {
     return null
   }
 
-  const image = await readImageFromR2(project.cleanedImageKey)
+  const image = await readImageFromR2(projectImageKey(projectId, "cleaned"))
   const imageHref = `data:${image.mediaType};base64,${Buffer.from(image.bytes).toString("base64")}`
   const svg = createProjectSvg({
     imageHref,
@@ -41,21 +40,15 @@ export async function renderAndSaveProjectThumbnail({
       width: THUMBNAIL_WIDTH,
       withoutEnlargement: true,
     })
-    .webp({ quality: 82 })
+    .png()
     .toBuffer()
-  const thumbnailImageKey = await uploadImageToR2({
+  await uploadImageToR2({
     bytes,
     keyPrefix: `projects/${projectId}/thumbnail`,
-    mediaType: "image/webp",
+    mediaType: "image/png",
   })
 
-  await updateProjectThumbnailImageByUserId({
-    projectId,
-    thumbnailImageKey,
-    userId,
-  })
-
-  return { thumbnailImageKey }
+  return { ok: true }
 }
 
 export const projectThumbnailRoutes = new Hono()
@@ -67,12 +60,12 @@ export const projectThumbnailRoutes = new Hono()
     }
 
     const { projectId } = c.req.valid("param")
-    const project = await findProjectThumbnailImageKeyByUserId({
+    const project = await findProjectByUserId({
       projectId,
       userId: session.user.id,
     })
 
-    if (!project?.thumbnailImageKey) {
+    if (!project) {
       return c.json({ message: "Thumbnail not available" }, 404, {
         "Cache-Control": "private, no-store",
       })
@@ -81,10 +74,12 @@ export const projectThumbnailRoutes = new Hono()
     let asset: Awaited<ReturnType<typeof readImageFromR2>>
 
     try {
-      asset = await readImageFromR2(project.thumbnailImageKey)
+      asset = await readImageFromR2(projectImageKey(projectId, "thumbnail"))
     } catch (error) {
       console.error("[hengen] failed to read project thumbnail", error)
-      return c.json({ message: "Thumbnail not available" }, 502)
+      return c.json({ message: "Thumbnail not available" }, 404, {
+        "Cache-Control": "private, no-store",
+      })
     }
 
     const body = new ArrayBuffer(asset.bytes.byteLength)

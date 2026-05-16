@@ -15,28 +15,12 @@ const client = new S3Client({
   },
 })
 
-function extensionFromMediaType(mediaType: string) {
-  if (mediaType === "image/png") {
-    return "png"
-  }
-
-  if (mediaType === "image/webp") {
-    return "webp"
-  }
-
-  if (mediaType === "image/jpeg" || mediaType === "image/jpg") {
-    return "jpg"
-  }
-
-  return "bin"
-}
-
 export async function uploadImageToR2(options: {
   keyPrefix: string
   bytes: Uint8Array
   mediaType: string
 }) {
-  const key = `${options.keyPrefix}.${extensionFromMediaType(options.mediaType)}`
+  const key = `${options.keyPrefix}.png`
 
   await client.send(
     new PutObjectCommand({
@@ -69,4 +53,11 @@ export async function readImageFromR2(key: string) {
     bytes,
     mediaType: response.ContentType ?? "application/octet-stream",
   }
+}
+
+export function projectImageKey(
+  projectId: string,
+  kind: "original" | "cleaned" | "thumbnail"
+) {
+  return `projects/${projectId}/${kind}.png`
 }
