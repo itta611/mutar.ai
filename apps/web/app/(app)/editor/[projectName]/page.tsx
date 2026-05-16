@@ -1,15 +1,18 @@
 "use client"
 
 import { useAtomValue, useSetAtom } from "jotai"
-import { fontFamilyMap } from "@hengen/svg-renderer"
+import Konva from "konva"
+import { use, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { Html } from "react-konva-utils"
 import {
-  use,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type WheelEvent,
-} from "react"
+  Group,
+  Image as KonvaImage,
+  Layer,
+  Rect,
+  Stage,
+  Text,
+} from "react-konva"
+import { fontFamilyMap } from "@hengen/svg-renderer"
 
 import {
   type EditorBox,
@@ -35,68 +38,49 @@ type Size = {
   width: number
 }
 
-let measureCanvas: HTMLCanvasElement | null = null
+type TextStyle = {
+  bold: boolean
+  fontFamily: string
+  fontSize: number
+}
+
+type EditingText = {
+  index: number
+}
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
 }
 
-function measureTextWidth(element: HTMLElement) {
-  measureCanvas ??= document.createElement("canvas")
+function getBoxRect(box: EditorBox) {
+  const xs = box.bbox.map((point) => point.x ?? 0)
+  const ys = box.bbox.map((point) => point.y ?? 0)
+  const left = Math.min(...xs)
+  const top = Math.min(...ys)
 
-  const context = measureCanvas.getContext("2d")
-
-  if (!context) {
-    return element.scrollWidth
+  return {
+    height: Math.max(...ys) - top,
+    left,
+    top,
+    width: Math.max(...xs) - left,
   }
-
-  const style = window.getComputedStyle(element)
-  context.font = `${style.fontStyle} ${style.fontVariant} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`
-
-  return Math.max(
-    ...(element.innerText || element.textContent || "")
-      .split("\n")
-      .map((line) => context.measureText(line).width),
-    0
-  )
-}
-
-function measureTextHeight(element: HTMLElement, lineHeight: number) {
-  const range = document.createRange()
-  range.selectNodeContents(element)
-
-  const lineCount = new Set(
-    Array.from(range.getClientRects()).map((rect) => Math.round(rect.top))
-  ).size
-  range.detach()
-
-  return (
-    Math.max(
-      1,
-      lineCount,
-      (element.innerText || element.textContent || "").split("\n").length
-    ) * lineHeight
-  )
 }
 
 function resizeBboxWidth(box: EditorBox, width: number): EditorBox {
-  const xs = box.bbox.map((point) => point.x ?? 0)
-  const left = Math.min(...xs)
-  const right = Math.max(...xs)
-  const currentWidth = right - left
+  const rect = getBoxRect(box)
   const nextWidth = Math.max(1, Math.ceil(width))
 
-  if (Math.ceil(currentWidth) === nextWidth) {
+  if (Math.ceil(rect.width) === nextWidth) {
     return box
   }
 
   const align = box.align ?? "center"
   const nextLeft =
     align === "left"
-      ? left
+      ? rect.left
       : align === "right"
-        ? right - nextWidth
-        : left + currentWidth / 2 - nextWidth / 2
+        ? rect.left + rect.width - nextWidth
+        : rect.left + rect.width / 2 - nextWidth / 2
 
   return {
     ...box,
@@ -104,21 +88,18 @@ function resizeBboxWidth(box: EditorBox, width: number): EditorBox {
       ...point,
       x:
         nextLeft +
-        (currentWidth > 0
-          ? (((point.x ?? left) - left) / currentWidth) * nextWidth
+        (rect.width > 0
+          ? (((point.x ?? rect.left) - rect.left) / rect.width) * nextWidth
           : 0),
     })),
   }
 }
 
 function resizeBboxHeight(box: EditorBox, height: number): EditorBox {
-  const ys = box.bbox.map((point) => point.y ?? 0)
-  const top = Math.min(...ys)
-  const bottom = Math.max(...ys)
-  const currentHeight = bottom - top
+  const rect = getBoxRect(box)
   const nextHeight = Math.max(1, Math.ceil(height))
 
-  if (Math.ceil(currentHeight) === nextHeight) {
+  if (Math.ceil(rect.height) === nextHeight) {
     return box
   }
 
@@ -127,12 +108,132 @@ function resizeBboxHeight(box: EditorBox, height: number): EditorBox {
     bbox: box.bbox.map((point) => ({
       ...point,
       y:
-        top +
-        (currentHeight > 0
-          ? (((point.y ?? top) - top) / currentHeight) * nextHeight
+        rect.top +
+        (rect.height > 0
+          ? (((point.y ?? rect.top) - rect.top) / rect.height) * nextHeight
           : 0),
     })),
   }
+}
+
+function createTextMeasurer(style: TextStyle) {
+  return new Konva.Text({
+    fontFamily: style.fontFamily,
+    fontSize: style.fontSize,
+    fontStyle: style.bold ? "bold" : "normal",
+    lineHeight: 1.4,
+    text: "Hg",
+  })
+}
+
+function getTextNodeTopInset(
+  textNode: Pick<Konva.Text, "fontSize" | "lineHeight">,
+  measurer: Pick<Konva.Text, "measureSize">
+) {
+  const metrics = measurer.measureSize("Hg")
+  const lineHeight = textNode.fontSize() * textNode.lineHeight()
+  const ascent =
+    metrics.fontBoundingBoxAscent ?? metrics.actualBoundingBoxAscent
+  const descent =
+    metrics.fontBoundingBoxDescent ?? metrics.actualBoundingBoxDescent
+  const baseline = (ascent - descent) / 2 + lineHeight / 2
+
+  return Math.max(0, baseline - metrics.actualBoundingBoxAscent)
+}
+
+function getTextStyleTopInset(style: TextStyle) {
+  const measurer = createTextMeasurer(style)
+
+  return getTextNodeTopInset(measurer, measurer)
+}
+
+function createBoxTextNode(box: EditorBox, label = box.label) {
+  const rect = getBoxRect(box)
+
+  return new Konva.Text({
+    align: box.align ?? "center",
+    fill: box.color ?? "rgba(0,0,0,1)",
+    fontFamily: fontFamilyMap[box.fontFamily ?? "gothic"],
+    fontSize: box.fontSize,
+    fontStyle: box.bold ? "bold" : "normal",
+    lineHeight: 1.4,
+    text: label,
+    width: box.wrapText ? rect.width : undefined,
+    wrap: box.wrapText ? "char" : "none",
+  })
+}
+
+function TextEditor({
+  onClose,
+  onChange,
+  textNode,
+}: {
+  onClose: (value: string) => void
+  onChange: (value: string) => void
+  textNode: Konva.Text
+}) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    const textarea = textareaRef.current
+
+    if (!textarea) {
+      return
+    }
+
+    textarea.value = textNode.text()
+    textarea.focus()
+
+    textarea.style.width = `${textNode.width() - textNode.padding() * 2}px`
+    textarea.style.height = `${textNode.height() - textNode.padding() * 2 + 5}px`
+    textarea.style.fontSize = `${textNode.fontSize()}px`
+    textarea.style.fontWeight = textNode.fontStyle().includes("bold")
+      ? "700"
+      : "400"
+    textarea.style.border = "none"
+    textarea.style.padding = "0px"
+    textarea.style.overflow = "hidden"
+    textarea.style.background = "none"
+    textarea.style.outline = "none"
+    textarea.style.resize = "none"
+    textarea.style.lineHeight = `${textNode.lineHeight()}`
+    textarea.style.fontFamily = textNode.fontFamily()
+    textarea.style.transformOrigin = "left top"
+    textarea.style.top = "0px"
+    textarea.style.left = "0px"
+    textarea.style.textAlign = textNode.align()
+    textarea.style.color = textNode.fill().toString()
+    textarea.style.overflowWrap =
+      textNode.wrap() === "none" ? "normal" : "break-word"
+    textarea.style.whiteSpace = textNode.wrap() === "none" ? "pre" : "normal"
+    textarea.style.userSelect = "text"
+    textarea.style.wordBreak = "normal"
+
+    const close = () => onClose(textarea.value)
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        close()
+      }
+    }
+
+    textarea.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      textarea.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [onClose, textNode])
+
+  return (
+    <Html groupProps={{ x: textNode.x() }}>
+      <textarea
+        aria-label="Edit text"
+        className="absolute m-0 resize-none"
+        onBlur={(event) => onClose(event.currentTarget.value)}
+        onChange={(event) => onChange(event.currentTarget.value)}
+        ref={textareaRef}
+      />
+    </Html>
+  )
 }
 
 export default function Page({
@@ -152,8 +253,11 @@ export default function Page({
     height: 0,
     width: 0,
   })
-  const textRefs = useRef<(HTMLDivElement | null)[]>([])
-  const [textWidths, setTextWidths] = useState<Array<number | undefined>>([])
+  const [imageElement, setImageElement] = useState<HTMLImageElement | null>(
+    null
+  )
+  const [editingText, setEditingText] = useState<EditingText | null>(null)
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [viewBox, setViewBox] = useState<ViewBox | null>(null)
 
   useEffect(() => {
@@ -195,42 +299,27 @@ export default function Page({
     return () => resizeObserver.disconnect()
   }, [])
 
-  useLayoutEffect(() => {
+  useEffect(() => {
+    const image = new Image()
+    image.src = `/api/projects/${projectId}/image`
+    image.onload = () => setImageElement(image)
+
+    return () => {
+      image.onload = null
+    }
+  }, [projectId])
+
+  useEffect(() => {
     if (status !== "ready") {
       return
     }
 
-    const nextTextWidths = boxes.map((box, index) => {
-      if (box.wrapText) {
-        return undefined
-      }
+    setBoxes((current) => {
+      const next = current.map((box) => resizeTextBox(box, box.label))
 
-      const element = textRefs.current[index]
-
-      return element
-        ? Math.max(1, Math.ceil(measureTextWidth(element)))
-        : undefined
+      return next.some((box, index) => box !== current[index]) ? next : current
     })
-
-    setTextWidths((current) =>
-      current.length === nextTextWidths.length &&
-      current.every((width, index) => width === nextTextWidths[index])
-        ? current
-        : nextTextWidths
-    )
-
-    const nextBoxes = boxes.map((box, index) => {
-      const element = textRefs.current[index]
-
-      return element
-        ? resizeBboxHeight(box, measureTextHeight(element, box.fontSize * 1.4))
-        : box
-    })
-
-    if (nextBoxes.some((box, index) => box !== boxes[index])) {
-      setBoxes(nextBoxes)
-    }
-  }, [boxes, setBoxes, status])
+  }, [setBoxes, status])
 
   if (status !== "ready" || !imageSize) {
     const loadingText = {
@@ -259,21 +348,30 @@ export default function Page({
     viewBox?.key === currentViewBoxKey
       ? viewBox
       : { height, key: currentViewBoxKey, width, x: 0, y: 0 }
+  const stageScale = Math.min(
+    containerSize.width / activeViewBox.width,
+    containerSize.height / activeViewBox.height
+  )
+  const stageOffsetX =
+    (containerSize.width - activeViewBox.width * stageScale) / 2
+  const stageOffsetY =
+    (containerSize.height - activeViewBox.height * stageScale) / 2
+  const layerX = stageOffsetX - activeViewBox.x * stageScale
+  const layerY = stageOffsetY - activeViewBox.y * stageScale
 
-  function handleWheel(event: WheelEvent<SVGSVGElement>) {
-    event.preventDefault()
+  function handleWheel(event: Konva.KonvaEventObject<WheelEvent>) {
+    event.evt.preventDefault()
 
-    const matrix = event.currentTarget.getScreenCTM()
+    const stage = event.target.getStage()
+    const pointer = stage?.getPointerPosition()
 
-    if (!matrix) {
+    if (!pointer) {
       return
     }
 
-    const svgPoint = event.currentTarget.createSVGPoint()
-    svgPoint.x = event.clientX
-    svgPoint.y = event.clientY
-    const pointer = svgPoint.matrixTransform(matrix.inverse())
-    const nextScale = event.deltaY < 0 ? 0.9 : 1.1
+    const pointerX = (pointer.x - layerX) / stageScale
+    const pointerY = (pointer.y - layerY) / stageScale
+    const nextScale = event.evt.deltaY < 0 ? 0.9 : 1.1
     const nextWidth = Math.min(
       width,
       Math.max(width / 8, activeViewBox.width * nextScale)
@@ -282,169 +380,133 @@ export default function Page({
       height,
       Math.max(height / 8, activeViewBox.height * nextScale)
     )
-    const ratioX = (pointer.x - activeViewBox.x) / activeViewBox.width
-    const ratioY = (pointer.y - activeViewBox.y) / activeViewBox.height
-    const x = clamp(pointer.x - ratioX * nextWidth, 0, width - nextWidth)
-    const y = clamp(pointer.y - ratioY * nextHeight, 0, height - nextHeight)
+    const ratioX = (pointerX - activeViewBox.x) / activeViewBox.width
+    const ratioY = (pointerY - activeViewBox.y) / activeViewBox.height
 
     setViewBox({
       height: nextHeight,
       key: currentViewBoxKey,
       width: nextWidth,
-      x,
-      y,
+      x: clamp(pointerX - ratioX * nextWidth, 0, width - nextWidth),
+      y: clamp(pointerY - ratioY * nextHeight, 0, height - nextHeight),
     })
   }
 
-  function updateTextWidth(index: number, width: number) {
-    const nextWidth = Math.max(1, Math.ceil(width))
+  function resizeTextBox(box: EditorBox, label: string) {
+    const nextBox = { ...box, label }
+    const textNode = createBoxTextNode(nextBox, label)
 
-    setTextWidths((current) => {
-      if (current[index] === nextWidth) {
-        return current
-      }
-
-      const next = [...current]
-      next[index] = nextWidth
-
-      return next
-    })
-  }
-
-  function updateBboxWidth(index: number, width: number) {
-    setBoxes((current) =>
-      current.map((box, boxIndex) =>
-        boxIndex === index ? resizeBboxWidth(box, width) : box
-      )
+    return resizeBboxHeight(
+      nextBox.wrapText
+        ? nextBox
+        : resizeBboxWidth(nextBox, textNode.getTextWidth()),
+      textNode.height()
     )
   }
 
-  function updateBboxHeight(index: number, height: number) {
+  function updateLabel(index: number, label: string) {
     setBoxes((current) =>
       current.map((box, boxIndex) =>
-        boxIndex === index ? resizeBboxHeight(box, height) : box
+        boxIndex === index ? resizeTextBox(box, label) : box
+      )
+    )
+    setEditingText(null)
+  }
+
+  function updateLabelDraft(index: number, label: string) {
+    setBoxes((current) =>
+      current.map((box, boxIndex) =>
+        boxIndex === index ? resizeTextBox(box, label) : box
       )
     )
   }
 
   return (
-    <div ref={containerRef} className="min-h-full">
-      {/** biome-ignore lint/a11y/noSvgWithoutTitle: ツールチップが邪魔だから */}
-      <svg
-        className="size-full overflow-hidden"
+    <div ref={containerRef} className="relative min-h-full overflow-hidden">
+      <Stage
+        height={containerSize.height}
         onWheel={handleWheel}
-        preserveAspectRatio="xMidYMid meet"
-        viewBox={`${activeViewBox.x} ${activeViewBox.y} ${activeViewBox.width} ${activeViewBox.height}`}
-        style={{ height: containerSize.height, width: containerSize.width }}
+        width={containerSize.width}
       >
-        <image
-          href={`/api/projects/${projectId}/image`}
-          height={height}
-          preserveAspectRatio="xMidYMid meet"
-          width={width}
-        />
-        {boxes.map((box, index) => {
-          if (!box.bbox) {
-            return null
-          }
+        <Layer x={layerX} y={layerY} scaleX={stageScale} scaleY={stageScale}>
+          <KonvaImage
+            height={height}
+            image={imageElement ?? undefined}
+            width={width}
+          />
+          {boxes.map((box, index) => {
+            const rect = getBoxRect(box)
+            const fontFamily = fontFamilyMap[box.fontFamily ?? "gothic"]
+            const textNode = createBoxTextNode(box)
+            const textWidth = box.wrapText
+              ? rect.width
+              : textNode.getTextWidth()
+            const textX =
+              box.wrapText || box.align === "left"
+                ? 0
+                : box.align === "right"
+                  ? rect.width - textWidth
+                  : rect.width / 2 - textWidth / 2
+            const topInset = getTextStyleTopInset({
+              bold: box.bold ?? false,
+              fontFamily,
+              fontSize: box.fontSize,
+            })
+            const isActive =
+              hoveredIndex === index || editingText?.index === index
 
-          const xs = box.bbox.map((point) => point.x ?? 0)
-          const ys = box.bbox.map((point) => point.y ?? 0)
-          const left = Math.min(...xs)
-          const top = Math.min(...ys)
-          const boxWidth = Math.max(...xs) - left
-          const boxHeight = Math.max(...ys) - top
-          const align = box.align ?? "center"
-          const fontFamily = fontFamilyMap[box.fontFamily ?? "gothic"]
-          const fontWeight = box.bold ? 700 : 400
-          const centerX = left + boxWidth / 2
-          const right = left + boxWidth
-          const wrapText = box.wrapText ?? false
-          const lineHeight = box.fontSize * 1.4
-          const editableHeight = boxHeight
-          const editableWidth = wrapText
-            ? boxWidth
-            : (textWidths[index] ?? boxWidth)
-          const editableX =
-            align === "left"
-              ? left
-              : align === "right"
-                ? right - editableWidth
-                : centerX - editableWidth / 2
-          const editableY = top + boxHeight / 2 - editableHeight / 2
-
-          return (
-            <g className="group" key={`${box.label}-${index}`}>
-              <rect
-                className="pointer-events-none stroke-transparent group-hover:stroke-indigo-500 group-focus-within:stroke-indigo-500"
-                fill="none"
-                height={editableHeight + 2}
-                strokeWidth={2}
-                width={editableWidth + 2}
-                x={editableX - 1}
-                y={editableY - 1}
-              />
-              <foreignObject
-                x={editableX}
-                y={editableY}
-                width={editableWidth}
-                height={editableHeight}
-              >
-                {/* biome-ignore lint/a11y/useSemanticElements: contentEditable is required here. */}
-                <div
-                  aria-label="Edit text"
-                  contentEditable
-                  ref={(element) => {
-                    textRefs.current[index] = element
-                  }}
-                  role="textbox"
-                  suppressContentEditableWarning
-                  tabIndex={0}
-                  onInput={(event) => {
-                    const width = measureTextWidth(event.currentTarget)
-                    const height = measureTextHeight(
-                      event.currentTarget,
-                      lineHeight
-                    )
-
-                    updateTextWidth(index, width)
-                    updateBboxHeight(index, height)
-
-                    if (!wrapText) {
-                      updateBboxWidth(index, width)
-                    }
-                  }}
-                  onBlur={(event) => {
-                    const label = event.currentTarget.innerText
-
-                    setBoxes((current) =>
-                      current.map((item, itemIndex) =>
-                        itemIndex === index ? { ...item, label } : item
-                      )
-                    )
-                  }}
-                  style={{
-                    color: box.color ?? "rgba(0,0,0,1)",
-                    boxSizing: "border-box",
-                    fontFamily,
-                    fontSize: box.fontSize,
-                    fontWeight,
-                    height: "100%",
-                    lineHeight: `${lineHeight}px`,
-                    outline: "none",
-                    overflowWrap: wrapText ? "anywhere" : "normal",
-                    textAlign: align,
-                    whiteSpace: wrapText ? "pre-wrap" : "pre",
-                    width: "100%",
-                  }}
-                >
-                  {box.label}
-                </div>
-              </foreignObject>
-            </g>
-          )
-        })}
-      </svg>
+            return (
+              <Group key={index} x={rect.left} y={rect.top - topInset}>
+                {isActive ? (
+                  <Rect
+                    height={rect.height + 2}
+                    listening={false}
+                    stroke="#6366f1"
+                    strokeWidth={2}
+                    width={textWidth + 2}
+                    x={textX - 1}
+                    y={-1}
+                  />
+                ) : null}
+                <Text
+                  align={box.align ?? "center"}
+                  fill={box.color ?? "rgba(0,0,0,1)"}
+                  fontFamily={fontFamily}
+                  fontSize={box.fontSize}
+                  fontStyle={box.bold ? "bold" : "normal"}
+                  height={rect.height}
+                  lineHeight={1.4}
+                  onClick={() =>
+                    setEditingText({
+                      index,
+                    })
+                  }
+                  onTap={() =>
+                    setEditingText({
+                      index,
+                    })
+                  }
+                  onMouseEnter={() => setHoveredIndex(index)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                  text={box.label}
+                  visible={editingText?.index !== index}
+                  width={textWidth}
+                  wrap={box.wrapText ? "char" : "none"}
+                  x={textX}
+                  y={0}
+                />
+                {editingText?.index === index ? (
+                  <TextEditor
+                    onChange={(value) => updateLabelDraft(index, value)}
+                    onClose={(value) => updateLabel(index, value)}
+                    textNode={textNode}
+                  />
+                ) : null}
+              </Group>
+            )
+          })}
+        </Layer>
+      </Stage>
     </div>
   )
 }
