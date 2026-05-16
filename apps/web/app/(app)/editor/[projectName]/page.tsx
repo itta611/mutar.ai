@@ -371,19 +371,28 @@ export default function Page({
               : align === "right"
                 ? right - editableWidth
                 : centerX - editableWidth / 2
+          const editableY = top + boxHeight / 2 - editableHeight / 2
 
           return (
-            <g key={`${box.label}-${index}`}>
+            <g className="group" key={`${box.label}-${index}`}>
+              <rect
+                className="pointer-events-none stroke-transparent group-hover:stroke-indigo-500 group-focus-within:stroke-indigo-500"
+                fill="none"
+                height={editableHeight + 2}
+                strokeWidth={2}
+                width={editableWidth + 2}
+                x={editableX - 1}
+                y={editableY - 1}
+              />
               <foreignObject
                 x={editableX}
-                y={top + boxHeight / 2 - editableHeight / 2}
+                y={editableY}
                 width={editableWidth}
                 height={editableHeight}
               >
                 {/* biome-ignore lint/a11y/useSemanticElements: contentEditable is required here. */}
                 <div
                   aria-label="Edit text"
-                  className="shadow-[inset_0_0_0_2px_transparent] hover:shadow-[inset_0_0_0_2px_#6366f1] focus:shadow-[inset_0_0_0_2px_#6366f1]"
                   contentEditable
                   ref={(element) => {
                     textRefs.current[index] = element
