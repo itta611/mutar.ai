@@ -21,7 +21,6 @@ import {
   editorProjectIdAtom,
   editorProjectStatusAtom,
 } from "@/atom/generate"
-import { ProjectSwitcher } from "@/components/project-switcher"
 import LogoIcon from "@/components/logo-icon"
 import ShimmerText from "@/components/ui/shimmer-text"
 import { useEditorProject } from "@/hooks/use-editor-project"
@@ -463,7 +462,6 @@ export default function Page({
           })}
         </Layer>
       </Stage>
-      <ProjectSwitcher currentProjectId={projectId} />
     </div>
   )
 }

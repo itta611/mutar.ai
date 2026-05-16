@@ -3,15 +3,15 @@
 import { useQuery } from "@tanstack/react-query"
 import Image from "next/image"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 import { useEffect, useRef } from "react"
 
 import { listProjects, projectKeys } from "@/components/generated-images"
 
-export function ProjectSwitcher({
-  currentProjectId,
-}: {
-  currentProjectId: string
-}) {
+export function ProjectSwitcher() {
+  const { projectName: currentProjectId } = useParams<{
+    projectName: string
+  }>()
   const selectedRef = useRef<HTMLAnchorElement>(null)
   const { data: projects = [] } = useQuery({
     queryKey: projectKeys.list,
@@ -22,6 +22,7 @@ export function ProjectSwitcher({
     selectedRef.current?.scrollIntoView({
       block: "nearest",
       inline: "center",
+      behavior: "smooth",
     })
   }, [currentProjectId, projects])
 
