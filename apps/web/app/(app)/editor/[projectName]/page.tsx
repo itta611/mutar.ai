@@ -3,7 +3,6 @@
 import { useAtomValue, useSetAtom } from "jotai"
 import Konva from "konva"
 import { use, useEffect, useLayoutEffect, useRef, useState } from "react"
-import { Html } from "react-konva-utils"
 import {
   Group,
   Image as KonvaImage,
@@ -14,6 +13,7 @@ import {
 } from "react-konva"
 import { fontFamilyMap } from "@hengen/svg-renderer"
 
+import { TextEditor } from "./text-editor"
 import {
   type EditorBox,
   editorBoxesAtom,
@@ -25,12 +25,11 @@ import LogoIcon from "@/components/logo-icon"
 import ShimmerText from "@/components/ui/shimmer-text"
 import { useEditorProject } from "@/hooks/use-editor-project"
 
-type ViewBox = {
-  height: number
+type StageTransform = {
   key: string
-  width: number
   x: number
   y: number
+  scale: number
 }
 
 type Size = {
@@ -46,10 +45,6 @@ type TextStyle = {
 
 type EditingText = {
   index: number
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max)
 }
 
 function getBoxRect(box: EditorBox) {
@@ -163,79 +158,6 @@ function createBoxTextNode(box: EditorBox, label = box.label) {
   })
 }
 
-function TextEditor({
-  onClose,
-  onChange,
-  textNode,
-}: {
-  onClose: (value: string) => void
-  onChange: (value: string) => void
-  textNode: Konva.Text
-}) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-  useEffect(() => {
-    const textarea = textareaRef.current
-
-    if (!textarea) {
-      return
-    }
-
-    textarea.value = textNode.text()
-    textarea.focus()
-
-    textarea.style.width = `${textNode.width() - textNode.padding() * 2}px`
-    textarea.style.height = `${textNode.height() - textNode.padding() * 2 + 5}px`
-    textarea.style.fontSize = `${textNode.fontSize()}px`
-    textarea.style.fontWeight = textNode.fontStyle().includes("bold")
-      ? "700"
-      : "400"
-    textarea.style.border = "none"
-    textarea.style.padding = "0px"
-    textarea.style.overflow = "hidden"
-    textarea.style.background = "none"
-    textarea.style.outline = "none"
-    textarea.style.resize = "none"
-    textarea.style.lineHeight = `${textNode.lineHeight()}`
-    textarea.style.fontFamily = textNode.fontFamily()
-    textarea.style.transformOrigin = "left top"
-    textarea.style.top = "0px"
-    textarea.style.left = "0px"
-    textarea.style.textAlign = textNode.align()
-    textarea.style.color = textNode.fill().toString()
-    textarea.style.overflowWrap =
-      textNode.wrap() === "none" ? "normal" : "break-word"
-    textarea.style.whiteSpace = textNode.wrap() === "none" ? "pre" : "normal"
-    textarea.style.userSelect = "text"
-    textarea.style.wordBreak = "normal"
-
-    const close = () => onClose(textarea.value)
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        close()
-      }
-    }
-
-    textarea.addEventListener("keydown", handleKeyDown)
-
-    return () => {
-      textarea.removeEventListener("keydown", handleKeyDown)
-    }
-  }, [onClose, textNode])
-
-  return (
-    <Html groupProps={{ x: textNode.x() }}>
-      <textarea
-        aria-label="Edit text"
-        className="absolute m-0 resize-none"
-        onBlur={(event) => onClose(event.currentTarget.value)}
-        onChange={(event) => onChange(event.currentTarget.value)}
-        ref={textareaRef}
-      />
-    </Html>
-  )
-}
-
 export default function Page({
   params,
 }: {
@@ -249,6 +171,7 @@ export default function Page({
   const setBoxes = useSetAtom(editorBoxesAtom)
   const fetchProject = useEditorProject()
   const containerRef = useRef<HTMLDivElement>(null)
+  const stageRef = useRef<Konva.Stage>(null)
   const [containerSize, setContainerSize] = useState<Size>({
     height: 0,
     width: 0,
@@ -258,7 +181,9 @@ export default function Page({
   )
   const [editingText, setEditingText] = useState<EditingText | null>(null)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  const [viewBox, setViewBox] = useState<ViewBox | null>(null)
+  const [stageTransform, setStageTransform] = useState<StageTransform | null>(
+    null
+  )
 
   useEffect(() => {
     if (currentProjectId !== projectId || status === null) {
@@ -343,52 +268,52 @@ export default function Page({
   }
 
   const [width, height] = imageSize
-  const currentViewBoxKey = `${projectId}:${width}:${height}`
-  const activeViewBox =
-    viewBox?.key === currentViewBoxKey
-      ? viewBox
-      : { height, key: currentViewBoxKey, width, x: 0, y: 0 }
-  const stageScale = Math.min(
-    containerSize.width / activeViewBox.width,
-    containerSize.height / activeViewBox.height
+  const fitScale = Math.min(
+    containerSize.width / width,
+    containerSize.height / height
   )
-  const stageOffsetX =
-    (containerSize.width - activeViewBox.width * stageScale) / 2
-  const stageOffsetY =
-    (containerSize.height - activeViewBox.height * stageScale) / 2
-  const layerX = stageOffsetX - activeViewBox.x * stageScale
-  const layerY = stageOffsetY - activeViewBox.y * stageScale
+  const stageTransformKey = `${projectId}:${width}:${height}:${containerSize.width}:${containerSize.height}`
+  const defaultStageTransform = {
+    key: stageTransformKey,
+    scale: fitScale,
+    x: (containerSize.width - width * fitScale) / 2,
+    y: (containerSize.height - height * fitScale) / 2,
+  }
+  const activeStageTransform =
+    stageTransform?.key === stageTransformKey
+      ? stageTransform
+      : defaultStageTransform
 
   function handleWheel(event: Konva.KonvaEventObject<WheelEvent>) {
     event.evt.preventDefault()
 
-    const stage = event.target.getStage()
+    const stage = stageRef.current
     const pointer = stage?.getPointerPosition()
 
-    if (!pointer) {
+    if (!stage || !pointer) {
       return
     }
 
-    const pointerX = (pointer.x - layerX) / stageScale
-    const pointerY = (pointer.y - layerY) / stageScale
-    const nextScale = event.evt.deltaY < 0 ? 0.9 : 1.1
-    const nextWidth = Math.min(
-      width,
-      Math.max(width / 8, activeViewBox.width * nextScale)
-    )
-    const nextHeight = Math.min(
-      height,
-      Math.max(height / 8, activeViewBox.height * nextScale)
-    )
-    const ratioX = (pointerX - activeViewBox.x) / activeViewBox.width
-    const ratioY = (pointerY - activeViewBox.y) / activeViewBox.height
+    const oldScale = stage.scaleX()
+    const mousePointTo = {
+      x: (pointer.x - stage.x()) / oldScale,
+      y: (pointer.y - stage.y()) / oldScale,
+    }
+    let direction = event.evt.deltaY > 0 ? -1 : 1
 
-    setViewBox({
-      height: nextHeight,
-      key: currentViewBoxKey,
-      width: nextWidth,
-      x: clamp(pointerX - ratioX * nextWidth, 0, width - nextWidth),
-      y: clamp(pointerY - ratioY * nextHeight, 0, height - nextHeight),
+    if (event.evt.ctrlKey) {
+      direction = -direction
+    }
+
+    const scaleBy = 1.05
+    const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy
+    const scale = Math.max(fitScale / 8, Math.min(fitScale * 16, newScale))
+
+    setStageTransform({
+      key: activeStageTransform.key,
+      scale,
+      x: pointer.x - mousePointTo.x * scale,
+      y: pointer.y - mousePointTo.y * scale,
     })
   }
 
@@ -424,11 +349,31 @@ export default function Page({
   return (
     <div ref={containerRef} className="relative min-h-full overflow-hidden">
       <Stage
+        draggable
         height={containerSize.height}
+        onDragEnd={(event) =>
+          setStageTransform({
+            ...activeStageTransform,
+            x: event.target.x(),
+            y: event.target.y(),
+          })
+        }
+        onDragMove={(event) =>
+          setStageTransform({
+            ...activeStageTransform,
+            x: event.target.x(),
+            y: event.target.y(),
+          })
+        }
         onWheel={handleWheel}
+        ref={stageRef}
+        scaleX={activeStageTransform.scale}
+        scaleY={activeStageTransform.scale}
         width={containerSize.width}
+        x={activeStageTransform.x}
+        y={activeStageTransform.y}
       >
-        <Layer x={layerX} y={layerY} scaleX={stageScale} scaleY={stageScale}>
+        <Layer>
           <KonvaImage
             height={height}
             image={imageElement ?? undefined}
