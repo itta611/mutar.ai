@@ -269,16 +269,26 @@ export default function Page({
   }
 
   const [width, height] = imageSize
+  const defaultViewportPadding = 32
+  const projectSwitcherHeight = 96
+  const imageViewportWidth = Math.max(
+    1,
+    containerSize.width - defaultViewportPadding * 2
+  )
+  const imageViewportHeight = Math.max(
+    1,
+    containerSize.height - projectSwitcherHeight - defaultViewportPadding * 2
+  )
   const fitScale = Math.min(
-    containerSize.width / width,
-    containerSize.height / height
+    imageViewportWidth / width,
+    imageViewportHeight / height
   )
   const stageTransformKey = `${projectId}:${width}:${height}:${containerSize.width}:${containerSize.height}`
   const defaultStageTransform = {
     key: stageTransformKey,
     scale: fitScale,
-    x: (containerSize.width - width * fitScale) / 2,
-    y: (containerSize.height - height * fitScale) / 2,
+    x: defaultViewportPadding + (imageViewportWidth - width * fitScale) / 2,
+    y: defaultViewportPadding + (imageViewportHeight - height * fitScale) / 2,
   }
   const activeStageTransform =
     stageTransform?.key === stageTransformKey
