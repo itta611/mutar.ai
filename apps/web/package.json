@@ -10,6 +10,7 @@
   "dependencies": {
     "konva": "^10.3.0",
     "react-konva": "^19.2.4",
-    "react-konva-utils": "^2.0.0"
+    "react-konva-utils": "^2.0.0",
+    "tailwind-scrollbar": "^4.0.2"
   }
 }
