@@ -22,11 +22,11 @@ export type GeneratedImage = {
   title: string
 }
 
-const projectKeys = {
+export const projectKeys = {
   list: ["projects"] as const,
 }
 
-async function listProjects() {
+export async function listProjects() {
   const response = await apiClient.projects.$get()
 
   if (!response.ok) {
