@@ -1,12 +1,13 @@
 import { zValidator } from "@hono/zod-validator"
 import {
   findProjectByUserId,
-  findProjectThumbnailSourceByUserId,
+  findProjectThumbnailSource,
 } from "@hengen/db/repo"
 import { createProjectSvg, type SvgProject } from "@hengen/svg-renderer"
 import { Hono } from "hono"
 import sharp from "sharp"
 
+import { env } from "@/lib/env"
 import { projectImageKey, readImageFromR2, uploadImageToR2 } from "../../../r2"
 import { getSession } from "../../../session"
 import { projectParamsSchema } from "../../schema"
@@ -15,15 +16,10 @@ const THUMBNAIL_WIDTH = 640
 
 export async function renderAndSaveProjectThumbnail({
   projectId,
-  userId,
 }: {
   projectId: string
-  userId: string
 }) {
-  const project = await findProjectThumbnailSourceByUserId({
-    projectId,
-    userId,
-  })
+  const project = await findProjectThumbnailSource(projectId)
 
   if (!project) {
     return null
@@ -93,9 +89,9 @@ export const projectThumbnailRoutes = new Hono()
     })
   })
   .post("/", zValidator("param", projectParamsSchema), async (c) => {
-    const session = await getSession(c.req.raw.headers)
-
-    if (!session) {
+    if (
+      c.req.header("Authorization") !== `Bearer ${env.HENGEN_WORKER_SECRET}`
+    ) {
       return c.json({ message: "Unauthorized" }, 401)
     }
 
@@ -104,7 +100,6 @@ export const projectThumbnailRoutes = new Hono()
     try {
       const thumbnail = await renderAndSaveProjectThumbnail({
         projectId,
-        userId: session.user.id,
       })
 
       if (!thumbnail) {

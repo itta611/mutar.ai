@@ -135,13 +135,7 @@ export async function findProjectByUserId({
   return project
 }
 
-export async function findProjectThumbnailSourceByUserId({
-  projectId,
-  userId,
-}: {
-  projectId: string
-  userId: string
-}) {
+export async function findProjectThumbnailSource(projectId: string) {
   const [project] = await db
     .select({
       id: projects.id,
@@ -150,7 +144,7 @@ export async function findProjectThumbnailSourceByUserId({
       analysis: projects.analysis,
     })
     .from(projects)
-    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .where(eq(projects.id, projectId))
     .limit(1)
 
   return project
