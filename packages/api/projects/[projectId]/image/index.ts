@@ -45,7 +45,7 @@ export const projectImageRoutes = new Hono().get(
     return new Response(body, {
       headers: {
         "Content-Type": asset.mediaType,
-        "Cache-Control": "private, no-store",
+        "Cache-Control": "private, max-age=31536000, immutable",
       },
     })
   }
