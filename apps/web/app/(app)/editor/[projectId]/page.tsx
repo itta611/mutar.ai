@@ -255,9 +255,18 @@ export default function Page({
               />
               {editingText?.index === index ? (
                 <TextEditor
+                  color={box.color ?? "rgba(0,0,0,1)"}
+                  fontFamily={fontFamily}
+                  fontSize={box.fontSize}
+                  fontWeight={box.bold ? 700 : 400}
+                  height={rect.height}
                   onChange={(value) => updateLabelDraft(index, value)}
                   onClose={(value) => updateLabel(index, value)}
-                  textNode={textNode}
+                  textAlign={box.align ?? "center"}
+                  value={box.label}
+                  width={textWidth}
+                  wrapText={box.wrapText ?? false}
+                  x={textX}
                 />
               ) : null}
             </Group>
