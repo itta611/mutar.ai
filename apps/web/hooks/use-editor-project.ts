@@ -10,18 +10,21 @@ import {
   editorImageSizeAtom,
   editorProjectIdAtom,
 } from "@/atom/generate"
+import { resizeTextBox } from "@/hooks/editor-bbox"
 import { apiClient } from "@/lib/api-client"
 
-type EditorProject = {
-  analysis: { boxes: EditorBox[]; summary: string }
-  height: number
-  id: string
-  status: "ready"
-  width: number
-} | {
-  id: string
-  status: "generating" | "analyzing" | "erasing" | "error"
-}
+type EditorProject =
+  | {
+      analysis: { boxes: EditorBox[]; summary: string }
+      height: number
+      id: string
+      status: "ready"
+      width: number
+    }
+  | {
+      id: string
+      status: "generating" | "analyzing" | "erasing" | "error"
+    }
 
 async function getProject(projectId: string) {
   const response = await apiClient.projects[":projectId"].$get({
@@ -68,7 +71,9 @@ export function useEditorProject() {
         }
 
         setImageSize([project.width, project.height])
-        setBoxes(project.analysis.boxes)
+        setBoxes(
+          project.analysis.boxes.map((box) => resizeTextBox(box, box.label))
+        )
       } catch {
         setImageSize(null)
         setBoxes([])

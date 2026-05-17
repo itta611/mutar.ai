@@ -15,12 +15,17 @@ import { fontFamilyMap } from "@hengen/svg-renderer"
 
 import { TextEditor } from "./text-editor"
 import {
-  type EditorBox,
   editorBoxesAtom,
   editorImageSizeAtom,
   editorProjectIdAtom,
 } from "@/atom/generate"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  createBoxTextNode,
+  getBoxRect,
+  getTextStyleTopInset,
+  resizeTextBox,
+} from "@/hooks/editor-bbox"
 import { useEditorProject } from "@/hooks/use-editor-project"
 
 type StageTransform = {
@@ -33,12 +38,6 @@ type StageTransform = {
 type Size = {
   height: number
   width: number
-}
-
-type TextStyle = {
-  bold: boolean
-  fontFamily: string
-  fontSize: number
 }
 
 type EditingText = {
@@ -56,117 +55,6 @@ function getImageViewportSize(containerSize: Size) {
       containerSize.height - projectSwitcherHeight - defaultViewportPadding * 2
     ),
   }
-}
-
-function getBoxRect(box: EditorBox) {
-  const xs = box.bbox.map((point) => point.x ?? 0)
-  const ys = box.bbox.map((point) => point.y ?? 0)
-  const left = Math.min(...xs)
-  const top = Math.min(...ys)
-
-  return {
-    height: Math.max(...ys) - top,
-    left,
-    top,
-    width: Math.max(...xs) - left,
-  }
-}
-
-function resizeBboxWidth(box: EditorBox, width: number): EditorBox {
-  const rect = getBoxRect(box)
-  const nextWidth = Math.max(1, Math.ceil(width))
-
-  if (Math.ceil(rect.width) === nextWidth) {
-    return box
-  }
-
-  const align = box.align ?? "center"
-  const nextLeft =
-    align === "left"
-      ? rect.left
-      : align === "right"
-        ? rect.left + rect.width - nextWidth
-        : rect.left + rect.width / 2 - nextWidth / 2
-
-  return {
-    ...box,
-    bbox: box.bbox.map((point) => ({
-      ...point,
-      x:
-        nextLeft +
-        (rect.width > 0
-          ? (((point.x ?? rect.left) - rect.left) / rect.width) * nextWidth
-          : 0),
-    })),
-  }
-}
-
-function resizeBboxHeight(box: EditorBox, height: number): EditorBox {
-  const rect = getBoxRect(box)
-  const nextHeight = Math.max(1, Math.ceil(height))
-
-  if (Math.ceil(rect.height) === nextHeight) {
-    return box
-  }
-
-  return {
-    ...box,
-    bbox: box.bbox.map((point) => ({
-      ...point,
-      y:
-        rect.top +
-        (rect.height > 0
-          ? (((point.y ?? rect.top) - rect.top) / rect.height) * nextHeight
-          : 0),
-    })),
-  }
-}
-
-function createTextMeasurer(style: TextStyle) {
-  return new Konva.Text({
-    fontFamily: style.fontFamily,
-    fontSize: style.fontSize,
-    fontStyle: style.bold ? "bold" : "normal",
-    lineHeight: 1.4,
-    text: "Hg",
-  })
-}
-
-function getTextNodeTopInset(
-  textNode: Pick<Konva.Text, "fontSize" | "lineHeight">,
-  measurer: Pick<Konva.Text, "measureSize">
-) {
-  const metrics = measurer.measureSize("Hg")
-  const lineHeight = textNode.fontSize() * textNode.lineHeight()
-  const ascent =
-    metrics.fontBoundingBoxAscent ?? metrics.actualBoundingBoxAscent
-  const descent =
-    metrics.fontBoundingBoxDescent ?? metrics.actualBoundingBoxDescent
-  const baseline = (ascent - descent) / 2 + lineHeight / 2
-
-  return Math.max(0, baseline - metrics.actualBoundingBoxAscent)
-}
-
-function getTextStyleTopInset(style: TextStyle) {
-  const measurer = createTextMeasurer(style)
-
-  return getTextNodeTopInset(measurer, measurer)
-}
-
-function createBoxTextNode(box: EditorBox, label = box.label) {
-  const rect = getBoxRect(box)
-
-  return new Konva.Text({
-    align: box.align ?? "center",
-    fill: box.color ?? "rgba(0,0,0,1)",
-    fontFamily: fontFamilyMap[box.fontFamily ?? "gothic"],
-    fontSize: box.fontSize,
-    fontStyle: box.bold ? "bold" : "normal",
-    lineHeight: 1.4,
-    text: label,
-    width: box.wrapText ? rect.width : undefined,
-    wrap: box.wrapText ? "char" : "none",
-  })
 }
 
 export default function Page({
@@ -234,24 +122,9 @@ export default function Page({
     }
   }, [activeProjectId])
 
-  useEffect(() => {
-    if (!imageSize) {
-      return
-    }
-
-    setBoxes((current) => {
-      const next = current.map((box) => resizeTextBox(box, box.label))
-
-      return next.some((box, index) => box !== current[index]) ? next : current
-    })
-  }, [imageSize, setBoxes])
-
   const imageViewportSize = getImageViewportSize(containerSize)
 
-  if (
-    !imageSize ||
-    imageElement?.projectId !== activeProjectId
-  ) {
+  if (!imageSize || imageElement?.projectId !== activeProjectId) {
     const skeletonScale = Math.min(
       imageViewportSize.width / 4,
       imageViewportSize.height / 3
@@ -286,8 +159,7 @@ export default function Page({
     key: stageTransformKey,
     scale: fitScale,
     x:
-      defaultViewportPadding +
-      (imageViewportSize.width - width * fitScale) / 2,
+      defaultViewportPadding + (imageViewportSize.width - width * fitScale) / 2,
     y:
       defaultViewportPadding +
       (imageViewportSize.height - height * fitScale) / 2,
@@ -328,18 +200,6 @@ export default function Page({
       x: pointer.x - mousePointTo.x * scale,
       y: pointer.y - mousePointTo.y * scale,
     })
-  }
-
-  function resizeTextBox(box: EditorBox, label: string) {
-    const nextBox = { ...box, label }
-    const textNode = createBoxTextNode(nextBox, label)
-
-    return resizeBboxHeight(
-      nextBox.wrapText
-        ? nextBox
-        : resizeBboxWidth(nextBox, textNode.getTextWidth()),
-      textNode.height()
-    )
   }
 
   function updateLabel(index: number, label: string) {
