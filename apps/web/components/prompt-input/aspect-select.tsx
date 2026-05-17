@@ -9,10 +9,10 @@ import {
 } from "../ui/dropdown-menu"
 
 const aspects = [
-  { label: "16:9", width: 16, height: 9 },
-  { label: "4:3", width: 16, height: 12 },
-  { label: "3:4", width: 12, height: 16 },
-  { label: "1:1", width: 12, height: 12 },
+  { label: "16:9", value: "16:9", width: 16, height: 9 },
+  { label: "4:3", value: "4:3", width: 16, height: 12 },
+  { label: "3:4", value: "3:4", width: 12, height: 16 },
+  { label: "1:1", value: "1:1", width: 12, height: 12 },
 ] as const
 
 export function AspectSelect({
@@ -22,21 +22,28 @@ export function AspectSelect({
   selectedAspect: EditorAspectRatio
   onAspectChange: (aspect: EditorAspectRatio) => void
 }) {
+  const selectedAspectLabel =
+    aspects.find((aspect) => aspect.value === selectedAspect)?.label ?? "自動"
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
           <Button variant="outline" size="sm">
             <ProportionsIcon />
-            {selectedAspect}
+            {selectedAspectLabel}
           </Button>
         }
       />
       <DropdownMenuContent>
+        <DropdownMenuItem onClick={() => onAspectChange("auto")}>
+          <ProportionsIcon />
+          自動
+        </DropdownMenuItem>
         {aspects.map((aspect) => (
           <DropdownMenuItem
             key={aspect.label}
-            onClick={() => onAspectChange(aspect.label)}
+            onClick={() => onAspectChange(aspect.value)}
           >
             <div className="mr-0.5 flex size-4 items-center justify-center">
               <div
