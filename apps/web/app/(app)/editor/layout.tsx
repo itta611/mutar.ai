@@ -1,4 +1,5 @@
 import { ProjectSwitcher } from "@/components/project-switcher"
+import { EditorSync } from "./sync"
 
 export default function EditorLayout({
   children,
@@ -7,6 +8,7 @@ export default function EditorLayout({
 }>) {
   return (
     <div className="relative h-full">
+      <EditorSync />
       {children}
       <ProjectSwitcher />
     </div>

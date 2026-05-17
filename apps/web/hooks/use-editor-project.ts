@@ -16,8 +16,11 @@ type EditorProject = {
   analysis: { boxes: EditorBox[]; summary: string }
   height: number
   id: string
-  status: "generating" | "analyzing" | "erasing" | "ready" | "error"
+  status: "ready"
   width: number
+} | {
+  id: string
+  status: "generating" | "analyzing" | "erasing" | "error"
 }
 
 async function getProject(projectId: string) {

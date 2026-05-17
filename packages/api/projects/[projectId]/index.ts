@@ -26,6 +26,16 @@ export const projectRoutes = new Hono()
       return c.json({ message: "Not found" }, 404)
     }
 
+    if (project.status !== "ready") {
+      return c.json(
+        {
+          id: project.id,
+          status: project.status,
+        },
+        200
+      )
+    }
+
     return c.json(project, 200)
   })
   .delete("/", zValidator("param", projectParamsSchema), async (c) => {

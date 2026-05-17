@@ -6,7 +6,7 @@ import Image from "next/image"
 import { useParams } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
-import { editorImageSizeAtom, editorProjectIdAtom } from "@/atom/generate"
+import { editorProjectIdAtom } from "@/atom/generate"
 import { listProjects, projectKeys } from "@/components/generated-images"
 import {
   editorProjectQuery,
@@ -27,7 +27,6 @@ export function ProjectSwitcher() {
     projectId: string
   }>()
   const currentProjectId = useAtomValue(editorProjectIdAtom) ?? routeProjectId
-  const imageSize = useAtomValue(editorImageSizeAtom)
   const fetchProject = useEditorProject()
   const queryClient = useQueryClient()
   const [selectedProjectId, setSelectedProjectId] = useState(currentProjectId)
@@ -35,10 +34,6 @@ export function ProjectSwitcher() {
   const { data: projects = [] } = useQuery({
     queryKey: projectKeys.list,
     queryFn: listProjects,
-    refetchInterval: (query) =>
-      query.state.data?.some((project) => project.status !== "ready")
-        ? 5000
-        : false,
   })
 
   useEffect(() => {
@@ -49,6 +44,7 @@ export function ProjectSwitcher() {
     })
   }, [selectedProjectId, projects])
 
+  // プロジェクトの前後３つをprefetchする
   useEffect(() => {
     const currentIndex = projects.findIndex(
       (project) => project.id === selectedProjectId
@@ -66,18 +62,6 @@ export function ProjectSwitcher() {
         preloadProjectImage(project.id)
       })
   }, [projects, queryClient, selectedProjectId])
-
-  useEffect(() => {
-    const currentProject = projects.find(
-      (project) => project.id === currentProjectId
-    )
-
-    if (!currentProject || currentProject.status !== "ready" || imageSize) {
-      return
-    }
-
-    fetchProject(currentProject.id, { force: true })
-  }, [currentProjectId, fetchProject, imageSize, projects])
 
   useEffect(() => {
     const handlePopState = () => {
