@@ -161,9 +161,9 @@ function createBoxTextNode(box: EditorBox, label = box.label) {
 export default function Page({
   params,
 }: {
-  params: Promise<{ projectName: string }>
+  params: Promise<{ projectId: string }>
 }) {
-  const { projectName: projectId } = use(params)
+  const { projectId } = use(params)
   const currentProjectId = useAtomValue(editorProjectIdAtom)
   const status = useAtomValue(editorProjectStatusAtom)
   const imageSize = useAtomValue(editorImageSizeAtom)

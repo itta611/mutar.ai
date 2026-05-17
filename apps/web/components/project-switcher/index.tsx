@@ -8,8 +8,8 @@ import { useEffect, useRef, useState } from "react"
 import { listProjects, projectKeys } from "@/components/generated-images"
 
 export function ProjectSwitcher() {
-  const { projectName: currentProjectId } = useParams<{
-    projectName: string
+  const { projectId: currentProjectId } = useParams<{
+    projectId: string
   }>()
   const router = useRouter()
   const [selectedProjectId, setSelectedProjectId] = useState(currentProjectId)
