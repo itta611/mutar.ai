@@ -14,19 +14,33 @@ import {
 import { Logo } from "@/components/logo"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { authClient } from "@/lib/auth-client"
-import { ChevronDown } from "lucide-react"
+import {
+  ChevronDown,
+  LogOutIcon,
+  Monitor,
+  MonitorIcon,
+  Moon,
+  MoonIcon,
+  PaletteIcon,
+  Sun,
+  SunIcon,
+} from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useTheme } from "next-themes"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
 
 export function AppSidebar() {
   const router = useRouter()
+  const { setTheme, theme } = useTheme()
   const session = authClient.useSession()
   const user = session.data?.user
 
@@ -87,14 +101,32 @@ export function AppSidebar() {
                     <ChevronDown className="text-zinc-500" />
                   </SidebarMenuButton>
                 }
-              ></DropdownMenuTrigger>
+              />
               <DropdownMenuContent>
+                <div className="text-muted-foreground relative flex cursor-default items-center gap-2 pl-2 text-sm h-9">
+                  <PaletteIcon size={16} />
+                  <div className="grow">テーマ</div>
+                  <Tabs onValueChange={(value) => setTheme(value)}>
+                    <TabsList>
+                      <TabsTrigger value="system">
+                        <MonitorIcon />
+                      </TabsTrigger>
+                      <TabsTrigger value="dark">
+                        <MoonIcon />
+                      </TabsTrigger>
+                      <TabsTrigger value="light">
+                        <SunIcon />
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
                 <DropdownMenuItem
                   onClick={async () => {
                     await authClient.signOut()
                     router.push("/")
                   }}
                 >
+                  <LogOutIcon size={16} />
                   ログアウト
                 </DropdownMenuItem>
               </DropdownMenuContent>
