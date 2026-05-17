@@ -7,9 +7,9 @@ import {
   Group,
   Image as KonvaImage,
   Layer,
-  Rect,
   Stage,
   Text,
+  Transformer,
 } from "react-konva"
 import { fontFamilyMap } from "@hengen/svg-renderer"
 
@@ -18,13 +18,16 @@ import {
   editorBoxesAtom,
   editorImageSizeAtom,
   editorProjectIdAtom,
+  type EditorBox,
 } from "@/atom/generate"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   createBoxTextNode,
   getBoxRect,
   getTextStyleTopInset,
+  moveTextBox,
   resizeTextBox,
+  resizeWrappedTextBox,
 } from "@/hooks/editor-bbox"
 import { useEditorProject } from "@/hooks/use-editor-project"
 
@@ -71,6 +74,8 @@ export default function Page({
   const fetchProject = useEditorProject()
   const containerRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<Konva.Stage>(null)
+  const textRefs = useRef(new Map<number, Konva.Text>())
+  const transformerRef = useRef<Konva.Transformer>(null)
   const [containerSize, setContainerSize] = useState<Size>({
     height: 0,
     width: 0,
@@ -80,7 +85,7 @@ export default function Page({
     projectId: string
   } | null>(null)
   const [editingText, setEditingText] = useState<EditingText | null>(null)
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [stageTransform, setStageTransform] = useState<StageTransform | null>(
     null
   )
@@ -121,6 +126,21 @@ export default function Page({
       image.onload = null
     }
   }, [activeProjectId])
+
+  useEffect(() => {
+    const transformer = transformerRef.current
+    const textNode =
+      selectedIndex === null || editingText?.index === selectedIndex
+        ? null
+        : textRefs.current.get(selectedIndex)
+
+    if (!transformer) {
+      return
+    }
+
+    transformer.nodes(textNode ? [textNode] : [])
+    transformer.getLayer()?.batchDraw()
+  }, [boxes, editingText?.index, selectedIndex])
 
   const imageViewportSize = getImageViewportSize(containerSize)
 
@@ -202,6 +222,18 @@ export default function Page({
     })
   }
 
+  function updateStageDrag(event: Konva.KonvaEventObject<DragEvent>) {
+    if (event.target !== event.currentTarget) {
+      return
+    }
+
+    setStageTransform({
+      ...activeStageTransform,
+      x: event.target.x(),
+      y: event.target.y(),
+    })
+  }
+
   function updateLabel(index: number, label: string) {
     setBoxes((current) =>
       current.map((box, boxIndex) =>
@@ -219,25 +251,96 @@ export default function Page({
     )
   }
 
+  function selectText(event: Konva.KonvaEventObject<Event>, index: number) {
+    event.cancelBubble = true
+    setSelectedIndex(index)
+  }
+
+  function startEditing(event: Konva.KonvaEventObject<Event>, index: number) {
+    event.cancelBubble = true
+    setSelectedIndex(index)
+    setEditingText({ index })
+  }
+
+  function handleTextDragEnd(
+    event: Konva.KonvaEventObject<DragEvent>,
+    index: number,
+    textX: number
+  ) {
+    event.cancelBubble = true
+
+    const node = event.target as Konva.Text
+    const leftOffset = node.x() - textX
+    const topOffset = node.y()
+
+    setBoxes((current) =>
+      current.map((box, boxIndex) => {
+        if (boxIndex !== index) {
+          return box
+        }
+
+        const rect = getBoxRect(box)
+
+        return moveTextBox(box, rect.left + leftOffset, rect.top + topOffset)
+      })
+    )
+  }
+
+  function handleTextTransform(
+    event: Konva.KonvaEventObject<Event>,
+    box: EditorBox,
+    textX: number
+  ) {
+    event.cancelBubble = true
+
+    const node = event.target as Konva.Text
+    const width = Math.max(1, node.width() * node.scaleX())
+    const leftOffset = node.x() - textX
+    const nextBox = resizeWrappedTextBox(
+      box,
+      getBoxRect(box).left + leftOffset,
+      width
+    )
+
+    node.scaleX(1)
+    node.scaleY(1)
+    node.width(width)
+    node.height(getBoxRect(nextBox).height)
+    node.wrap("char")
+    transformerRef.current?.forceUpdate()
+  }
+
+  function handleTextTransformEnd(
+    event: Konva.KonvaEventObject<Event>,
+    index: number,
+    textX: number
+  ) {
+    event.cancelBubble = true
+
+    const node = event.target as Konva.Text
+    const width = Math.max(1, node.width() * node.scaleX())
+    const leftOffset = node.x() - textX
+
+    setBoxes((current) =>
+      current.map((currentBox, boxIndex) => {
+        if (boxIndex !== index) {
+          return currentBox
+        }
+
+        const rect = getBoxRect(currentBox)
+
+        return resizeWrappedTextBox(currentBox, rect.left + leftOffset, width)
+      })
+    )
+  }
+
   return (
     <div ref={containerRef} className="relative min-h-full overflow-hidden">
       <Stage
         draggable
         height={containerSize.height}
-        onDragEnd={(event) =>
-          setStageTransform({
-            ...activeStageTransform,
-            x: event.target.x(),
-            y: event.target.y(),
-          })
-        }
-        onDragMove={(event) =>
-          setStageTransform({
-            ...activeStageTransform,
-            x: event.target.x(),
-            y: event.target.y(),
-          })
-        }
+        onDragEnd={updateStageDrag}
+        onDragMove={updateStageDrag}
         onWheel={handleWheel}
         ref={stageRef}
         scaleX={activeStageTransform.scale}
@@ -270,42 +373,40 @@ export default function Page({
               fontFamily,
               fontSize: box.fontSize,
             })
-            const isActive =
-              hoveredIndex === index || editingText?.index === index
-
             return (
               <Group key={index} x={rect.left} y={rect.top - topInset}>
-                {isActive ? (
-                  <Rect
-                    height={rect.height + 2}
-                    listening={false}
-                    stroke="#6366f1"
-                    strokeWidth={2}
-                    width={textWidth + 2}
-                    x={textX - 1}
-                    y={-1}
-                  />
-                ) : null}
                 <Text
                   align={box.align ?? "center"}
+                  draggable={editingText?.index !== index}
                   fill={box.color ?? "rgba(0,0,0,1)"}
                   fontFamily={fontFamily}
                   fontSize={box.fontSize}
                   fontStyle={box.bold ? "bold" : "normal"}
                   height={rect.height}
                   lineHeight={1.4}
-                  onClick={() =>
-                    setEditingText({
-                      index,
-                    })
+                  onClick={(event) => selectText(event, index)}
+                  onDblClick={(event) => startEditing(event, index)}
+                  onDblTap={(event) => startEditing(event, index)}
+                  onDragEnd={(event) => handleTextDragEnd(event, index, textX)}
+                  onDragMove={(event) => {
+                    event.cancelBubble = true
+                    transformerRef.current?.forceUpdate()
+                  }}
+                  onDragStart={(event) => selectText(event, index)}
+                  onTap={(event) => selectText(event, index)}
+                  onTransform={(event) =>
+                    handleTextTransform(event, box, textX)
                   }
-                  onTap={() =>
-                    setEditingText({
-                      index,
-                    })
+                  onTransformEnd={(event) =>
+                    handleTextTransformEnd(event, index, textX)
                   }
-                  onMouseEnter={() => setHoveredIndex(index)}
-                  onMouseLeave={() => setHoveredIndex(null)}
+                  ref={(node) => {
+                    if (node) {
+                      textRefs.current.set(index, node)
+                    } else {
+                      textRefs.current.delete(index)
+                    }
+                  }}
                   text={box.label}
                   visible={editingText?.index !== index}
                   width={textWidth}
@@ -323,6 +424,16 @@ export default function Page({
               </Group>
             )
           })}
+          <Transformer
+            anchorFill="#6366f1"
+            anchorStroke="#6366f1"
+            borderStroke="#6366f1"
+            borderStrokeWidth={1.5}
+            enabledAnchors={["middle-left", "middle-right"]}
+            flipEnabled={false}
+            ref={transformerRef}
+            rotateEnabled={false}
+          />
         </Layer>
       </Stage>
     </div>

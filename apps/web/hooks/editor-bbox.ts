@@ -25,6 +25,32 @@ export function getBoxRect(box: EditorBox) {
   }
 }
 
+function updateBboxRect(
+  box: EditorBox,
+  rect: { height: number; left: number; top: number; width: number }
+): EditorBox {
+  const current = getBoxRect(box)
+
+  return {
+    ...box,
+    bbox: box.bbox.map((point) => ({
+      ...point,
+      x:
+        rect.left +
+        (current.width > 0
+          ? (((point.x ?? current.left) - current.left) / current.width) *
+            rect.width
+          : 0),
+      y:
+        rect.top +
+        (current.height > 0
+          ? (((point.y ?? current.top) - current.top) / current.height) *
+            rect.height
+          : 0),
+    })),
+  }
+}
+
 function resizeBboxWidth(box: EditorBox, width: number): EditorBox {
   const rect = getBoxRect(box)
   const nextWidth = Math.max(1, Math.ceil(width))
@@ -41,17 +67,7 @@ function resizeBboxWidth(box: EditorBox, width: number): EditorBox {
         ? rect.left + rect.width - nextWidth
         : rect.left + rect.width / 2 - nextWidth / 2
 
-  return {
-    ...box,
-    bbox: box.bbox.map((point) => ({
-      ...point,
-      x:
-        nextLeft +
-        (rect.width > 0
-          ? (((point.x ?? rect.left) - rect.left) / rect.width) * nextWidth
-          : 0),
-    })),
-  }
+  return updateBboxRect(box, { ...rect, left: nextLeft, width: nextWidth })
 }
 
 function resizeBboxHeight(box: EditorBox, height: number): EditorBox {
@@ -62,17 +78,7 @@ function resizeBboxHeight(box: EditorBox, height: number): EditorBox {
     return box
   }
 
-  return {
-    ...box,
-    bbox: box.bbox.map((point) => ({
-      ...point,
-      y:
-        rect.top +
-        (rect.height > 0
-          ? (((point.y ?? rect.top) - rect.top) / rect.height) * nextHeight
-          : 0),
-    })),
-  }
+  return updateBboxRect(box, { ...rect, height: nextHeight })
 }
 
 function createTextMeasurer(style: TextStyle) {
@@ -132,4 +138,28 @@ export function resizeTextBox(box: EditorBox, label: string) {
       : resizeBboxWidth(nextBox, textNode.getTextWidth()),
     textNode.height()
   )
+}
+
+export function moveTextBox(box: EditorBox, left: number, top: number) {
+  const rect = getBoxRect(box)
+
+  return updateBboxRect(box, { ...rect, left, top })
+}
+
+export function resizeWrappedTextBox(
+  box: EditorBox,
+  left: number,
+  width: number
+) {
+  const rect = getBoxRect(box)
+  const nextBox = updateBboxRect(
+    { ...box, wrapText: true },
+    {
+      ...rect,
+      left,
+      width: Math.max(1, Math.ceil(width)),
+    }
+  )
+
+  return resizeBboxHeight(nextBox, createBoxTextNode(nextBox).height())
 }
