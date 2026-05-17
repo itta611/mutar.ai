@@ -2,6 +2,7 @@
 
 import { useSetAtom } from "jotai"
 import { useCallback } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 
 import {
   type EditorBox,
@@ -31,7 +32,16 @@ async function getProject(projectId: string) {
   }
 }
 
+export function editorProjectQuery(projectId: string) {
+  return {
+    queryKey: ["editor-project", projectId] as const,
+    queryFn: () => getProject(projectId),
+    staleTime: 60 * 1000,
+  }
+}
+
 export function useEditorProject() {
+  const queryClient = useQueryClient()
   const setEditorProjectStatus = useSetAtom(editorProjectStatusAtom)
   const setBoxes = useSetAtom(editorBoxesAtom)
   const setImageSize = useSetAtom(editorImageSizeAtom)
@@ -42,7 +52,9 @@ export function useEditorProject() {
       setProjectId(projectId)
 
       try {
-        const project = await getProject(projectId)
+        const project = await queryClient.ensureQueryData(
+          editorProjectQuery(projectId)
+        )
 
         setImageSize([project.width, project.height])
         setBoxes(project.analysis.boxes)
@@ -51,6 +63,6 @@ export function useEditorProject() {
         setEditorProjectStatus("error")
       }
     },
-    [setBoxes, setEditorProjectStatus, setImageSize, setProjectId]
+    [queryClient, setBoxes, setEditorProjectStatus, setImageSize, setProjectId]
   )
 }

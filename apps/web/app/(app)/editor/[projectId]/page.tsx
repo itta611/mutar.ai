@@ -165,6 +165,7 @@ export default function Page({
 }) {
   const { projectId } = use(params)
   const currentProjectId = useAtomValue(editorProjectIdAtom)
+  const activeProjectId = currentProjectId ?? projectId
   const status = useAtomValue(editorProjectStatusAtom)
   const imageSize = useAtomValue(editorImageSizeAtom)
   const boxes = useAtomValue(editorBoxesAtom)
@@ -186,10 +187,10 @@ export default function Page({
   )
 
   useEffect(() => {
-    if (currentProjectId !== projectId || status === null) {
+    if (currentProjectId !== activeProjectId || status === null) {
       fetchProject(projectId)
     }
-  }, [currentProjectId, fetchProject, projectId, status])
+  }, [activeProjectId, currentProjectId, fetchProject, projectId, status])
 
   useEffect(() => {
     if (status === "ready" || status === "error") {
@@ -197,11 +198,11 @@ export default function Page({
     }
 
     const id = window.setInterval(() => {
-      fetchProject(projectId)
+      fetchProject(activeProjectId)
     }, 5000)
 
     return () => window.clearInterval(id)
-  }, [fetchProject, projectId, status])
+  }, [activeProjectId, fetchProject, status])
 
   useLayoutEffect(() => {
     const container = containerRef.current
@@ -226,13 +227,13 @@ export default function Page({
 
   useEffect(() => {
     const image = new Image()
-    image.src = `/api/projects/${projectId}/image`
+    image.src = `/api/projects/${activeProjectId}/image`
     image.onload = () => setImageElement(image)
 
     return () => {
       image.onload = null
     }
-  }, [projectId])
+  }, [activeProjectId])
 
   useEffect(() => {
     if (status !== "ready") {
@@ -282,7 +283,7 @@ export default function Page({
     imageViewportWidth / width,
     imageViewportHeight / height
   )
-  const stageTransformKey = `${projectId}:${width}:${height}:${containerSize.width}:${containerSize.height}`
+  const stageTransformKey = `${activeProjectId}:${width}:${height}:${containerSize.width}:${containerSize.height}`
   const defaultStageTransform = {
     key: stageTransformKey,
     scale: fitScale,
