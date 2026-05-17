@@ -13,6 +13,7 @@ import {
   useEditorProject,
 } from "@/hooks/use-editor-project"
 import { Loader2Icon } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 function preloadProjectImage(projectId: string) {
   new window.Image().src = `/api/projects/${projectId}/image`
@@ -114,7 +115,12 @@ export function ProjectSwitcher() {
               />
             ) : (
               <Loader2Icon
-                className="m-auto animate-spin text-muted-foreground"
+                className={cn(
+                  "m-auto animate-spin",
+                  project.id === selectedProjectId
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                )}
                 size={20}
               />
             )}
