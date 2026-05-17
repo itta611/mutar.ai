@@ -21,8 +21,7 @@ import {
   editorProjectIdAtom,
   editorProjectStatusAtom,
 } from "@/atom/generate"
-import LogoIcon from "@/components/logo-icon"
-import ShimmerText from "@/components/ui/shimmer-text"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useEditorProject } from "@/hooks/use-editor-project"
 
 type StageTransform = {
@@ -45,6 +44,19 @@ type TextStyle = {
 
 type EditingText = {
   index: number
+}
+
+const defaultViewportPadding = 32
+const projectSwitcherHeight = 96
+
+function getImageViewportSize(containerSize: Size) {
+  return {
+    width: Math.max(1, containerSize.width - defaultViewportPadding * 2),
+    height: Math.max(
+      1,
+      containerSize.height - projectSwitcherHeight - defaultViewportPadding * 2
+    ),
+  }
 }
 
 function getBoxRect(box: EditorBox) {
@@ -177,9 +189,10 @@ export default function Page({
     height: 0,
     width: 0,
   })
-  const [imageElement, setImageElement] = useState<HTMLImageElement | null>(
-    null
-  )
+  const [imageElement, setImageElement] = useState<{
+    image: HTMLImageElement
+    projectId: string
+  } | null>(null)
   const [editingText, setEditingText] = useState<EditingText | null>(null)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [stageTransform, setStageTransform] = useState<StageTransform | null>(
@@ -228,7 +241,7 @@ export default function Page({
   useEffect(() => {
     const image = new Image()
     image.src = `/api/projects/${activeProjectId}/image`
-    image.onload = () => setImageElement(image)
+    image.onload = () => setImageElement({ image, projectId: activeProjectId })
 
     return () => {
       image.onload = null
@@ -247,48 +260,52 @@ export default function Page({
     })
   }, [setBoxes, status])
 
-  if (status !== "ready" || !imageSize) {
-    const loadingText = {
-      generating: "画像を生成中... (1/3)",
-      analyzing: "画像を分析中... (2/3)",
-      erasing: "画像を仕上げ中... (2/3)",
-      none: "読み込み中...",
-      ready: "読み込んでいます...",
-      error: "問題が発生しました。",
-    }[status]
+  const imageViewportSize = getImageViewportSize(containerSize)
+
+  if (
+    status !== "ready" ||
+    !imageSize ||
+    imageElement?.projectId !== activeProjectId
+  ) {
+    const skeletonScale = Math.min(
+      imageViewportSize.width / 4,
+      imageViewportSize.height / 3
+    )
 
     return (
-      <div
-        className="min-h-full flex flex-col items-center justify-center"
-        ref={containerRef}
-      >
-        <LogoIcon className="mb-4 h-12 w-12 animate-[spin_2.5s_linear_infinite] fill-primary dark:fill-zinc-100" />
-        <ShimmerText variant="zinc">{loadingText}</ShimmerText>
+      <div className="relative min-h-full" ref={containerRef}>
+        <Skeleton
+          className="absolute"
+          style={{
+            height: skeletonScale * 3,
+            left:
+              defaultViewportPadding +
+              (imageViewportSize.width - skeletonScale * 4) / 2,
+            top:
+              defaultViewportPadding +
+              (imageViewportSize.height - skeletonScale * 3) / 2,
+            width: skeletonScale * 4,
+          }}
+        />
       </div>
     )
   }
 
   const [width, height] = imageSize
-  const defaultViewportPadding = 32
-  const projectSwitcherHeight = 96
-  const imageViewportWidth = Math.max(
-    1,
-    containerSize.width - defaultViewportPadding * 2
-  )
-  const imageViewportHeight = Math.max(
-    1,
-    containerSize.height - projectSwitcherHeight - defaultViewportPadding * 2
-  )
   const fitScale = Math.min(
-    imageViewportWidth / width,
-    imageViewportHeight / height
+    imageViewportSize.width / width,
+    imageViewportSize.height / height
   )
   const stageTransformKey = `${activeProjectId}:${width}:${height}:${containerSize.width}:${containerSize.height}`
   const defaultStageTransform = {
     key: stageTransformKey,
     scale: fitScale,
-    x: defaultViewportPadding + (imageViewportWidth - width * fitScale) / 2,
-    y: defaultViewportPadding + (imageViewportHeight - height * fitScale) / 2,
+    x:
+      defaultViewportPadding +
+      (imageViewportSize.width - width * fitScale) / 2,
+    y:
+      defaultViewportPadding +
+      (imageViewportSize.height - height * fitScale) / 2,
   }
   const activeStageTransform =
     stageTransform?.key === stageTransformKey
@@ -387,7 +404,7 @@ export default function Page({
         <Layer>
           <KonvaImage
             height={height}
-            image={imageElement ?? undefined}
+            image={imageElement.image}
             width={width}
           />
           {boxes.map((box, index) => {
