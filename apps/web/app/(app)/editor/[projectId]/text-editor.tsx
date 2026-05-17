@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useRef } from "react"
 import { Html } from "react-konva-utils"
 
 export function TextEditor({
@@ -29,6 +30,24 @@ export function TextEditor({
   wrapText: boolean
   x: number
 }) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    const closeOnOutsidePointerDown = (event: PointerEvent) => {
+      const textarea = textareaRef.current
+
+      if (textarea && event.target !== textarea) {
+        onClose(textarea.value)
+      }
+    }
+
+    document.addEventListener("pointerdown", closeOnOutsidePointerDown, true)
+
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsidePointerDown, true)
+    }
+  }, [onClose])
+
   return (
     <Html groupProps={{ x }}>
       <textarea
@@ -42,6 +61,7 @@ export function TextEditor({
             onClose(event.currentTarget.value)
           }
         }}
+        ref={textareaRef}
         style={{
           background: "none",
           border: "none",
