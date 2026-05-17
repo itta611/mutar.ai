@@ -19,7 +19,6 @@ import {
   editorBoxesAtom,
   editorImageSizeAtom,
   editorProjectIdAtom,
-  editorProjectStatusAtom,
 } from "@/atom/generate"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useEditorProject } from "@/hooks/use-editor-project"
@@ -178,7 +177,6 @@ export default function Page({
   const { projectId } = use(params)
   const currentProjectId = useAtomValue(editorProjectIdAtom)
   const activeProjectId = currentProjectId ?? projectId
-  const status = useAtomValue(editorProjectStatusAtom)
   const imageSize = useAtomValue(editorImageSizeAtom)
   const boxes = useAtomValue(editorBoxesAtom)
   const setBoxes = useSetAtom(editorBoxesAtom)
@@ -200,22 +198,10 @@ export default function Page({
   )
 
   useEffect(() => {
-    if (currentProjectId !== activeProjectId || status === null) {
+    if (currentProjectId !== activeProjectId) {
       fetchProject(projectId)
     }
-  }, [activeProjectId, currentProjectId, fetchProject, projectId, status])
-
-  useEffect(() => {
-    if (status === "ready" || status === "error") {
-      return
-    }
-
-    const id = window.setInterval(() => {
-      fetchProject(activeProjectId)
-    }, 5000)
-
-    return () => window.clearInterval(id)
-  }, [activeProjectId, fetchProject, status])
+  }, [activeProjectId, currentProjectId, fetchProject, projectId])
 
   useLayoutEffect(() => {
     const container = containerRef.current
@@ -249,7 +235,7 @@ export default function Page({
   }, [activeProjectId])
 
   useEffect(() => {
-    if (status !== "ready") {
+    if (!imageSize) {
       return
     }
 
@@ -258,12 +244,11 @@ export default function Page({
 
       return next.some((box, index) => box !== current[index]) ? next : current
     })
-  }, [setBoxes, status])
+  }, [imageSize, setBoxes])
 
   const imageViewportSize = getImageViewportSize(containerSize)
 
   if (
-    status !== "ready" ||
     !imageSize ||
     imageElement?.projectId !== activeProjectId
   ) {

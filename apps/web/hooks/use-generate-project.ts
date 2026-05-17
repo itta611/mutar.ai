@@ -6,7 +6,6 @@ import { useSetAtom } from "jotai"
 import {
   editorImageSizeAtom,
   editorProjectIdAtom,
-  editorProjectStatusAtom,
 } from "@/atom/generate"
 import { apiClient } from "@/lib/api-client"
 
@@ -25,7 +24,6 @@ async function createProject(input: GenerateProjectInput) {
 }
 
 export function useGenerateProject() {
-  const setEditorProjectStatus = useSetAtom(editorProjectStatusAtom)
   const setImageSize = useSetAtom(editorImageSizeAtom)
   const setProjectId = useSetAtom(editorProjectIdAtom)
   const createProjectMutation = useMutation({ mutationFn: createProject })
@@ -35,7 +33,6 @@ export function useGenerateProject() {
 
     setProjectId(data.projectId)
     setImageSize(null)
-    setEditorProjectStatus("generating")
 
     return data.projectId
   }

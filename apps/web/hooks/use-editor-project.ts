@@ -6,13 +6,19 @@ import { useQueryClient } from "@tanstack/react-query"
 
 import {
   type EditorBox,
-  type EditorProjectStatus,
   editorBoxesAtom,
   editorImageSizeAtom,
   editorProjectIdAtom,
-  editorProjectStatusAtom,
 } from "@/atom/generate"
 import { apiClient } from "@/lib/api-client"
+
+type EditorProject = {
+  analysis: { boxes: EditorBox[]; summary: string }
+  height: number
+  id: string
+  status: "generating" | "analyzing" | "erasing" | "ready" | "error"
+  width: number
+}
 
 async function getProject(projectId: string) {
   const response = await apiClient.projects[":projectId"].$get({
@@ -23,13 +29,7 @@ async function getProject(projectId: string) {
     throw new Error("request_failed")
   }
 
-  return (await response.json()) as {
-    analysis: { boxes: EditorBox[]; summary: string }
-    height: number
-    id: string
-    status: EditorProjectStatus
-    width: number
-  }
+  return (await response.json()) as EditorProject
 }
 
 export function editorProjectQuery(projectId: string) {
@@ -42,27 +42,35 @@ export function editorProjectQuery(projectId: string) {
 
 export function useEditorProject() {
   const queryClient = useQueryClient()
-  const setEditorProjectStatus = useSetAtom(editorProjectStatusAtom)
   const setBoxes = useSetAtom(editorBoxesAtom)
   const setImageSize = useSetAtom(editorImageSizeAtom)
   const setProjectId = useSetAtom(editorProjectIdAtom)
 
   return useCallback(
-    async (projectId: string) => {
+    async (projectId: string, options?: { force?: boolean }) => {
       setProjectId(projectId)
 
       try {
-        const project = await queryClient.ensureQueryData(
-          editorProjectQuery(projectId)
-        )
+        const query = editorProjectQuery(projectId)
+        const cached = queryClient.getQueryData<EditorProject>(query.queryKey)
+        const project =
+          cached?.status === "ready" && !options?.force
+            ? cached
+            : await queryClient.fetchQuery({ ...query, staleTime: 0 })
+
+        if (project.status !== "ready") {
+          setImageSize(null)
+          setBoxes([])
+          return
+        }
 
         setImageSize([project.width, project.height])
         setBoxes(project.analysis.boxes)
-        setEditorProjectStatus(project.status)
       } catch {
-        setEditorProjectStatus("error")
+        setImageSize(null)
+        setBoxes([])
       }
     },
-    [queryClient, setBoxes, setEditorProjectStatus, setImageSize, setProjectId]
+    [queryClient, setBoxes, setImageSize, setProjectId]
   )
 }

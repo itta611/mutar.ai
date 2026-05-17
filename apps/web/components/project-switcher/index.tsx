@@ -6,12 +6,13 @@ import Image from "next/image"
 import { useParams } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 
-import { editorProjectIdAtom } from "@/atom/generate"
+import { editorImageSizeAtom, editorProjectIdAtom } from "@/atom/generate"
 import { listProjects, projectKeys } from "@/components/generated-images"
 import {
   editorProjectQuery,
   useEditorProject,
 } from "@/hooks/use-editor-project"
+import { Loader2Icon } from "lucide-react"
 
 function preloadProjectImage(projectId: string) {
   new window.Image().src = `/api/projects/${projectId}/image`
@@ -26,6 +27,7 @@ export function ProjectSwitcher() {
     projectId: string
   }>()
   const currentProjectId = useAtomValue(editorProjectIdAtom) ?? routeProjectId
+  const imageSize = useAtomValue(editorImageSizeAtom)
   const fetchProject = useEditorProject()
   const queryClient = useQueryClient()
   const [selectedProjectId, setSelectedProjectId] = useState(currentProjectId)
@@ -33,6 +35,10 @@ export function ProjectSwitcher() {
   const { data: projects = [] } = useQuery({
     queryKey: projectKeys.list,
     queryFn: listProjects,
+    refetchInterval: (query) =>
+      query.state.data?.some((project) => project.status !== "ready")
+        ? 5000
+        : false,
   })
 
   useEffect(() => {
@@ -62,6 +68,18 @@ export function ProjectSwitcher() {
   }, [projects, queryClient, selectedProjectId])
 
   useEffect(() => {
+    const currentProject = projects.find(
+      (project) => project.id === currentProjectId
+    )
+
+    if (!currentProject || currentProject.status !== "ready" || imageSize) {
+      return
+    }
+
+    fetchProject(currentProject.id, { force: true })
+  }, [currentProjectId, fetchProject, imageSize, projects])
+
+  useEffect(() => {
     const handlePopState = () => {
       const projectId = getProjectIdFromPathname()
 
@@ -84,7 +102,7 @@ export function ProjectSwitcher() {
         {projects.map((project) => (
           <button
             aria-current={project.id === selectedProjectId ? "page" : undefined}
-            className="cursor-pointer aspect-square size-16 shrink-0 overflow-hidden rounded-lg bg-muted border-1 -border-offset-1 border-black/10 aria-[current=page]:ring-2 aria-[current=page]:ring-offset-2 aria-[current=page]:ring-indigo-600"
+            className="cursor-pointer aspect-square size-16 shrink-0 overflow-hidden rounded-lg bg-muted border border-black/10 ring-offset-background aria-[current=page]:ring-2 aria-[current=page]:ring-offset-2 aria-[current=page]:ring-primary"
             key={project.id}
             onClick={(event) => {
               setSelectedProjectId(project.id)
@@ -110,7 +128,12 @@ export function ProjectSwitcher() {
                 unoptimized
                 width={80}
               />
-            ) : null}
+            ) : (
+              <Loader2Icon
+                className="m-auto animate-spin text-muted-foreground"
+                size={20}
+              />
+            )}
           </button>
         ))}
       </div>
