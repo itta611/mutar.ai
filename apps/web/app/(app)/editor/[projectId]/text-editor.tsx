@@ -65,7 +65,7 @@ export function TextEditor({
           width,
           wordBreak: "normal",
         }}
-        value={value}
+        defaultValue={value}
       />
     </Html>
   )
