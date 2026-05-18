@@ -1,6 +1,6 @@
 "use client"
 
-import { useAtomValue, useSetAtom } from "jotai"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import Konva from "konva"
 import { use, useEffect, useRef, useState } from "react"
 import {
@@ -19,6 +19,7 @@ import {
   editorBoxesAtom,
   editorImageSizeAtom,
   editorProjectIdAtom,
+  editorSelectedBoxIndexAtom,
   type EditorBox,
 } from "@/atom/generate"
 import {
@@ -30,6 +31,7 @@ import {
   resizeWrappedTextBox,
 } from "@/hooks/editor-bbox"
 import { useEditorProject } from "@/hooks/use-editor-project"
+import { useEditorProjectSync } from "@/hooks/use-editor-project-sync"
 
 type EditingText = {
   index: number
@@ -189,8 +191,10 @@ export default function Page({
   } | null>(null)
   const [editingText, setEditingText] = useState<EditingText | null>(null)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+  const [selectedIndex, setSelectedIndex] = useAtom(editorSelectedBoxIndexAtom)
   const [snapGuides, setSnapGuides] = useState<SnapGuide[]>([])
+
+  useEditorProjectSync()
 
   useEffect(() => {
     if (currentProjectId !== activeProjectId) {
@@ -272,7 +276,11 @@ export default function Page({
   }
 
   function clearTextSelection(event: Konva.KonvaEventObject<Event>) {
-    for (let node: Konva.Node | null = event.target; node; node = node.getParent()) {
+    for (
+      let node: Konva.Node | null = event.target;
+      node;
+      node = node.getParent()
+    ) {
       if (node === transformerRef.current) {
         return
       }
@@ -420,7 +428,11 @@ export default function Page({
     >
       <Layer onClick={clearTextSelection} onTap={clearTextSelection}>
         {imageElement ? (
-          <KonvaImage height={height} image={imageElement.image} width={width} />
+          <KonvaImage
+            height={height}
+            image={imageElement.image}
+            width={width}
+          />
         ) : null}
         {boxes.map((box, index) => {
           const rect = getBoxRect(box)

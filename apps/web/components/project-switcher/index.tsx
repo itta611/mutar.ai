@@ -85,16 +85,9 @@ export function ProjectSwitcher() {
         {projects.map((project) => (
           <button
             aria-current={project.id === currentProjectId ? "page" : undefined}
-            className="cursor-pointer aspect-square size-16 shrink-0 overflow-hidden rounded-lg bg-muted border border-black/10 ring-offset-background aria-[current=page]:ring-2 aria-[current=page]:ring-offset-2 aria-[current=page]:ring-primary"
+            className="cursor-pointer aspect-square size-16 shrink-0 overflow-hidden rounded-lg bg-muted aria-[current=page]:outline-2 aria-[current=page]:outline-offset-2 aria-[current=page]:outline-primary"
             key={project.id}
-            onClick={(event) => {
-              queryClient.prefetchQuery(editorProjectQuery(project.id))
-              preloadProjectImage(project.id)
-              event.currentTarget.scrollIntoView({
-                block: "nearest",
-                inline: "center",
-                behavior: "smooth",
-              })
+            onClick={() => {
               window.history.pushState(null, "", `/editor/${project.id}`)
               fetchProject(project.id)
             }}

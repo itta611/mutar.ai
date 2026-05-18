@@ -8,3 +8,4 @@ export type EditorBox = SvgBox
 export const editorProjectIdAtom = atom<string | null>(null)
 export const editorImageSizeAtom = atom<ImageSize | null>(null)
 export const editorBoxesAtom = atom<EditorBox[]>([])
+export const editorSelectedBoxIndexAtom = atom<number | null>(null)
