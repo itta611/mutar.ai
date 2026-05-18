@@ -53,6 +53,7 @@ export default function Page({
     projectId: string
   } | null>(null)
   const [editingText, setEditingText] = useState<EditingText | null>(null)
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
 
   useEffect(() => {
@@ -73,10 +74,11 @@ export default function Page({
 
   useEffect(() => {
     const transformer = transformerRef.current
+    const transformerIndex = selectedIndex ?? hoveredIndex
     const textNode =
-      selectedIndex === null || editingText?.index === selectedIndex
+      transformerIndex === null || editingText?.index === transformerIndex
         ? null
-        : textRefs.current.get(selectedIndex)
+        : textRefs.current.get(transformerIndex)
 
     if (!transformer) {
       return
@@ -84,7 +86,7 @@ export default function Page({
 
     transformer.nodes(textNode ? [textNode] : [])
     transformer.getLayer()?.batchDraw()
-  }, [boxes, editingText?.index, selectedIndex])
+  }, [boxes, editingText?.index, hoveredIndex, selectedIndex])
 
   function updateLabel(index: number, label: string) {
     setBoxes((current) =>
@@ -234,6 +236,8 @@ export default function Page({
                   transformerRef.current?.forceUpdate()
                 }}
                 onDragStart={(event) => selectText(event, index)}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
                 onTap={(event) => selectText(event, index)}
                 onTransform={(event) => handleTextTransform(event, box, textX)}
                 onTransformEnd={(event) =>
@@ -273,11 +277,12 @@ export default function Page({
           )
         })}
         <Transformer
-          anchorFill="#6366f1"
           anchorStroke="#6366f1"
           borderStroke="#6366f1"
           borderStrokeWidth={1.5}
-          enabledAnchors={["middle-left", "middle-right"]}
+          enabledAnchors={
+            selectedIndex === null ? [] : ["middle-left", "middle-right"]
+          }
           flipEnabled={false}
           ref={transformerRef}
           rotateEnabled={false}
