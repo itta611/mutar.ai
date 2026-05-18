@@ -34,6 +34,96 @@ type EditingText = {
   index: number
 }
 
+const snapOffset = 5
+
+function getSnapStops(boxes: EditorBox[], skipIndex: number) {
+  return boxes.reduce(
+    (stops, box, index) => {
+      if (index === skipIndex) {
+        return stops
+      }
+
+      const rect = getBoxRect(box)
+
+      stops.vertical.push(rect.left, rect.left + rect.width / 2, rect.left + rect.width)
+      stops.horizontal.push(rect.top, rect.top + rect.height / 2, rect.top + rect.height)
+
+      return stops
+    },
+    { horizontal: [] as number[], vertical: [] as number[] }
+  )
+}
+
+function snapPoint(value: number, stops: number[]) {
+  const closest = stops
+    .map((stop) => ({ diff: Math.abs(stop - value), stop }))
+    .sort((a, b) => a.diff - b.diff)[0]
+
+  return closest && closest.diff < snapOffset ? closest.stop : value
+}
+
+function snapAxis(start: number, size: number, stops: number[]) {
+  const points = [
+    { offset: 0, value: start },
+    { offset: size / 2, value: start + size / 2 },
+    { offset: size, value: start + size },
+  ]
+  const closest = points
+    .flatMap((point) =>
+      stops.map((stop) => ({
+        diff: Math.abs(stop - point.value),
+        offset: point.offset,
+        stop,
+      }))
+    )
+    .sort((a, b) => a.diff - b.diff)[0]
+
+  return closest && closest.diff < snapOffset
+    ? closest.stop - closest.offset
+    : start
+}
+
+function snapBoxPosition(
+  boxes: EditorBox[],
+  index: number,
+  rect: { height: number; left: number; top: number; width: number }
+) {
+  const stops = getSnapStops(boxes, index)
+
+  return {
+    left: snapAxis(rect.left, rect.width, stops.vertical),
+    top: snapAxis(rect.top, rect.height, stops.horizontal),
+  }
+}
+
+function snapBoxWidth(
+  boxes: EditorBox[],
+  index: number,
+  left: number,
+  width: number,
+  activeAnchor: string | null
+) {
+  const stops = getSnapStops(boxes, index)
+
+  if (activeAnchor === "middle-left") {
+    const nextLeft = snapPoint(left, stops.vertical)
+
+    return {
+      left: nextLeft,
+      width: Math.max(1, width + left - nextLeft),
+    }
+  }
+
+  if (activeAnchor === "middle-right") {
+    return {
+      left,
+      width: Math.max(1, snapPoint(left + width, stops.vertical) - left),
+    }
+  }
+
+  return { left, width }
+}
+
 export default function Page({
   params,
 }: {
@@ -142,9 +232,6 @@ export default function Page({
     const leftOffset = node.x() - textX
     const topOffset = node.y()
 
-    node.x(textX)
-    node.y(0)
-
     setBoxes((current) =>
       current.map((box, boxIndex) => {
         if (boxIndex !== index) {
@@ -152,31 +239,69 @@ export default function Page({
         }
 
         const rect = getBoxRect(box)
+        const nextPosition = snapBoxPosition(current, index, {
+          ...rect,
+          left: rect.left + leftOffset,
+          top: rect.top + topOffset,
+        })
 
-        return moveTextBox(box, rect.left + leftOffset, rect.top + topOffset)
+        node.x(textX)
+        node.y(0)
+
+        return moveTextBox(box, nextPosition.left, nextPosition.top)
       })
     )
+  }
+
+  function handleTextDragMove(
+    event: Konva.KonvaEventObject<DragEvent>,
+    index: number,
+    textX: number
+  ) {
+    event.cancelBubble = true
+
+    const box = boxes[index]
+    const node = event.target as Konva.Text
+
+    if (!box) {
+      return
+    }
+
+    const rect = getBoxRect(box)
+    const nextPosition = snapBoxPosition(boxes, index, {
+      ...rect,
+      left: rect.left + node.x() - textX,
+      top: rect.top + node.y(),
+    })
+
+    node.x(textX + nextPosition.left - rect.left)
+    node.y(nextPosition.top - rect.top)
+    transformerRef.current?.forceUpdate()
   }
 
   function handleTextTransform(
     event: Konva.KonvaEventObject<Event>,
     box: EditorBox,
+    index: number,
     textX: number
   ) {
     event.cancelBubble = true
 
     const node = event.target as Konva.Text
-    const width = Math.max(1, node.width() * node.scaleX())
-    const leftOffset = node.x() - textX
-    const nextBox = resizeWrappedTextBox(
-      box,
-      getBoxRect(box).left + leftOffset,
-      width
+    const rect = getBoxRect(box)
+    const nextRect = snapBoxWidth(
+      boxes,
+      index,
+      rect.left + node.x() - textX,
+      Math.max(1, node.width() * node.scaleX()),
+      transformerRef.current?.getActiveAnchor() ?? null
     )
+    const nextBox = resizeWrappedTextBox(box, nextRect.left, nextRect.width)
 
     node.scaleX(1)
     node.scaleY(1)
-    node.width(width)
+    node.x(textX + nextRect.left - rect.left)
+    node.width(nextRect.width)
     node.height(getBoxRect(nextBox).height)
     node.wrap("char")
     transformerRef.current?.forceUpdate()
@@ -190,8 +315,6 @@ export default function Page({
     event.cancelBubble = true
 
     const node = event.target as Konva.Text
-    const width = Math.max(1, node.width() * node.scaleX())
-    const leftOffset = node.x() - textX
 
     setBoxes((current) =>
       current.map((currentBox, boxIndex) => {
@@ -200,8 +323,19 @@ export default function Page({
         }
 
         const rect = getBoxRect(currentBox)
+        const nextRect = snapBoxWidth(
+          current,
+          index,
+          rect.left + node.x() - textX,
+          Math.max(1, node.width() * node.scaleX()),
+          transformerRef.current?.getActiveAnchor() ?? null
+        )
 
-        return resizeWrappedTextBox(currentBox, rect.left + leftOffset, width)
+        node.scaleX(1)
+        node.scaleY(1)
+        node.x(0)
+
+        return resizeWrappedTextBox(currentBox, nextRect.left, nextRect.width)
       })
     )
   }
@@ -249,15 +383,14 @@ export default function Page({
                 onDblClick={(event) => startEditing(event, index)}
                 onDblTap={(event) => startEditing(event, index)}
                 onDragEnd={(event) => handleTextDragEnd(event, index, textX)}
-                onDragMove={(event) => {
-                  event.cancelBubble = true
-                  transformerRef.current?.forceUpdate()
-                }}
+                onDragMove={(event) => handleTextDragMove(event, index, textX)}
                 onDragStart={(event) => selectText(event, index)}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
                 onTap={(event) => selectText(event, index)}
-                onTransform={(event) => handleTextTransform(event, box, textX)}
+                onTransform={(event) =>
+                  handleTextTransform(event, box, index, textX)
+                }
                 onTransformEnd={(event) =>
                   handleTextTransformEnd(event, index, textX)
                 }
