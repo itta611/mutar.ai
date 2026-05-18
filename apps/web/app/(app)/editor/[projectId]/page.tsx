@@ -127,6 +127,9 @@ export default function Page({
     const leftOffset = node.x() - textX
     const topOffset = node.y()
 
+    node.x(textX)
+    node.y(0)
+
     setBoxes((current) =>
       current.map((box, boxIndex) => {
         if (boxIndex !== index) {
