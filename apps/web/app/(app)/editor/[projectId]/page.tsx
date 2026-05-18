@@ -95,6 +95,8 @@ export default function Page({
       )
     )
     setEditingText(null)
+    setHoveredIndex(null)
+    setSelectedIndex(null)
   }
 
   function updateLabelDraft(index: number, label: string) {
