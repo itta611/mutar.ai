@@ -28,7 +28,7 @@ type ImageElement = {
   projectId: string
 }
 
-const defaultViewportPadding = 32
+const defaultViewportPadding = 80
 const projectSwitcherHeight = 96
 Konva.hitOnDragEnabled = true
 
@@ -189,7 +189,12 @@ export function EditorStage({
       return
     }
 
-    if (touch1 && !touch2 && !stage.isDragging() && touchDragStoppedRef.current) {
+    if (
+      touch1 &&
+      !touch2 &&
+      !stage.isDragging() &&
+      touchDragStoppedRef.current
+    ) {
       stage.startDrag()
       touchDragStoppedRef.current = false
     }

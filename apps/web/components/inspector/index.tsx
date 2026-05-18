@@ -52,7 +52,7 @@ export function Inspector() {
   }
 
   return (
-    <aside className="absolute right-4 top-4 z-20 w-64 rounded-lg border border-border bg-background/95 p-3 shadow-lg backdrop-blur">
+    <div className="w-72 border-l p-3 bg-background">
       <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
         <TypeIcon className="size-4" />
         インスペクタ
@@ -124,6 +124,6 @@ export function Inspector() {
       ) : (
         <p className="text-sm text-muted-foreground">テキストを選択</p>
       )}
-    </aside>
+    </div>
   )
 }

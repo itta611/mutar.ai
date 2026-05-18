@@ -9,12 +9,14 @@ export default function EditorLayout({
   children: React.ReactNode
 }>) {
   return (
-    <div className="relative h-full">
-      <EditorSync />
-      {children}
+    <div className="relative h-full flex">
+      <div className="grow relative">
+        <EditorSync />
+        {children}
+        <EditorNavigationButtons />
+        <ProjectSwitcher />
+      </div>
       <Inspector />
-      <EditorNavigationButtons />
-      <ProjectSwitcher />
     </div>
   )
 }
