@@ -41,6 +41,14 @@ type SnapGuide = {
 }
 
 const snapOffset = 5
+const textTransformerStyle = {
+  anchorStroke: "#6366f1",
+  anchorStrokeWidth: 1.5,
+  borderStroke: "#6366f1",
+  borderStrokeWidth: 1.5,
+  flipEnabled: false,
+  rotateEnabled: false,
+}
 
 function getSnapStops(boxes: EditorBox[], skipIndex: number) {
   return boxes.reduce(
@@ -173,6 +181,7 @@ export default function Page({
   const setBoxes = useSetAtom(editorBoxesAtom)
   const fetchProject = useEditorProject()
   const textRefs = useRef(new Map<number, Konva.Text>())
+  const hoverTransformerRef = useRef<Konva.Transformer>(null)
   const transformerRef = useRef<Konva.Transformer>(null)
   const [imageElement, setImageElement] = useState<{
     image: HTMLImageElement
@@ -204,6 +213,24 @@ export default function Page({
     const transformerIndex = selectedIndex ?? hoveredIndex
     const textNode =
       transformerIndex === null ? null : textRefs.current.get(transformerIndex)
+
+    if (!transformer) {
+      return
+    }
+
+    transformer.nodes(textNode ? [textNode] : [])
+    transformer.getLayer()?.batchDraw()
+  }, [boxes, editingText?.index, hoveredIndex, selectedIndex])
+
+  useEffect(() => {
+    const transformer = hoverTransformerRef.current
+    const textNode =
+      selectedIndex === null ||
+      hoveredIndex === null ||
+      hoveredIndex === selectedIndex ||
+      editingText?.index === hoveredIndex
+        ? null
+        : textRefs.current.get(hoveredIndex)
 
     if (!transformer) {
       return
@@ -485,16 +512,17 @@ export default function Page({
           />
         ))}
         <Transformer
-          anchorStroke="#6366f1"
-          anchorStrokeWidth={1.5}
-          borderStroke="#6366f1"
-          borderStrokeWidth={1.5}
           enabledAnchors={
             selectedIndex === null ? [] : ["middle-left", "middle-right"]
           }
-          flipEnabled={false}
           ref={transformerRef}
-          rotateEnabled={false}
+          {...textTransformerStyle}
+        />
+        <Transformer
+          enabledAnchors={[]}
+          listening={false}
+          ref={hoverTransformerRef}
+          {...textTransformerStyle}
         />
       </Layer>
     </EditorStage>
