@@ -486,6 +486,7 @@ export default function Page({
         ))}
         <Transformer
           anchorStroke="#6366f1"
+          anchorStrokeWidth={1.5}
           borderStroke="#6366f1"
           borderStrokeWidth={1.5}
           enabledAnchors={
