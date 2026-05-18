@@ -36,7 +36,7 @@ export function EditorNavigationButtons() {
     <>
       <Button
         aria-label="前のプロジェクト"
-        className="absolute left-7 top-1/2 z-10 size-11 -translate-y-1/2 rounded-full border-border bg-background/90 text-foreground shadow-lg backdrop-blur hover:bg-background"
+        className="absolute left-7 top-1/2 z-10 size-11 -translate-y-1/2 rounded-full text-foreground shadow-lg bg-background!"
         disabled={!previousProject}
         onClick={() => previousProject && navigate(previousProject.id)}
         size="icon"
@@ -47,7 +47,7 @@ export function EditorNavigationButtons() {
       </Button>
       <Button
         aria-label="次のプロジェクト"
-        className="absolute right-7 top-1/2 z-10 size-11 -translate-y-1/2 rounded-full border-border bg-background/90 text-foreground shadow-lg backdrop-blur hover:bg-background"
+        className="absolute right-7 top-1/2 z-10 size-11 -translate-y-1/2 rounded-full text-foreground shadow-lg bg-background!"
         disabled={!nextProject}
         onClick={() => nextProject && navigate(nextProject.id)}
         size="icon"
