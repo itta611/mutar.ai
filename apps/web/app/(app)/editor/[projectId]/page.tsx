@@ -7,6 +7,7 @@ import {
   Group,
   Image as KonvaImage,
   Layer,
+  Line,
   Text,
   Transformer,
 } from "react-konva"
@@ -34,6 +35,11 @@ type EditingText = {
   index: number
 }
 
+type SnapGuide = {
+  direction: "horizontal" | "vertical"
+  position: number
+}
+
 const snapOffset = 5
 
 function getSnapStops(boxes: EditorBox[], skipIndex: number) {
@@ -45,8 +51,16 @@ function getSnapStops(boxes: EditorBox[], skipIndex: number) {
 
       const rect = getBoxRect(box)
 
-      stops.vertical.push(rect.left, rect.left + rect.width / 2, rect.left + rect.width)
-      stops.horizontal.push(rect.top, rect.top + rect.height / 2, rect.top + rect.height)
+      stops.vertical.push(
+        rect.left,
+        rect.left + rect.width / 2,
+        rect.left + rect.width
+      )
+      stops.horizontal.push(
+        rect.top,
+        rect.top + rect.height / 2,
+        rect.top + rect.height
+      )
 
       return stops
     },
@@ -59,7 +73,9 @@ function snapPoint(value: number, stops: number[]) {
     .map((stop) => ({ diff: Math.abs(stop - value), stop }))
     .sort((a, b) => a.diff - b.diff)[0]
 
-  return closest && closest.diff < snapOffset ? closest.stop : value
+  return closest && closest.diff < snapOffset
+    ? { guide: closest.stop, value: closest.stop }
+    : { guide: null, value }
 }
 
 function snapAxis(start: number, size: number, stops: number[]) {
@@ -79,8 +95,8 @@ function snapAxis(start: number, size: number, stops: number[]) {
     .sort((a, b) => a.diff - b.diff)[0]
 
   return closest && closest.diff < snapOffset
-    ? closest.stop - closest.offset
-    : start
+    ? { guide: closest.stop, value: closest.stop - closest.offset }
+    : { guide: null, value: start }
 }
 
 function snapBoxPosition(
@@ -89,10 +105,20 @@ function snapBoxPosition(
   rect: { height: number; left: number; top: number; width: number }
 ) {
   const stops = getSnapStops(boxes, index)
+  const x = snapAxis(rect.left, rect.width, stops.vertical)
+  const y = snapAxis(rect.top, rect.height, stops.horizontal)
 
   return {
-    left: snapAxis(rect.left, rect.width, stops.vertical),
-    top: snapAxis(rect.top, rect.height, stops.horizontal),
+    guides: [
+      ...(x.guide === null
+        ? []
+        : [{ direction: "vertical" as const, position: x.guide }]),
+      ...(y.guide === null
+        ? []
+        : [{ direction: "horizontal" as const, position: y.guide }]),
+    ],
+    left: x.value,
+    top: y.value,
   }
 }
 
@@ -109,19 +135,29 @@ function snapBoxWidth(
     const nextLeft = snapPoint(left, stops.vertical)
 
     return {
-      left: nextLeft,
-      width: Math.max(1, width + left - nextLeft),
+      guides:
+        nextLeft.guide === null
+          ? []
+          : [{ direction: "vertical" as const, position: nextLeft.guide }],
+      left: nextLeft.value,
+      width: Math.max(1, width + left - nextLeft.value),
     }
   }
 
   if (activeAnchor === "middle-right") {
+    const right = snapPoint(left + width, stops.vertical)
+
     return {
+      guides:
+        right.guide === null
+          ? []
+          : [{ direction: "vertical" as const, position: right.guide }],
       left,
-      width: Math.max(1, snapPoint(left + width, stops.vertical) - left),
+      width: Math.max(1, right.value - left),
     }
   }
 
-  return { left, width }
+  return { guides: [] as SnapGuide[], left, width }
 }
 
 export default function Page({
@@ -145,6 +181,7 @@ export default function Page({
   const [editingText, setEditingText] = useState<EditingText | null>(null)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+  const [snapGuides, setSnapGuides] = useState<SnapGuide[]>([])
 
   useEffect(() => {
     if (currentProjectId !== activeProjectId) {
@@ -185,6 +222,7 @@ export default function Page({
     setEditingText(null)
     setHoveredIndex(null)
     setSelectedIndex(null)
+    setSnapGuides([])
   }
 
   function updateLabelDraft(index: number, label: string) {
@@ -219,6 +257,7 @@ export default function Page({
 
     setHoveredIndex(null)
     setSelectedIndex(null)
+    setSnapGuides([])
   }
 
   function handleTextDragEnd(
@@ -251,6 +290,7 @@ export default function Page({
         return moveTextBox(box, nextPosition.left, nextPosition.top)
       })
     )
+    setSnapGuides([])
   }
 
   function handleTextDragMove(
@@ -276,6 +316,7 @@ export default function Page({
 
     node.x(textX + nextPosition.left - rect.left)
     node.y(nextPosition.top - rect.top)
+    setSnapGuides(nextPosition.guides)
     transformerRef.current?.forceUpdate()
   }
 
@@ -304,6 +345,7 @@ export default function Page({
     node.width(nextRect.width)
     node.height(getBoxRect(nextBox).height)
     node.wrap("char")
+    setSnapGuides(nextRect.guides)
     transformerRef.current?.forceUpdate()
   }
 
@@ -338,6 +380,7 @@ export default function Page({
         return resizeWrappedTextBox(currentBox, nextRect.left, nextRect.width)
       })
     )
+    setSnapGuides([])
   }
 
   const [width = 0, height = 0] = imageSize ?? []
@@ -427,6 +470,20 @@ export default function Page({
             </Group>
           )
         })}
+        {snapGuides.map((guide) => (
+          <Line
+            dash={[6, 4]}
+            key={`${guide.direction}-${guide.position}`}
+            listening={false}
+            points={
+              guide.direction === "vertical"
+                ? [guide.position, 0, guide.position, height]
+                : [0, guide.position, width, guide.position]
+            }
+            stroke="#6366f1"
+            strokeWidth={1}
+          />
+        ))}
         <Transformer
           anchorStroke="#6366f1"
           borderStroke="#6366f1"
