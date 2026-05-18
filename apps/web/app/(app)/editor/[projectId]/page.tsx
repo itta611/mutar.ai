@@ -76,9 +76,7 @@ export default function Page({
     const transformer = transformerRef.current
     const transformerIndex = selectedIndex ?? hoveredIndex
     const textNode =
-      transformerIndex === null || editingText?.index === transformerIndex
-        ? null
-        : textRefs.current.get(transformerIndex)
+      transformerIndex === null ? null : textRefs.current.get(transformerIndex)
 
     if (!transformer) {
       return
@@ -116,6 +114,21 @@ export default function Page({
     event.cancelBubble = true
     setSelectedIndex(index)
     setEditingText({ index })
+  }
+
+  function clearTextSelection(event: Konva.KonvaEventObject<Event>) {
+    for (let node: Konva.Node | null = event.target; node; node = node.getParent()) {
+      if (node === transformerRef.current) {
+        return
+      }
+    }
+
+    if (document.activeElement instanceof HTMLTextAreaElement) {
+      document.activeElement.blur()
+    }
+
+    setHoveredIndex(null)
+    setSelectedIndex(null)
   }
 
   function handleTextDragEnd(
@@ -201,7 +214,7 @@ export default function Page({
       imageElement={imageElement}
       imageSize={imageSize}
     >
-      <Layer>
+      <Layer onClick={clearTextSelection} onTap={clearTextSelection}>
         {imageElement ? (
           <KonvaImage height={height} image={imageElement.image} width={width} />
         ) : null}
