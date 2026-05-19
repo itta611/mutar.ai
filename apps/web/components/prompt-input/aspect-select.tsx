@@ -23,7 +23,7 @@ export function AspectSelect({
   onAspectChange: (aspect: EditorAspectRatio) => void
 }) {
   const selectedAspectLabel =
-    aspects.find((aspect) => aspect.value === selectedAspect)?.label ?? "自動"
+    aspects.find((aspect) => aspect.value === selectedAspect)?.label ?? "縦横比"
 
   return (
     <DropdownMenu>

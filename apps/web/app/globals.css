@@ -128,32 +128,3 @@
     @apply font-sans;
   }
 }
-
-.font-heading {
-  font-family: var(--font-display);
-}
-
-.tiptap-layer .ProseMirror {
-  height: 100%;
-  overflow: hidden;
-  white-space: pre-wrap;
-  word-break: keep-all;
-  overflow-wrap: normal;
-}
-
-.tiptap-layer .ProseMirror p {
-  margin: 0;
-  line-height: 1.2;
-}
-
-.tiptap-layer .ProseMirror-focused {
-  outline: none;
-}
-
-.tiptap-layer .ProseMirror p.is-editor-empty:first-child::before {
-  content: attr(data-placeholder);
-  color: rgba(20, 20, 20, 0.32);
-  float: left;
-  pointer-events: none;
-  height: 0;
-}

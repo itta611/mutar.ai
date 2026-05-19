@@ -9,6 +9,7 @@ type TextStyle = {
   bold: boolean
   fontFamily: string
   fontSize: number
+  lineheight: number
 }
 
 export function getBoxRect(box: EditorBox) {
@@ -86,7 +87,7 @@ function createTextMeasurer(style: TextStyle) {
     fontFamily: style.fontFamily,
     fontSize: style.fontSize,
     fontStyle: style.bold ? "bold" : "normal",
-    lineHeight: 1.4,
+    lineHeight: style.lineheight,
     text: "Hg",
   })
 }
@@ -121,7 +122,7 @@ export function createBoxTextNode(box: EditorBox, label = box.label) {
     fontFamily: fontFamilyMap[box.fontFamily ?? "gothic"],
     fontSize: box.fontSize,
     fontStyle: box.bold ? "bold" : "normal",
-    lineHeight: 1.4,
+    lineHeight: box.lineheight ?? 1.4,
     text: label,
     width: box.wrapText ? rect.width : undefined,
     wrap: box.wrapText ? "char" : "none",

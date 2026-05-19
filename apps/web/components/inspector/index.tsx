@@ -28,7 +28,9 @@ const fonts = [
 function updateTextBox(
   boxes: EditorBox[],
   index: number,
-  patch: Partial<Pick<EditorBox, "bold" | "fontFamily" | "fontSize">>
+  patch: Partial<
+    Pick<EditorBox, "bold" | "color" | "fontFamily" | "fontSize" | "lineheight">
+  >
 ) {
   return boxes.map((box, boxIndex) =>
     boxIndex === index ? resizeTextBox({ ...box, ...patch }, box.label) : box
@@ -42,7 +44,12 @@ export function Inspector() {
   const selectedFont = fonts.find((font) => font.value === box?.fontFamily)
 
   function updateBox(
-    patch: Partial<Pick<EditorBox, "bold" | "fontFamily" | "fontSize">>
+    patch: Partial<
+      Pick<
+        EditorBox,
+        "bold" | "color" | "fontFamily" | "fontSize" | "lineheight"
+      >
+    >
   ) {
     if (selectedIndex === null) {
       return
@@ -108,6 +115,36 @@ export function Inspector() {
               }}
               type="number"
               value={box.fontSize}
+            />
+          </div>
+          <div className="block space-y-1.5">
+            <span className="text-xs font-medium text-muted-foreground">
+              行間
+            </span>
+            <Input
+              min={0.1}
+              onChange={(event) => {
+                const lineheight = Number(event.currentTarget.value)
+
+                if (Number.isFinite(lineheight) && lineheight > 0) {
+                  updateBox({ lineheight })
+                }
+              }}
+              step={0.1}
+              type="number"
+              value={box.lineheight ?? 1.4}
+            />
+          </div>
+          <div className="block space-y-1.5">
+            <span className="text-xs font-medium text-muted-foreground">
+              フォントカラー
+            </span>
+            <Input
+              onChange={(event) =>
+                updateBox({ color: event.currentTarget.value })
+              }
+              type="color"
+              value={box.color?.startsWith("#") ? box.color : "#000000"}
             />
           </div>
           <Button

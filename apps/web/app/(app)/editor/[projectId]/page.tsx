@@ -449,6 +449,7 @@ export default function Page({
             bold: box.bold ?? false,
             fontFamily,
             fontSize: box.fontSize,
+            lineheight: box.lineheight ?? 1.4,
           })
           return (
             <Group key={index} x={rect.left} y={rect.top - topInset}>
@@ -460,7 +461,7 @@ export default function Page({
                 fontSize={box.fontSize}
                 fontStyle={box.bold ? "bold" : "normal"}
                 height={rect.height}
-                lineHeight={1.4}
+                lineHeight={box.lineheight ?? 1.4}
                 onClick={(event) => selectText(event, index)}
                 onDblClick={(event) => startEditing(event, index)}
                 onDblTap={(event) => startEditing(event, index)}
@@ -497,6 +498,7 @@ export default function Page({
                   fontSize={box.fontSize}
                   fontWeight={box.bold ? 700 : 400}
                   height={rect.height}
+                  lineheight={box.lineheight ?? 1.4}
                   onChange={(value) => updateLabelDraft(index, value)}
                   onClose={(value) => updateLabel(index, value)}
                   textAlign={box.align ?? "center"}

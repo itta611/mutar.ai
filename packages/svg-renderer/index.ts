@@ -5,6 +5,7 @@ export type SvgBox = {
   color?: string
   fontFamily?: "mincho" | "pop" | "gothic"
   fontSize: number
+  lineheight?: number
   label: string
   wrapText?: boolean
 }
@@ -12,6 +13,7 @@ export type SvgBox = {
 type DetectedTextBox = {
   color?: string
   fontSize?: number
+  lineheight?: number
   height?: number
   text?: string
   width?: number
@@ -117,7 +119,11 @@ function createTextElement(box: SvgBox | DetectedTextBox, project: SvgProject) {
     typeof box.fontSize === "number" && Number.isFinite(box.fontSize)
       ? box.fontSize
       : 16
-  const lineHeight = fontSize * 1.4
+  const lineheight =
+    typeof box.lineheight === "number" && Number.isFinite(box.lineheight)
+      ? box.lineheight
+      : 1.4
+  const lineHeight = fontSize * lineheight
   const lines =
     "wrapText" in box && box.wrapText
       ? label

@@ -8,6 +8,7 @@ export function TextEditor({
   fontSize,
   fontWeight,
   height,
+  lineheight,
   onClose,
   onChange,
   textAlign,
@@ -21,6 +22,7 @@ export function TextEditor({
   fontSize: number
   fontWeight: number
   height: number
+  lineheight: number
   onClose: (value: string) => void
   onChange: (value: string) => void
   textAlign: "left" | "center" | "right"
@@ -51,7 +53,7 @@ export function TextEditor({
           fontWeight,
           height: height + 5,
           left: 0,
-          lineHeight: 1.4,
+          lineHeight: lineheight,
           outline: "none",
           overflow: "hidden",
           overflowWrap: wrapText ? "break-word" : "normal",
