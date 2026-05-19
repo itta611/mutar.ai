@@ -1,7 +1,13 @@
 "use client"
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { EllipsisIcon, LoaderCircleIcon } from "lucide-react"
+import {
+  ClipboardIcon,
+  EllipsisIcon,
+  FolderIcon,
+  LoaderCircleIcon,
+  Trash2Icon,
+} from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -114,7 +120,7 @@ export function GeneratedImages({
                     </Button>
                   }
                 />
-                <DropdownMenuContent align="start" className="w-40">
+                <DropdownMenuContent align="start" className="w-48">
                   <DropdownMenuItem
                     onClick={(event) => {
                       event.preventDefault()
@@ -122,6 +128,17 @@ export function GeneratedImages({
                       navigator.clipboard.writeText(image.prompt)
                     }}
                   >
+                    <FolderIcon />
+                    プロジェクトに追加
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      navigator.clipboard.writeText(image.prompt)
+                    }}
+                  >
+                    <ClipboardIcon />
                     プロンプトをコピー
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -132,6 +149,7 @@ export function GeneratedImages({
                       deleteProjectMutation.mutate(image.id)
                     }}
                   >
+                    <Trash2Icon />
                     削除
                   </DropdownMenuItem>
                 </DropdownMenuContent>
