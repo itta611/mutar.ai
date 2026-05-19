@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   ClipboardIcon,
   EllipsisIcon,
-  FolderIcon,
+  FolderClosedIcon,
   LoaderCircleIcon,
   Trash2Icon,
 } from "lucide-react"
@@ -128,8 +128,8 @@ export function GeneratedImages({
                       navigator.clipboard.writeText(image.prompt)
                     }}
                   >
-                    <FolderIcon />
-                    プロジェクトに追加
+                    <ClipboardIcon />
+                    プロンプトをコピー
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={(event) => {
@@ -138,8 +138,8 @@ export function GeneratedImages({
                       navigator.clipboard.writeText(image.prompt)
                     }}
                   >
-                    <ClipboardIcon />
-                    プロンプトをコピー
+                    <FolderClosedIcon />
+                    プロジェクトに追加
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     variant="destructive"
