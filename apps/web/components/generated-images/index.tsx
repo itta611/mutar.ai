@@ -6,6 +6,7 @@ import {
   EllipsisIcon,
   FolderClosedIcon,
   LoaderCircleIcon,
+  StarIcon,
   Trash2Icon,
 } from "lucide-react"
 import Image from "next/image"
@@ -138,8 +139,8 @@ export function GeneratedImages({
                       navigator.clipboard.writeText(image.prompt)
                     }}
                   >
-                    <FolderClosedIcon />
-                    プロジェクトに追加
+                    <StarIcon />
+                    お気に入りに追加
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     variant="destructive"

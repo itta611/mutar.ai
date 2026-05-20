@@ -16,14 +16,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { authClient } from "@/lib/auth-client"
 import {
   ChevronDown,
+  HomeIcon,
   LogOutIcon,
   Monitor,
   MonitorIcon,
   Moon,
   MoonIcon,
   PaletteIcon,
+  SearchIcon,
+  StarIcon,
   Sun,
   SunIcon,
+  Trash2Icon,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -59,7 +63,28 @@ export function AppSidebar() {
           <SidebarGroupLabel>一般</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton isActive>ホーム</SidebarMenuButton>
+              <SidebarMenuButton isActive>
+                <HomeIcon />
+                ホーム
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton>
+                <StarIcon />
+                お気に入り
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton>
+                <Trash2Icon />
+                ゴミ箱
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton>
+                <SearchIcon />
+                検索
+              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
