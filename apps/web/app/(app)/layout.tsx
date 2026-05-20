@@ -18,8 +18,7 @@ export default function RootLayout({
     <Providers>
       <AppSidebar />
       <div className="w-full h-dvh flex flex-col">
-        <Navbar />
-        <div className="grow bg-zinc-50 dark:bg-background">{children}</div>
+        <div className="grow bg-background">{children}</div>
       </div>
     </Providers>
   )

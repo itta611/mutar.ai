@@ -77,7 +77,7 @@ export function GeneratedImages({
   })
 
   return (
-    <div className="grid grid-cols-2 gap-x-7 gap-y-7 sm:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-3 xl:grid-cols-4">
       {images.map((image) => (
         <div
           key={image.id}
@@ -91,12 +91,12 @@ export function GeneratedImages({
                 width={300}
                 height={300}
                 unoptimized
-                className="aspect-[16/9] w-full rounded-t-xl object-cover outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+                className="aspect-[16/9] w-full rounded-xl object-cover"
               />
             ) : (
-              <Skeleton className="aspect-[16/9] w-full rounded-t-xl rounded-b-none border" />
+              <Skeleton className="aspect-[16/9] w-full rounded-xl" />
             )}
-            <div className="flex items-center justify-between px-4 py-2.5 rounded-b-xl bg-accent">
+            <div className="flex items-center justify-between px-1 py-2.5 rounded-b-xl bg-background">
               {image.status !== "ready" ? (
                 <LoaderCircleIcon className="mr-2 size-4 shrink-0 animate-spin text-muted-foreground" />
               ) : null}
@@ -107,7 +107,7 @@ export function GeneratedImages({
                 <DropdownMenuTrigger
                   render={
                     <Button
-                      size="icon-xs"
+                      size="icon-sm"
                       variant="ghost"
                       type="button"
                       className="text-muted-foreground"
@@ -116,7 +116,7 @@ export function GeneratedImages({
                         event.stopPropagation()
                       }}
                     >
-                      <EllipsisIcon className="size-4" />
+                      <EllipsisIcon />
                     </Button>
                   }
                 />
