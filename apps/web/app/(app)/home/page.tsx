@@ -1,6 +1,6 @@
 import { listGeneratedImagesByUserId } from "@hengen/db/repo"
 import { getServerSession } from "@/lib/session"
-import { GeneratedImages } from "@/components/generated-images"
+import { GeneratedImages } from "@/components/gallary"
 import LogoIcon from "@/components/logo-icon"
 import { PromptInput } from "@/components/prompt-input"
 

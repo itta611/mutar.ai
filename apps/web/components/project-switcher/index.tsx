@@ -7,7 +7,7 @@ import { useParams } from "next/navigation"
 import { useEffect, useRef } from "react"
 
 import { editorProjectIdAtom } from "@/atom/generate"
-import { listProjects, projectKeys } from "@/components/generated-images"
+import { listProjects, projectKeys } from "@/components/gallary"
 import {
   editorProjectQuery,
   useEditorProject,

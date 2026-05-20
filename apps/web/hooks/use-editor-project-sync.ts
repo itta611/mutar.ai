@@ -6,7 +6,7 @@ import { useParams } from "next/navigation"
 import { useEffect } from "react"
 
 import { editorImageSizeAtom, editorProjectIdAtom } from "@/atom/generate"
-import { listProjects, projectKeys } from "@/components/generated-images"
+import { listProjects, projectKeys } from "@/components/gallary"
 import { useEditorProject } from "@/hooks/use-editor-project"
 
 export function useEditorProjectSync() {

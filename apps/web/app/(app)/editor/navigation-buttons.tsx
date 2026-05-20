@@ -6,7 +6,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 import { useParams } from "next/navigation"
 
 import { editorProjectIdAtom } from "@/atom/generate"
-import { listProjects, projectKeys } from "@/components/generated-images"
+import { listProjects, projectKeys } from "@/components/gallary"
 import { Button } from "@/components/ui/button"
 import { useEditorProject } from "@/hooks/use-editor-project"
 
