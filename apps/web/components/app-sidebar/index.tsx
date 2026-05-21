@@ -73,6 +73,12 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
+              <SidebarMenuButton>
+                <SearchIcon />
+                検索
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
               <SidebarMenuButton
                 isActive={pathname === "/starred"}
                 render={<Link href="/starred" />}
@@ -88,12 +94,6 @@ export function AppSidebar() {
               >
                 <Trash2Icon />
                 ゴミ箱
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton>
-                <SearchIcon />
-                検索
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
