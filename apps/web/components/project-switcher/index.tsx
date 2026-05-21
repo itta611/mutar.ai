@@ -81,7 +81,7 @@ export function ProjectSwitcher() {
 
   return (
     <div className="absolute inset-x-0 bottom-2 flex justify-center">
-      <div className="scrollbar-none flex max-w-[520px] gap-5 overflow-x-auto px-2 py-1 [mask-image:linear-gradient(to_right,transparent,black_40px,black_calc(100%-40px),transparent)] before:shrink-0 before:basis-[calc(50%-2rem)] after:shrink-0 after:basis-[calc(50%-2rem)]">
+      <div className="scrollbar-none flex max-w-[520px] gap-5 overflow-x-auto py-1 [mask-image:linear-gradient(to_right,transparent,black_40px,black_calc(100%-40px),transparent)] before:shrink-0 before:basis-[calc(50%-3.25rem)] after:shrink-0 after:basis-[calc(50%-3.25rem)]">
         {projects.map((project) => (
           <button
             aria-current={project.id === currentProjectId ? "page" : undefined}
