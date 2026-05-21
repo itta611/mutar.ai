@@ -1,7 +1,11 @@
 import { randomUUID } from "node:crypto"
 
 import { zValidator } from "@hono/zod-validator"
-import { createProject, listGeneratedImagesByUserId } from "@hengen/db/repo"
+import {
+  createProject,
+  listDeletedImagesByUserId,
+  listGeneratedImagesByUserId,
+} from "@hengen/db/repo"
 import { Hono } from "hono"
 import { z } from "zod"
 
@@ -22,7 +26,10 @@ export const projectsRoutes = new Hono()
       return c.json({ message: "Unauthorized" }, 401)
     }
 
-    const projects = await listGeneratedImagesByUserId(session.user.id)
+    const projects =
+      c.req.query("trash") === "true"
+        ? await listDeletedImagesByUserId(session.user.id)
+        : await listGeneratedImagesByUserId(session.user.id)
 
     return c.json({ projects }, 200)
   })

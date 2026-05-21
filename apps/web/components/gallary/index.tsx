@@ -6,6 +6,7 @@ import {
   EllipsisIcon,
   FolderClosedIcon,
   LoaderCircleIcon,
+  Undo2Icon,
   StarIcon,
   StarOffIcon,
   Trash2Icon,
@@ -34,10 +35,25 @@ export type GeneratedImage = {
 
 export const projectKeys = {
   list: ["projects"] as const,
+  trash: ["projects", "trash"] as const,
 }
 
 export async function listProjects() {
   const response = await apiClient.projects.$get()
+
+  if (!response.ok) {
+    throw new Error("request_failed")
+  }
+
+  const data = await response.json()
+
+  return data.projects
+}
+
+async function listTrashProjects() {
+  const response = await apiClient.projects.$get({
+    query: { trash: "true" },
+  })
 
   if (!response.ok) {
     throw new Error("request_failed")
@@ -55,6 +71,18 @@ async function deleteProject(id: string) {
 
   if (!response.ok) {
     throw new Error("delete_failed")
+  }
+
+  return response.json()
+}
+
+async function restoreProject(id: string) {
+  const response = await apiClient.projects[":projectId"].restore.$post({
+    param: { projectId: id },
+  })
+
+  if (!response.ok) {
+    throw new Error("restore_failed")
   }
 
   return response.json()
@@ -82,29 +110,42 @@ async function updateProjectStarred({
 export function GeneratedImages({
   initialImages,
   starredOnly = false,
+  trashOnly = false,
 }: {
   initialImages: GeneratedImage[]
   starredOnly?: boolean
+  trashOnly?: boolean
 }) {
   const queryClient = useQueryClient()
+  const queryKey = trashOnly ? projectKeys.trash : projectKeys.list
   const { data: images = initialImages } = useQuery({
-    queryKey: projectKeys.list,
-    queryFn: listProjects,
+    queryKey,
+    queryFn: trashOnly ? listTrashProjects : listProjects,
     initialData: initialImages,
   })
   const deleteProjectMutation = useMutation({
     mutationFn: deleteProject,
     onSuccess: (_data, id) => {
-      queryClient.setQueryData<GeneratedImage[]>(projectKeys.list, (images) =>
+      queryClient.setQueryData<GeneratedImage[]>(queryKey, (images) =>
         images?.filter((image) => image.id !== id)
       )
       toast.success("プロジェクトを削除しました")
     },
   })
+  const restoreProjectMutation = useMutation({
+    mutationFn: restoreProject,
+    onSuccess: (_data, id) => {
+      queryClient.setQueryData<GeneratedImage[]>(projectKeys.trash, (images) =>
+        images?.filter((image) => image.id !== id)
+      )
+      queryClient.invalidateQueries({ queryKey: projectKeys.list })
+      toast.success("プロジェクトを元に戻しました")
+    },
+  })
   const updateProjectStarredMutation = useMutation({
     mutationFn: updateProjectStarred,
     onSuccess: (_data, input) => {
-      queryClient.setQueryData<GeneratedImage[]>(projectKeys.list, (images) =>
+      queryClient.setQueryData<GeneratedImage[]>(queryKey, (images) =>
         images?.map((image) =>
           image.id === input.id
             ? { ...image, isStarred: input.isStarred }
@@ -192,17 +233,30 @@ export function GeneratedImages({
                       ? "お気に入りから削除"
                       : "お気に入りに追加"}
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={(event) => {
-                      event.preventDefault()
-                      event.stopPropagation()
-                      deleteProjectMutation.mutate(image.id)
-                    }}
-                  >
-                    <Trash2Icon />
-                    削除
-                  </DropdownMenuItem>
+                  {trashOnly ? (
+                    <DropdownMenuItem
+                      onClick={(event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        restoreProjectMutation.mutate(image.id)
+                      }}
+                    >
+                      <Undo2Icon />
+                      元に戻す
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={(event) => {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        deleteProjectMutation.mutate(image.id)
+                      }}
+                    >
+                      <Trash2Icon />
+                      削除
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

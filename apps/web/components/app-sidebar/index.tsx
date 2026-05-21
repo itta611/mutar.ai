@@ -82,7 +82,10 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton>
+              <SidebarMenuButton
+                isActive={pathname === "/trash"}
+                render={<Link href="/trash" />}
+              >
                 <Trash2Icon />
                 ゴミ箱
               </SidebarMenuButton>

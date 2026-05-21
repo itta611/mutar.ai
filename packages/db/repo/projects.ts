@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from "drizzle-orm"
+import { and, desc, eq, inArray, isNotNull, isNull } from "drizzle-orm"
 
 import { db } from ".."
 import { projects } from "../schema"
@@ -206,6 +206,7 @@ export async function listGeneratedImagesByUserId(userId: string) {
     .where(
       and(
         eq(projects.userId, userId),
+        isNull(projects.deletedAt),
         inArray(projects.status, [
           "ready",
           "generating",
@@ -231,6 +232,7 @@ export async function listStarredImagesByUserId(userId: string) {
       and(
         eq(projects.userId, userId),
         eq(projects.isStarred, true),
+        isNull(projects.deletedAt),
         inArray(projects.status, [
           "ready",
           "generating",
@@ -242,6 +244,31 @@ export async function listStarredImagesByUserId(userId: string) {
     .orderBy(desc(projects.createdAt))
 }
 
+export async function listDeletedImagesByUserId(userId: string) {
+  return db
+    .select({
+      id: projects.id,
+      prompt: projects.prompt,
+      isStarred: projects.isStarred,
+      status: projects.status,
+      title: projects.title,
+    })
+    .from(projects)
+    .where(
+      and(
+        eq(projects.userId, userId),
+        isNotNull(projects.deletedAt),
+        inArray(projects.status, [
+          "ready",
+          "generating",
+          "analyzing",
+          "erasing",
+        ])
+      )
+    )
+    .orderBy(desc(projects.deletedAt))
+}
+
 export async function deleteProjectByUserId({
   projectId,
   userId,
@@ -250,7 +277,24 @@ export async function deleteProjectByUserId({
   userId: string
 }) {
   const [project] = await db
-    .delete(projects)
+    .update(projects)
+    .set({ deletedAt: new Date(), updatedAt: new Date() })
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .returning({ id: projects.id })
+
+  return project
+}
+
+export async function restoreProjectByUserId({
+  projectId,
+  userId,
+}: {
+  projectId: string
+  userId: string
+}) {
+  const [project] = await db
+    .update(projects)
+    .set({ deletedAt: null, updatedAt: new Date() })
     .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
     .returning({ id: projects.id })
 
