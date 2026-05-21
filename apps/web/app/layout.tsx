@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { AuthDialog } from "@/components/auth-dialog"
 import { AuthDialogProvider } from "@/hooks/use-auth-dialog"
 import { SidebarProvider } from "@/components/ui/sidebar"
+import { Toaster } from "@/components/ui/sonner"
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -84,6 +85,7 @@ export default function RootLayout({
             <ThemeProvider>
               {children}
               <AuthDialog />
+              <Toaster position="bottom-center" />
             </ThemeProvider>
           </AuthDialogProvider>
         </SidebarProvider>

@@ -12,6 +12,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { toast } from "sonner"
 
 import {
   DropdownMenu,
@@ -97,6 +98,7 @@ export function GeneratedImages({
       queryClient.setQueryData<GeneratedImage[]>(projectKeys.list, (images) =>
         images?.filter((image) => image.id !== id)
       )
+      toast.success("プロジェクトを削除しました")
     },
   })
   const updateProjectStarredMutation = useMutation({
@@ -108,6 +110,11 @@ export function GeneratedImages({
             ? { ...image, isStarred: input.isStarred }
             : image
         )
+      )
+      toast.success(
+        input.isStarred
+          ? "お気に入りに追加しました"
+          : "お気に入りから削除しました"
       )
     },
   })
