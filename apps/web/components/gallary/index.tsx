@@ -28,6 +28,7 @@ import { Button } from "../ui/button"
 export type GeneratedImage = {
   id: string
   isStarred: boolean
+  deletedAt: Date | string | null
   prompt: string
   status: string
   title: string
@@ -35,6 +36,7 @@ export type GeneratedImage = {
 
 export const projectKeys = {
   list: ["projects"] as const,
+  starred: ["projects", "starred"] as const,
   trash: ["projects", "trash"] as const,
 }
 
@@ -50,9 +52,23 @@ export async function listProjects() {
   return data.projects
 }
 
-async function listTrashProjects() {
+export async function listTrashProjects() {
   const response = await apiClient.projects.$get({
     query: { trash: "true" },
+  })
+
+  if (!response.ok) {
+    throw new Error("request_failed")
+  }
+
+  const data = await response.json()
+
+  return data.projects
+}
+
+export async function listStarredProjects() {
+  const response = await apiClient.projects.$get({
+    query: { starred: "true" },
   })
 
   if (!response.ok) {
@@ -107,20 +123,21 @@ async function updateProjectStarred({
   return response.json()
 }
 
-export function GeneratedImages({
-  initialImages,
-  starredOnly = false,
-  trashOnly = false,
-}: {
+type GeneratedImagesViewProps = {
   initialImages: GeneratedImage[]
-  starredOnly?: boolean
-  trashOnly?: boolean
-}) {
+  queryFn: typeof listProjects
+  queryKey: (typeof projectKeys)[keyof typeof projectKeys]
+}
+
+function GeneratedImagesView({
+  initialImages,
+  queryFn,
+  queryKey,
+}: GeneratedImagesViewProps) {
   const queryClient = useQueryClient()
-  const queryKey = trashOnly ? projectKeys.trash : projectKeys.list
   const { data: images = initialImages } = useQuery({
     queryKey,
-    queryFn: trashOnly ? listTrashProjects : listProjects,
+    queryFn,
     initialData: initialImages,
   })
   const deleteProjectMutation = useMutation({
@@ -129,6 +146,7 @@ export function GeneratedImages({
       queryClient.setQueryData<GeneratedImage[]>(queryKey, (images) =>
         images?.filter((image) => image.id !== id)
       )
+      queryClient.invalidateQueries({ queryKey: projectKeys.trash })
       toast.success("プロジェクトを削除しました")
     },
   })
@@ -139,6 +157,7 @@ export function GeneratedImages({
         images?.filter((image) => image.id !== id)
       )
       queryClient.invalidateQueries({ queryKey: projectKeys.list })
+      queryClient.invalidateQueries({ queryKey: projectKeys.starred })
       toast.success("プロジェクトを元に戻しました")
     },
   })
@@ -146,11 +165,13 @@ export function GeneratedImages({
     mutationFn: updateProjectStarred,
     onSuccess: (_data, input) => {
       queryClient.setQueryData<GeneratedImage[]>(queryKey, (images) =>
-        images?.map((image) =>
-          image.id === input.id
-            ? { ...image, isStarred: input.isStarred }
-            : image
-        )
+        queryKey === projectKeys.starred && !input.isStarred
+          ? images?.filter((image) => image.id !== input.id)
+          : images?.map((image) =>
+              image.id === input.id
+                ? { ...image, isStarred: input.isStarred }
+                : image
+            )
       )
       toast.success(
         input.isStarred
@@ -159,11 +180,7 @@ export function GeneratedImages({
       )
     },
   })
-  const visibleImages = starredOnly
-    ? images.filter((image) => image.isStarred)
-    : images
-
-  if (visibleImages.length === 0) {
+  if (images.length === 0) {
     return (
       <div className="flex min-h-80 flex-col items-center justify-center gap-4 text-muted-foreground">
         <Image src="/empty-state.png" alt="" width={160} height={187} />
@@ -174,7 +191,7 @@ export function GeneratedImages({
 
   return (
     <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-3 xl:grid-cols-4">
-      {visibleImages.map((image) => (
+      {images.map((image) => (
         <div
           key={image.id}
           className="transition-transform duration-150 ease-out active:scale-[0.98]"
@@ -242,7 +259,7 @@ export function GeneratedImages({
                       ? "お気に入りから削除"
                       : "お気に入りに追加"}
                   </DropdownMenuItem>
-                  {trashOnly ? (
+                  {image.deletedAt ? (
                     <DropdownMenuItem
                       onClick={(event) => {
                         event.preventDefault()
@@ -273,5 +290,47 @@ export function GeneratedImages({
         </div>
       ))}
     </div>
+  )
+}
+
+export function GeneratedImages({
+  initialImages,
+}: {
+  initialImages: GeneratedImage[]
+}) {
+  return (
+    <GeneratedImagesView
+      initialImages={initialImages}
+      queryFn={listProjects}
+      queryKey={projectKeys.list}
+    />
+  )
+}
+
+export function StarredImages({
+  initialImages,
+}: {
+  initialImages: GeneratedImage[]
+}) {
+  return (
+    <GeneratedImagesView
+      initialImages={initialImages}
+      queryFn={listStarredProjects}
+      queryKey={projectKeys.starred}
+    />
+  )
+}
+
+export function TrashImages({
+  initialImages,
+}: {
+  initialImages: GeneratedImage[]
+}) {
+  return (
+    <GeneratedImagesView
+      initialImages={initialImages}
+      queryFn={listTrashProjects}
+      queryKey={projectKeys.trash}
+    />
   )
 }

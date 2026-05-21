@@ -201,6 +201,7 @@ export async function listGeneratedImagesByUserId(userId: string) {
       isStarred: projects.isStarred,
       status: projects.status,
       title: projects.title,
+      deletedAt: projects.deletedAt,
     })
     .from(projects)
     .where(
@@ -226,6 +227,7 @@ export async function listStarredImagesByUserId(userId: string) {
       isStarred: projects.isStarred,
       status: projects.status,
       title: projects.title,
+      deletedAt: projects.deletedAt,
     })
     .from(projects)
     .where(
@@ -252,6 +254,7 @@ export async function listDeletedImagesByUserId(userId: string) {
       isStarred: projects.isStarred,
       status: projects.status,
       title: projects.title,
+      deletedAt: projects.deletedAt,
     })
     .from(projects)
     .where(

@@ -5,6 +5,7 @@ import {
   createProject,
   listDeletedImagesByUserId,
   listGeneratedImagesByUserId,
+  listStarredImagesByUserId,
 } from "@hengen/db/repo"
 import { Hono } from "hono"
 import { z } from "zod"
@@ -29,7 +30,9 @@ export const projectsRoutes = new Hono()
     const projects =
       c.req.query("trash") === "true"
         ? await listDeletedImagesByUserId(session.user.id)
-        : await listGeneratedImagesByUserId(session.user.id)
+        : c.req.query("starred") === "true"
+          ? await listStarredImagesByUserId(session.user.id)
+          : await listGeneratedImagesByUserId(session.user.id)
 
     return c.json({ projects }, 200)
   })
