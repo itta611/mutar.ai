@@ -1,0 +1,1 @@
+ALTER TABLE "project" ADD COLUMN "isStarred" boolean DEFAULT false NOT NULL;

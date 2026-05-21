@@ -50,6 +50,13 @@
       "when": 1778903527345,
       "tag": "0006_wealthy_longshot",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1779283026459,
+      "tag": "0007_overjoyed_jamie_braddock",
+      "breakpoints": true
     }
   ]
 }

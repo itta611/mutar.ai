@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm"
 import {
+  boolean,
   index,
   integer,
   jsonb,
@@ -22,6 +23,7 @@ export const projects = pgTable(
     aspectRatio: text("aspectRatio").notNull().default("4:3"),
     model: text("model").notNull().default("openai/gpt-5.4-image-2"),
     status: text("status").notNull().default("ready"),
+    isStarred: boolean("isStarred").notNull().default(false),
     width: integer("width").notNull(),
     height: integer("height").notNull(),
     analysis: jsonb("analysis")

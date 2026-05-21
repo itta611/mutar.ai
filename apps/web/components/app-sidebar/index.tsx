@@ -39,10 +39,11 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTheme } from "next-themes"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
 
 export function AppSidebar() {
+  const pathname = usePathname()
   const router = useRouter()
   const { setTheme, theme } = useTheme()
   const session = authClient.useSession()
@@ -63,13 +64,19 @@ export function AppSidebar() {
           <SidebarGroupLabel>一般</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton isActive>
+              <SidebarMenuButton
+                isActive={pathname === "/home"}
+                render={<Link href="/home" />}
+              >
                 <HomeIcon />
                 ホーム
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton>
+              <SidebarMenuButton
+                isActive={pathname === "/starred"}
+                render={<Link href="/starred" />}
+              >
                 <StarIcon />
                 お気に入り
               </SidebarMenuButton>

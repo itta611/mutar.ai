@@ -62,6 +62,27 @@ export async function updateProjectStatusByUserId({
     .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
 }
 
+export async function updateProjectStarredByUserId({
+  isStarred,
+  projectId,
+  userId,
+}: {
+  isStarred: boolean
+  projectId: string
+  userId: string
+}) {
+  const [project] = await db
+    .update(projects)
+    .set({
+      isStarred,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))
+    .returning({ id: projects.id })
+
+  return project
+}
+
 export async function updateProjectCleanedImageByUserId({
   projectId,
   userId,
@@ -177,6 +198,7 @@ export async function listGeneratedImagesByUserId(userId: string) {
     .select({
       id: projects.id,
       prompt: projects.prompt,
+      isStarred: projects.isStarred,
       status: projects.status,
       title: projects.title,
     })
@@ -184,6 +206,31 @@ export async function listGeneratedImagesByUserId(userId: string) {
     .where(
       and(
         eq(projects.userId, userId),
+        inArray(projects.status, [
+          "ready",
+          "generating",
+          "analyzing",
+          "erasing",
+        ])
+      )
+    )
+    .orderBy(desc(projects.createdAt))
+}
+
+export async function listStarredImagesByUserId(userId: string) {
+  return db
+    .select({
+      id: projects.id,
+      prompt: projects.prompt,
+      isStarred: projects.isStarred,
+      status: projects.status,
+      title: projects.title,
+    })
+    .from(projects)
+    .where(
+      and(
+        eq(projects.userId, userId),
+        eq(projects.isStarred, true),
         inArray(projects.status, [
           "ready",
           "generating",

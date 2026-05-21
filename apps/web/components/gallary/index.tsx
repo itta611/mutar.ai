@@ -7,6 +7,7 @@ import {
   FolderClosedIcon,
   LoaderCircleIcon,
   StarIcon,
+  StarOffIcon,
   Trash2Icon,
 } from "lucide-react"
 import Image from "next/image"
@@ -24,6 +25,7 @@ import { Button } from "../ui/button"
 
 export type GeneratedImage = {
   id: string
+  isStarred: boolean
   prompt: string
   status: string
   title: string
@@ -57,10 +59,31 @@ async function deleteProject(id: string) {
   return response.json()
 }
 
+async function updateProjectStarred({
+  id,
+  isStarred,
+}: {
+  id: string
+  isStarred: boolean
+}) {
+  const response = await apiClient.projects[":projectId"].star.$put({
+    param: { projectId: id },
+    json: { isStarred },
+  })
+
+  if (!response.ok) {
+    throw new Error("update_failed")
+  }
+
+  return response.json()
+}
+
 export function GeneratedImages({
   initialImages,
+  starredOnly = false,
 }: {
   initialImages: GeneratedImage[]
+  starredOnly?: boolean
 }) {
   const queryClient = useQueryClient()
   const { data: images = initialImages } = useQuery({
@@ -76,10 +99,25 @@ export function GeneratedImages({
       )
     },
   })
+  const updateProjectStarredMutation = useMutation({
+    mutationFn: updateProjectStarred,
+    onSuccess: (_data, input) => {
+      queryClient.setQueryData<GeneratedImage[]>(projectKeys.list, (images) =>
+        images?.map((image) =>
+          image.id === input.id
+            ? { ...image, isStarred: input.isStarred }
+            : image
+        )
+      )
+    },
+  })
+  const visibleImages = starredOnly
+    ? images.filter((image) => image.isStarred)
+    : images
 
   return (
     <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-3 xl:grid-cols-4">
-      {images.map((image) => (
+      {visibleImages.map((image) => (
         <div
           key={image.id}
           className="transition-transform duration-150 ease-out active:scale-[0.98]"
@@ -136,11 +174,16 @@ export function GeneratedImages({
                     onClick={(event) => {
                       event.preventDefault()
                       event.stopPropagation()
-                      navigator.clipboard.writeText(image.prompt)
+                      updateProjectStarredMutation.mutate({
+                        id: image.id,
+                        isStarred: !image.isStarred,
+                      })
                     }}
                   >
-                    <StarIcon />
-                    お気に入りに追加
+                    {image.isStarred ? <StarOffIcon /> : <StarIcon />}
+                    {image.isStarred
+                      ? "お気に入りから削除"
+                      : "お気に入りに追加"}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     variant="destructive"
