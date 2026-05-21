@@ -163,6 +163,15 @@ export function GeneratedImages({
     ? images.filter((image) => image.isStarred)
     : images
 
+  if (visibleImages.length === 0) {
+    return (
+      <div className="flex min-h-80 flex-col items-center justify-center gap-4 text-muted-foreground">
+        <Image src="/empty-state.png" alt="" width={160} height={187} />
+        <p className="text-sm">プロジェクトがありません</p>
+      </div>
+    )
+  }
+
   return (
     <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-3 xl:grid-cols-4">
       {visibleImages.map((image) => (
