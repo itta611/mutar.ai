@@ -29,6 +29,7 @@ import {
   SunIcon,
   Trash2Icon,
 } from "lucide-react"
+import { useState } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,9 +41,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useTheme } from "next-themes"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { ProjectSearchDialog } from "@/components/project-search-dialog"
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
 
 export function AppSidebar() {
+  const [searchOpen, setSearchOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
   const { setTheme, theme } = useTheme()
@@ -73,7 +76,7 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton>
+              <SidebarMenuButton onClick={() => setSearchOpen(true)}>
                 <SearchIcon />
                 検索
               </SidebarMenuButton>
@@ -169,6 +172,7 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+      <ProjectSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
     </Sidebar>
   )
 }
