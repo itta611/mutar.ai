@@ -29,7 +29,7 @@ import {
   SunIcon,
   Trash2Icon,
 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,6 +51,21 @@ export function AppSidebar() {
   const { setTheme, theme } = useTheme()
   const session = authClient.useSession()
   const user = session.data?.user
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!event.metaKey || event.key.toLowerCase() !== "k") {
+        return
+      }
+
+      event.preventDefault()
+      setSearchOpen(true)
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [])
 
   return (
     <Sidebar className="border-r border-border/70">
