@@ -13,6 +13,7 @@ import { AuthDialog } from "@/components/auth-dialog"
 import { AuthDialogProvider } from "@/hooks/use-auth-dialog"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
+import { AuthRedirect } from "./auth-redirect"
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -83,7 +84,7 @@ export default function RootLayout({
         >
           <AuthDialogProvider>
             <ThemeProvider>
-              {children}
+              <AuthRedirect>{children}</AuthRedirect>
               <AuthDialog />
               <Toaster position="bottom-center" />
             </ThemeProvider>
