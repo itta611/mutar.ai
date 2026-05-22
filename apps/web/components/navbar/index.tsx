@@ -1,13 +1,15 @@
 "use client"
 
 import { DownloadIcon, PencilLine, XIcon } from "lucide-react"
+import { useAtomValue } from "jotai"
 import { useRouter } from "next/navigation"
 
+import { editorProjectTitleAtom } from "@/atom/generate"
 import { Button } from "@/components/ui/button"
 
 export function Navbar() {
   const router = useRouter()
-  const projectName = "プロジェクト名"
+  const projectName = useAtomValue(editorProjectTitleAtom)
 
   return (
     <nav className="shrink-0 flex h-13 items-center bg-sidebar border-b border-border/70 pr-4 pl-2">
@@ -20,7 +22,7 @@ export function Navbar() {
       >
         <XIcon />
       </Button>
-      <div className="grow pl-1">{projectName}</div>
+      <div className="grow px-1 w-0 truncate">{projectName}</div>
       <div className="flex flex-row-reverse items-center gap-2">
         <Button type="button">
           <DownloadIcon />

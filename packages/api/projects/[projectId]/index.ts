@@ -31,6 +31,7 @@ export const projectRoutes = new Hono()
       return c.json(
         {
           id: project.id,
+          title: project.title,
           status: project.status,
         },
         200

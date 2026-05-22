@@ -9,6 +9,7 @@ import {
   editorBoxesAtom,
   editorImageSizeAtom,
   editorProjectIdAtom,
+  editorProjectTitleAtom,
 } from "@/atom/generate"
 import { resizeTextBox } from "@/hooks/editor-bbox"
 import { apiClient } from "@/lib/api-client"
@@ -19,11 +20,13 @@ type EditorProject =
       height: number
       id: string
       status: "ready"
+      title: string
       width: number
     }
   | {
       id: string
       status: "generating" | "analyzing" | "erasing" | "error"
+      title: string
     }
 
 async function getProject(projectId: string) {
@@ -51,6 +54,7 @@ export function useEditorProject() {
   const setBoxes = useSetAtom(editorBoxesAtom)
   const setImageSize = useSetAtom(editorImageSizeAtom)
   const setProjectId = useSetAtom(editorProjectIdAtom)
+  const setProjectTitle = useSetAtom(editorProjectTitleAtom)
 
   return useCallback(
     async (projectId: string, options?: { force?: boolean }) => {
@@ -64,6 +68,8 @@ export function useEditorProject() {
             ? cached
             : await queryClient.fetchQuery({ ...query, staleTime: 0 })
 
+        setProjectTitle(project.title)
+
         if (project.status !== "ready") {
           setImageSize(null)
           setBoxes([])
@@ -75,10 +81,11 @@ export function useEditorProject() {
           project.analysis.boxes.map((box) => resizeTextBox(box, box.label))
         )
       } catch {
+        setProjectTitle("")
         setImageSize(null)
         setBoxes([])
       }
     },
-    [queryClient, setBoxes, setImageSize, setProjectId]
+    [queryClient, setBoxes, setImageSize, setProjectId, setProjectTitle]
   )
 }
