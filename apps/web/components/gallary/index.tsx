@@ -209,84 +209,85 @@ function GeneratedImagesView({
             ) : (
               <Skeleton className="aspect-[16/9] w-full rounded-xl" />
             )}
-            <div className="flex items-center justify-between px-1 py-2.5 rounded-b-xl bg-background">
-              {image.status !== "ready" ? (
-                <LoaderCircleIcon className="mr-2 size-4 shrink-0 animate-spin text-muted-foreground" />
-              ) : null}
-              <span className="min-w-0 flex-1 truncate text-sm mr-1.5">
-                {image.title.replace(/\\n|\r?\n/g, " ")}
-              </span>
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
-                    <Button
-                      size="icon-sm"
-                      variant="ghost"
-                      type="button"
-                      className="text-muted-foreground"
-                      onClick={(event) => {
-                        event.preventDefault()
-                        event.stopPropagation()
-                      }}
-                    >
-                      <EllipsisIcon />
-                    </Button>
-                  }
-                />
-                <DropdownMenuContent align="start" className="w-48">
-                  <DropdownMenuItem
-                    onClick={(event) => {
-                      event.preventDefault()
-                      event.stopPropagation()
-                      navigator.clipboard.writeText(image.prompt)
-                    }}
-                  >
-                    <ClipboardIcon />
-                    プロンプトをコピー
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={(event) => {
-                      event.preventDefault()
-                      event.stopPropagation()
-                      updateProjectStarredMutation.mutate({
-                        id: image.id,
-                        isStarred: !image.isStarred,
-                      })
-                    }}
-                  >
-                    {image.isStarred ? <StarOffIcon /> : <StarIcon />}
-                    {image.isStarred
-                      ? "お気に入りから削除"
-                      : "お気に入りに追加"}
-                  </DropdownMenuItem>
-                  {image.deletedAt ? (
-                    <DropdownMenuItem
-                      onClick={(event) => {
-                        event.preventDefault()
-                        event.stopPropagation()
-                        restoreProjectMutation.mutate(image.id)
-                      }}
-                    >
-                      <Undo2Icon />
-                      元に戻す
-                    </DropdownMenuItem>
-                  ) : (
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={(event) => {
-                        event.preventDefault()
-                        event.stopPropagation()
-                        deleteProjectMutation.mutate(image.id)
-                      }}
-                    >
-                      <Trash2Icon />
-                      削除
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
           </Link>
+          <div className="flex items-center justify-between px-1 py-2.5 rounded-b-xl bg-background">
+            {image.status !== "ready" ? (
+              <LoaderCircleIcon className="mr-2 size-4 shrink-0 animate-spin text-muted-foreground" />
+            ) : null}
+            <Link
+              href={`/editor/${image.id}`}
+              className="min-w-0 flex-1 truncate text-sm mr-1.5"
+            >
+              {image.title.replace(/\\n|\r?\n/g, " ")}
+            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    type="button"
+                    className="text-muted-foreground"
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                    }}
+                  >
+                    <EllipsisIcon />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuItem
+                  onClick={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    navigator.clipboard.writeText(image.prompt)
+                  }}
+                >
+                  <ClipboardIcon />
+                  プロンプトをコピー
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    updateProjectStarredMutation.mutate({
+                      id: image.id,
+                      isStarred: !image.isStarred,
+                    })
+                  }}
+                >
+                  {image.isStarred ? <StarOffIcon /> : <StarIcon />}
+                  {image.isStarred ? "お気に入りから削除" : "お気に入りに追加"}
+                </DropdownMenuItem>
+                {image.deletedAt ? (
+                  <DropdownMenuItem
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      restoreProjectMutation.mutate(image.id)
+                    }}
+                  >
+                    <Undo2Icon />
+                    元に戻す
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      deleteProjectMutation.mutate(image.id)
+                    }}
+                  >
+                    <Trash2Icon />
+                    削除
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       ))}
     </div>
