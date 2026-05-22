@@ -6,7 +6,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 import { useParams } from "next/navigation"
 
 import { editorProjectIdAtom } from "@/atom/generate"
-import { listProjects, projectKeys } from "@/components/gallary"
+import { listProjects } from "@/components/gallary"
 import { Button } from "@/components/ui/button"
 import { useEditorProject } from "@/hooks/use-editor-project"
 
@@ -15,7 +15,7 @@ export function EditorNavigationButtons() {
   const currentProjectId = useAtomValue(editorProjectIdAtom) ?? routeProjectId
   const fetchProject = useEditorProject()
   const { data: projects = [] } = useQuery({
-    queryKey: projectKeys.list,
+    queryKey: ["projects"],
     queryFn: listProjects,
   })
   const currentIndex = projects.findIndex(

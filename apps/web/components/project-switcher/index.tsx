@@ -7,7 +7,7 @@ import { useParams } from "next/navigation"
 import { useEffect, useRef } from "react"
 
 import { editorProjectIdAtom } from "@/atom/generate"
-import { listProjects, projectKeys } from "@/components/gallary"
+import { listProjects } from "@/components/gallary"
 import {
   editorProjectQuery,
   useEditorProject,
@@ -32,7 +32,7 @@ export function ProjectSwitcher() {
   const queryClient = useQueryClient()
   const selectedRef = useRef<HTMLButtonElement>(null)
   const { data: projects = [] } = useQuery({
-    queryKey: projectKeys.list,
+    queryKey: ["projects"],
     queryFn: listProjects,
   })
 

@@ -1,15 +1,13 @@
-import { listDeletedImagesByUserId } from "@hengen/db/repo"
-import { TrashImages } from "@/components/gallary"
-import { getServerSession } from "@/lib/session"
+import { Suspense } from "react"
+import { ProjectList } from "./project-list"
 
 export default async function Page() {
-  const session = await getServerSession()
-  const images = session ? await listDeletedImagesByUserId(session.user.id) : []
-
   return (
     <div className="min-h-full px-10 pb-10">
       <h1 className="py-10 text-xl font-bold">ゴミ箱</h1>
-      <TrashImages initialImages={images} />
+      <Suspense>
+        <ProjectList />
+      </Suspense>
     </div>
   )
 }

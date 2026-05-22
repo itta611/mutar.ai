@@ -34,12 +34,6 @@ export type GeneratedImage = {
   title: string
 }
 
-export const projectKeys = {
-  list: ["projects"] as const,
-  starred: ["projects", "starred"] as const,
-  trash: ["projects", "trash"] as const,
-}
-
 export async function listProjects() {
   const response = await apiClient.projects.$get()
 
@@ -52,9 +46,9 @@ export async function listProjects() {
   return data.projects
 }
 
-export async function listTrashProjects() {
+async function listStarredProjects() {
   const response = await apiClient.projects.$get({
-    query: { trash: "true" },
+    query: { starred: "true" },
   })
 
   if (!response.ok) {
@@ -66,9 +60,9 @@ export async function listTrashProjects() {
   return data.projects
 }
 
-export async function listStarredProjects() {
+async function listTrashProjects() {
   const response = await apiClient.projects.$get({
-    query: { starred: "true" },
+    query: { trash: "true" },
   })
 
   if (!response.ok) {
@@ -125,16 +119,20 @@ async function updateProjectStarred({
 
 type GeneratedImagesViewProps = {
   initialImages: GeneratedImage[]
-  queryFn: typeof listProjects
-  queryKey: (typeof projectKeys)[keyof typeof projectKeys]
+  queryKey: readonly string[]
 }
 
-function GeneratedImagesView({
+export function Gallery({
   initialImages,
-  queryFn,
   queryKey,
 }: GeneratedImagesViewProps) {
   const queryClient = useQueryClient()
+  const queryFn =
+    queryKey[1] === "trash"
+      ? listTrashProjects
+      : queryKey[1] === "starred"
+        ? listStarredProjects
+        : listProjects
   const { data: images = initialImages } = useQuery({
     queryKey,
     queryFn,
@@ -146,18 +144,19 @@ function GeneratedImagesView({
       queryClient.setQueryData<GeneratedImage[]>(queryKey, (images) =>
         images?.filter((image) => image.id !== id)
       )
-      queryClient.invalidateQueries({ queryKey: projectKeys.trash })
+      queryClient.invalidateQueries({ queryKey: ["projects", "trash"] })
       toast.success("プロジェクトを削除しました")
     },
   })
   const restoreProjectMutation = useMutation({
     mutationFn: restoreProject,
     onSuccess: (_data, id) => {
-      queryClient.setQueryData<GeneratedImage[]>(projectKeys.trash, (images) =>
-        images?.filter((image) => image.id !== id)
+      queryClient.setQueryData<GeneratedImage[]>(
+        ["projects", "trash"],
+        (images) => images?.filter((image) => image.id !== id)
       )
-      queryClient.invalidateQueries({ queryKey: projectKeys.list })
-      queryClient.invalidateQueries({ queryKey: projectKeys.starred })
+      queryClient.invalidateQueries({ queryKey: ["projects"] })
+      queryClient.invalidateQueries({ queryKey: ["projects", "starred"] })
       toast.success("プロジェクトを元に戻しました")
     },
   })
@@ -165,7 +164,7 @@ function GeneratedImagesView({
     mutationFn: updateProjectStarred,
     onSuccess: (_data, input) => {
       queryClient.setQueryData<GeneratedImage[]>(queryKey, (images) =>
-        queryKey === projectKeys.starred && !input.isStarred
+        queryKey[1] === "starred" && !input.isStarred
           ? images?.filter((image) => image.id !== input.id)
           : images?.map((image) =>
               image.id === input.id
@@ -291,47 +290,5 @@ function GeneratedImagesView({
         </div>
       ))}
     </div>
-  )
-}
-
-export function GeneratedImages({
-  initialImages,
-}: {
-  initialImages: GeneratedImage[]
-}) {
-  return (
-    <GeneratedImagesView
-      initialImages={initialImages}
-      queryFn={listProjects}
-      queryKey={projectKeys.list}
-    />
-  )
-}
-
-export function StarredImages({
-  initialImages,
-}: {
-  initialImages: GeneratedImage[]
-}) {
-  return (
-    <GeneratedImagesView
-      initialImages={initialImages}
-      queryFn={listStarredProjects}
-      queryKey={projectKeys.starred}
-    />
-  )
-}
-
-export function TrashImages({
-  initialImages,
-}: {
-  initialImages: GeneratedImage[]
-}) {
-  return (
-    <GeneratedImagesView
-      initialImages={initialImages}
-      queryFn={listTrashProjects}
-      queryKey={projectKeys.trash}
-    />
   )
 }

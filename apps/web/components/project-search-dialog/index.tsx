@@ -6,7 +6,7 @@ import { SearchIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
-import { listProjects, projectKeys } from "@/components/gallary"
+import { listProjects } from "@/components/gallary"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 
@@ -19,7 +19,7 @@ export function ProjectSearchDialog({
 }) {
   const [query, setQuery] = useState("")
   const { data: projects = [] } = useQuery({
-    queryKey: projectKeys.list,
+    queryKey: ["projects"],
     queryFn: listProjects,
   })
   const filteredProjects = useMemo(() => {

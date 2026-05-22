@@ -1,15 +1,9 @@
-import { listGeneratedImagesByUserId } from "@hengen/db/repo"
-import { getServerSession } from "@/lib/session"
-import { GeneratedImages } from "@/components/gallary"
 import LogoIcon from "@/components/logo-icon"
 import { PromptInput } from "@/components/prompt-input"
+import { Suspense } from "react"
+import { ProjectList } from "./project-list"
 
 export default async function Page() {
-  const session = await getServerSession()
-  const images = session
-    ? await listGeneratedImagesByUserId(session.user.id)
-    : []
-
   return (
     <div className="pb-10 min-h-full px-10">
       <div className="pt-18 pb-24 md:px-5 max-w-200 mx-auto">
@@ -19,7 +13,9 @@ export default async function Page() {
         </div>
         <PromptInput />
       </div>
-      <GeneratedImages initialImages={images} />
+      <Suspense>
+        <ProjectList />
+      </Suspense>
     </div>
   )
 }

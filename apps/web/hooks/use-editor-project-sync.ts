@@ -6,7 +6,7 @@ import { useParams } from "next/navigation"
 import { useEffect } from "react"
 
 import { editorImageSizeAtom, editorProjectIdAtom } from "@/atom/generate"
-import { listProjects, projectKeys } from "@/components/gallary"
+import { listProjects } from "@/components/gallary"
 import { useEditorProject } from "@/hooks/use-editor-project"
 
 export function useEditorProjectSync() {
@@ -17,7 +17,7 @@ export function useEditorProjectSync() {
   const imageSize = useAtomValue(editorImageSizeAtom)
   const fetchProject = useEditorProject()
   const { data: projects = [] } = useQuery({
-    queryKey: projectKeys.list,
+    queryKey: ["projects"],
     queryFn: listProjects,
     refetchInterval: (query) =>
       query.state.data?.some((project) => project.status !== "ready")

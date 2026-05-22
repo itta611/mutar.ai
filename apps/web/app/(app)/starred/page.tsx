@@ -1,15 +1,13 @@
-import { listStarredImagesByUserId } from "@hengen/db/repo"
-import { StarredImages } from "@/components/gallary"
-import { getServerSession } from "@/lib/session"
+import { Suspense } from "react"
+import { ProjectList } from "./project-list"
 
 export default async function Page() {
-  const session = await getServerSession()
-  const images = session ? await listStarredImagesByUserId(session.user.id) : []
-
   return (
     <div className="min-h-full px-10 pb-10">
       <h1 className="py-10 text-xl font-bold">お気に入り</h1>
-      <StarredImages initialImages={images} />
+      <Suspense>
+        <ProjectList />
+      </Suspense>
     </div>
   )
 }
