@@ -123,7 +123,7 @@ export function AppSidebar() {
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <SidebarMenuButton className="h-15 gap-4">
+                  <SidebarMenuButton className="h-15 gap-3.5">
                     {!user ? (
                       <Skeleton className="h-10 w-10 rounded-full" />
                     ) : (
