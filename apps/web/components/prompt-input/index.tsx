@@ -32,7 +32,7 @@ export function PromptInput() {
   }>({
     defaultValues: {
       prompt: defaultPrompt,
-      aspectRatio: "4:3",
+      aspectRatio: "auto",
       model: "openai/gpt-5.4-image-2",
     },
   })
