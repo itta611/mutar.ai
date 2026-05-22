@@ -50,7 +50,7 @@ export const projectsRoutes = new Hono()
       id: projectId,
       userId: session.user.id,
       prompt,
-      title: prompt,
+      title: "新規プロジェクト",
       aspectRatio,
       model,
       status: "generating",
