@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import { AppSidebar } from "@/components/app-sidebar"
-import { Navbar } from "@/components/navbar"
 import { Providers } from "./providers"
 
 export const metadata: Metadata = {
