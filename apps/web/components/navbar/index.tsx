@@ -23,16 +23,16 @@ export function Navbar() {
         <XIcon />
       </Button>
       <div className="grow w-0 truncate">{projectName}</div>
-      <Button type="button">
-        <DownloadIcon />
-        画像を保存
+      <Button type="button" variant="outline">
+        <PencilLine />
+        修正
       </Button>
       <Button aria-label="コピー" type="button" variant="outline">
         コピー
       </Button>
-      <Button type="button" variant="outline">
-        <PencilLine />
-        修正
+      <Button type="button">
+        <DownloadIcon />
+        画像を保存
       </Button>
     </nav>
   )
