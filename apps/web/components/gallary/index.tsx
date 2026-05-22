@@ -1,10 +1,10 @@
 "use client"
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useState } from "react"
 import {
   ClipboardIcon,
   EllipsisIcon,
-  FolderClosedIcon,
   LoaderCircleIcon,
   Undo2Icon,
   StarIcon,
@@ -36,34 +36,6 @@ export type GeneratedImage = {
 
 export async function listProjects() {
   const response = await apiClient.projects.$get()
-
-  if (!response.ok) {
-    throw new Error("request_failed")
-  }
-
-  const data = await response.json()
-
-  return data.projects
-}
-
-async function listStarredProjects() {
-  const response = await apiClient.projects.$get({
-    query: { starred: "true" },
-  })
-
-  if (!response.ok) {
-    throw new Error("request_failed")
-  }
-
-  const data = await response.json()
-
-  return data.projects
-}
-
-async function listTrashProjects() {
-  const response = await apiClient.projects.$get({
-    query: { trash: "true" },
-  })
 
   if (!response.ok) {
     throw new Error("request_failed")
@@ -122,28 +94,13 @@ type GeneratedImagesViewProps = {
   queryKey: readonly string[]
 }
 
-export function Gallery({
-  initialImages,
-  queryKey,
-}: GeneratedImagesViewProps) {
+export function Gallery({ initialImages, queryKey }: GeneratedImagesViewProps) {
   const queryClient = useQueryClient()
-  const queryFn =
-    queryKey[1] === "trash"
-      ? listTrashProjects
-      : queryKey[1] === "starred"
-        ? listStarredProjects
-        : listProjects
-  const { data: images = initialImages } = useQuery({
-    queryKey,
-    queryFn,
-    initialData: initialImages,
-  })
+  const [images, setImages] = useState(initialImages)
   const deleteProjectMutation = useMutation({
     mutationFn: deleteProject,
     onSuccess: (_data, id) => {
-      queryClient.setQueryData<GeneratedImage[]>(queryKey, (images) =>
-        images?.filter((image) => image.id !== id)
-      )
+      setImages((images) => images.filter((image) => image.id !== id))
       queryClient.invalidateQueries({ queryKey: ["projects", "trash"] })
       toast.success("プロジェクトを削除しました")
     },
@@ -151,10 +108,7 @@ export function Gallery({
   const restoreProjectMutation = useMutation({
     mutationFn: restoreProject,
     onSuccess: (_data, id) => {
-      queryClient.setQueryData<GeneratedImage[]>(
-        ["projects", "trash"],
-        (images) => images?.filter((image) => image.id !== id)
-      )
+      setImages((images) => images.filter((image) => image.id !== id))
       queryClient.invalidateQueries({ queryKey: ["projects"] })
       queryClient.invalidateQueries({ queryKey: ["projects", "starred"] })
       toast.success("プロジェクトを元に戻しました")
@@ -163,10 +117,10 @@ export function Gallery({
   const updateProjectStarredMutation = useMutation({
     mutationFn: updateProjectStarred,
     onSuccess: (_data, input) => {
-      queryClient.setQueryData<GeneratedImage[]>(queryKey, (images) =>
+      setImages((images) =>
         queryKey[1] === "starred" && !input.isStarred
-          ? images?.filter((image) => image.id !== input.id)
-          : images?.map((image) =>
+          ? images.filter((image) => image.id !== input.id)
+          : images.map((image) =>
               image.id === input.id
                 ? { ...image, isStarred: input.isStarred }
                 : image
