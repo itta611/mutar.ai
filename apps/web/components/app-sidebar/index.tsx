@@ -127,18 +127,24 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>お気に入り</SidebarGroupLabel>
           <SidebarMenu>
-            {starredProjects.map((project) => (
-              <SidebarMenuItem key={project.id}>
-                <SidebarMenuButton
-                  isActive={pathname === `/editor/${project.id}`}
-                  render={<Link href={`/editor/${project.id}`} />}
-                  className="justify-between pr-1"
-                >
-                  {project.title}
-                  <ProjectDropdownMenu project={project} />
-                </SidebarMenuButton>
+            {starredProjects.length === 0 ? (
+              <SidebarMenuItem className="text-xs text-muted-foreground/80 px-3 py-1.5">
+                プロジェクトをお気に入りしましょう。
               </SidebarMenuItem>
-            ))}
+            ) : (
+              starredProjects.map((project) => (
+                <SidebarMenuItem key={project.id}>
+                  <SidebarMenuButton
+                    isActive={pathname === `/editor/${project.id}`}
+                    render={<Link href={`/editor/${project.id}`} />}
+                    className="justify-between pr-1"
+                  >
+                    {project.title}
+                    <ProjectDropdownMenu project={project} />
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))
+            )}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
