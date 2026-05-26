@@ -14,18 +14,16 @@ import {
 import { Logo } from "@/components/logo"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { authClient } from "@/lib/auth-client"
+import { apiClient } from "@/lib/api-client"
+import { useQuery } from "@tanstack/react-query"
 import {
   ChevronDown,
   HomeIcon,
   LogOutIcon,
-  Monitor,
   MonitorIcon,
-  Moon,
   MoonIcon,
   PaletteIcon,
   SearchIcon,
-  StarIcon,
-  Sun,
   SunIcon,
   Trash2Icon,
 } from "lucide-react"
@@ -36,21 +34,40 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTheme } from "next-themes"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
+import { ProjectDropdownMenu } from "@/components/interface/project-dropdown-menu"
 import { ProjectSearchDialog } from "@/components/project-search-dialog"
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
+
+async function listStarredProjects() {
+  const response = await apiClient.projects.$get({
+    query: { starred: "true" },
+  })
+
+  if (!response.ok) {
+    throw new Error("request_failed")
+  }
+
+  const data = await response.json()
+
+  return data.projects
+}
 
 export function AppSidebar() {
   const [searchOpen, setSearchOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
-  const { setTheme, theme } = useTheme()
+  const { setTheme } = useTheme()
   const session = authClient.useSession()
   const user = session.data?.user
+  const { data: starredProjects = [] } = useQuery({
+    queryKey: ["projects", "starred"],
+    queryFn: listStarredProjects,
+    enabled: !!user,
+  })
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -98,15 +115,6 @@ export function AppSidebar() {
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton
-                isActive={pathname === "/starred"}
-                render={<Link href="/starred" />}
-              >
-                <StarIcon />
-                お気に入り
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
                 isActive={pathname === "/trash"}
                 render={<Link href="/trash" />}
               >
@@ -114,6 +122,23 @@ export function AppSidebar() {
                 ゴミ箱
               </SidebarMenuButton>
             </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>お気に入り</SidebarGroupLabel>
+          <SidebarMenu>
+            {starredProjects.map((project) => (
+              <SidebarMenuItem key={project.id}>
+                <SidebarMenuButton
+                  isActive={pathname === `/editor/${project.id}`}
+                  render={<Link href={`/editor/${project.id}`} />}
+                  className="justify-between pr-1"
+                >
+                  {project.title}
+                  <ProjectDropdownMenu project={project} />
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
