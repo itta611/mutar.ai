@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useEffect, useState } from "react"
 
 import { authClient } from "@/lib/auth-client"
@@ -100,7 +101,7 @@ export function AuthDialog() {
       open={isAuthDialogOpen}
       onOpenChange={(open) => !open && closeAuthDialog()}
     >
-      <DialogContent>
+      <DialogContent className="sm:max-w-108 px-10 pb-11 pt-12">
         <DialogTitle className="text-xl font-bold text-center">
           ログイン・新規登録
         </DialogTitle>
@@ -116,6 +117,7 @@ export function AuthDialog() {
             onClick={handleGoogleLogin}
             disabled={busyMode === "google"}
           >
+            <Image src="/google-icon.svg" alt="" width={18} height={18} />
             Google アカウントでログイン
           </Button>
 
