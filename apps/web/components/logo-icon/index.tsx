@@ -1,11 +1,12 @@
+import { cn } from "@/lib/utils"
 import React from "react"
 
-const LogoIcon = (props: React.SVGProps<SVGSVGElement>) => (
+const LogoIcon = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
   <svg
     viewBox="0 0 136 149"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    className="fill-primary"
+    className={cn("fill-primary", className)}
     {...props}
   >
     <title>Hengen logo icon</title>

@@ -13,6 +13,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "../ui/dialog"
+import LogoIcon from "../logo-icon"
 
 function getNameFromEmail(email: string) {
   const localPart = email.trim().split("@")[0]?.trim()
@@ -102,6 +103,7 @@ export function AuthDialog() {
       onOpenChange={(open) => !open && closeAuthDialog()}
     >
       <DialogContent className="sm:max-w-108 px-10 pb-11 pt-12">
+        <LogoIcon width={40} height={40} className="mx-auto" />
         <DialogTitle className="text-xl font-bold text-center">
           ログイン・新規登録
         </DialogTitle>
