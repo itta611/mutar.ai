@@ -14,7 +14,6 @@ import {
 } from "@/hooks/use-generate-project"
 import { authClient } from "@/lib/auth-client"
 import { AspectSelect } from "./aspect-select"
-import { ModelSelect } from "./model-select"
 
 const defaultPrompt =
   "企業の請求書処理を説明する業務フロー図の入った１枚のスライドを作成。「受領」「OCR読み取り」「承認」「支払い」「保存」の5ステップを左から右に配置。各ステップにアイコンを付け、スタイリッシュなデザイン。"
@@ -27,18 +26,15 @@ export function PromptInput() {
   const user = session.data?.user
   const { control, handleSubmit, register, setValue } = useForm<{
     aspectRatio: EditorAspectRatio
-    model: GenerateProjectInput["model"]
     prompt: string
   }>({
     defaultValues: {
       prompt: defaultPrompt,
       aspectRatio: "auto",
-      model: "openai/gpt-5.4-image-2",
     },
   })
   const prompt = useWatch({ control, name: "prompt" })
   const aspect = useWatch({ control, name: "aspectRatio" })
-  const model = useWatch({ control, name: "model" })
   const [isGenerating, setIsGenerating] = useState(false)
   const canGenerate = !isGenerating && prompt.trim().length > 0
 
@@ -61,7 +57,7 @@ export function PromptInput() {
   return (
     <form
       onSubmit={handleSubmit(handleGenerate)}
-      className="rounded-2xl border-2 border-primary p-3.5 shadow-lg/6 bg-background dark:bg-secondary"
+      className="rounded-3xl border-2 border-primary p-3.5 shadow-lg/6 bg-background dark:bg-secondary"
     >
       <Textarea
         id="generation-prompt"
@@ -83,10 +79,6 @@ export function PromptInput() {
           <AspectSelect
             selectedAspect={aspect}
             onAspectChange={(aspect) => setValue("aspectRatio", aspect)}
-          />
-          <ModelSelect
-            selectedModel={model}
-            onModelChange={(model) => setValue("model", model)}
           />
         </div>
         <Button type="submit" size="lg" disabled={!canGenerate}>

@@ -9,7 +9,6 @@ type CreateProjectInput = {
   prompt: string
   title: string
   aspectRatio: string
-  model: string
   status: string
   width: number
   height: number

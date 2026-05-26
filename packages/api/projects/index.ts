@@ -16,7 +16,6 @@ import { getSession } from "../session"
 const createProjectSchema = z.object({
   prompt: z.string().trim().min(12).max(1200),
   aspectRatio: z.enum(["auto", "16:9", "4:3", "3:4", "1:1"]),
-  model: z.enum(["google/gemini-2.5-flash-image", "openai/gpt-5.4-image-2"]),
 })
 
 export const projectsRoutes = new Hono()
@@ -44,7 +43,7 @@ export const projectsRoutes = new Hono()
     }
 
     const projectId = randomUUID()
-    const { aspectRatio, model, prompt } = c.req.valid("json")
+    const { aspectRatio, prompt } = c.req.valid("json")
 
     await createProject({
       id: projectId,
@@ -52,7 +51,6 @@ export const projectsRoutes = new Hono()
       prompt,
       title: "新規プロジェクト",
       aspectRatio,
-      model,
       status: "generating",
       width: 0,
       height: 0,
@@ -68,7 +66,7 @@ export const projectsRoutes = new Hono()
             "Content-Type": "application/json",
             Authorization: `Bearer ${env.HENGEN_WORKER_SECRET}`,
           },
-          body: JSON.stringify({ projectId, prompt, aspectRatio, model }),
+          body: JSON.stringify({ projectId, prompt, aspectRatio }),
         }
       )
 
