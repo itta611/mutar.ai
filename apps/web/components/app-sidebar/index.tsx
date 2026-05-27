@@ -24,6 +24,7 @@ import {
   MoonIcon,
   PaletteIcon,
   SearchIcon,
+  StarIcon,
   SunIcon,
   Trash2Icon,
 } from "lucide-react"
@@ -111,6 +112,15 @@ export function AppSidebar() {
               <SidebarMenuButton onClick={() => setSearchOpen(true)}>
                 <SearchIcon />
                 検索
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                isActive={pathname === "/starred"}
+                render={<Link href="/starred" />}
+              >
+                <StarIcon />
+                お気に入り
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
