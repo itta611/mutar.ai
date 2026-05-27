@@ -34,7 +34,7 @@ export function useGenerateProject() {
     const data = await createProjectMutation.mutateAsync(input)
 
     setProjectId(data.projectId)
-    setProjectTitle(input.prompt)
+    setProjectTitle("新規プロジェクト")
     setImageSize(null)
 
     return data.projectId
