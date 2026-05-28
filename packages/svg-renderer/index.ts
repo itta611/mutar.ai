@@ -31,9 +31,9 @@ export const fontFamilyMap: Record<
   NonNullable<SvgBox["fontFamily"]>,
   string
 > = {
-  gothic: '"Hiragino Sans", "Yu Gothic", "YuGothic", sans-serif',
-  mincho: '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif',
-  pop: '"Hiragino Maru Gothic ProN", "Yu Gothic", "YuGothic", sans-serif',
+  gothic: '"Noto Sans JP", sans-serif',
+  mincho: '"Noto Serif JP", serif',
+  pop: '"M PLUS Rounded 1c", sans-serif',
 }
 
 function escapeXml(value: string) {
