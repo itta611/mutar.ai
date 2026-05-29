@@ -156,21 +156,6 @@ export async function findProjectByUserId({
   return project
 }
 
-export async function findProjectThumbnailSource(projectId: string) {
-  const [project] = await db
-    .select({
-      id: projects.id,
-      width: projects.width,
-      height: projects.height,
-      analysis: projects.analysis,
-    })
-    .from(projects)
-    .where(eq(projects.id, projectId))
-    .limit(1)
-
-  return project
-}
-
 export async function findProjectForEditorByUserId({
   projectId,
   userId,

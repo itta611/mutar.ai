@@ -4,11 +4,11 @@ import { DownloadIcon, PencilLine, XIcon } from "lucide-react"
 import { useAtomValue } from "jotai"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { fontFamilyMap } from "@hengen/svg-renderer"
 import { toast } from "sonner"
 
 import {
   editorBoxesAtom,
+  fontFamilyMap,
   editorImageSizeAtom,
   editorProjectIdAtom,
   editorProjectTitleAtom,

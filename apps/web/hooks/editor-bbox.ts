@@ -1,9 +1,8 @@
 "use client"
 
 import Konva from "konva"
-import { fontFamilyMap } from "@hengen/svg-renderer"
 
-import type { EditorBox } from "@/atom/generate"
+import { fontFamilyMap, type EditorBox } from "@/atom/generate"
 
 type TextStyle = {
   bold: boolean

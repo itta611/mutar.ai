@@ -1,8 +1,0 @@
-{
-  "name": "@hengen/svg-renderer",
-  "private": true,
-  "type": "module",
-  "exports": {
-    ".": "./index.ts"
-  }
-}

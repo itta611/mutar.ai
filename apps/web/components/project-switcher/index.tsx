@@ -99,7 +99,7 @@ export function ProjectSwitcher() {
                 alt=""
                 className="h-full w-full object-cover"
                 height={80}
-                src={`/api/projects/${project.id}/thumbnail`}
+                src={`/api/projects/${project.id}/image`}
                 unoptimized
                 width={80}
               />

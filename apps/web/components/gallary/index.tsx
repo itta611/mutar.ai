@@ -56,7 +56,7 @@ export function Gallery({ initialImages, queryKey }: GeneratedImagesViewProps) {
           <Link href={`/editor/${image.id}`} className="block">
             {image.status === "ready" ? (
               <Image
-                src={`/api/projects/${image.id}/thumbnail`}
+                src={`/api/projects/${image.id}/image`}
                 alt=""
                 width={300}
                 height={300}

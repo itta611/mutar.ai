@@ -60,7 +60,7 @@ export function ProjectSearchDialog({
                 onClick={() => onOpenChange(false)}
               >
                 <Image
-                  src={`/api/projects/${project.id}/thumbnail`}
+                  src={`/api/projects/${project.id}/image`}
                   alt=""
                   width={220}
                   height={124}

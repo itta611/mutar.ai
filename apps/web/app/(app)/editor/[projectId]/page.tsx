@@ -11,7 +11,6 @@ import {
   Text,
   Transformer,
 } from "react-konva"
-import { fontFamilyMap } from "@hengen/svg-renderer"
 
 import { EditorStage } from "./editor-stage"
 import { TextEditor } from "./text-editor"
@@ -20,6 +19,7 @@ import {
   editorImageSizeAtom,
   editorProjectIdAtom,
   editorSelectedBoxIndexAtom,
+  fontFamilyMap,
   type EditorBox,
 } from "@/atom/generate"
 import {
