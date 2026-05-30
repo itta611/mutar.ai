@@ -1,7 +1,9 @@
 {
-	"editor.formatOnSave": true,
-	"editor.defaultFormatter": "biomejs.biome",
-	"[typescriptreact]": {
-		"editor.defaultFormatter": "biomejs.biome"
-	}
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "biomejs.biome",
+  "biome.configurationPath": "./biome.json",
+  "biome.requireConfiguration": true,
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  }
 }
