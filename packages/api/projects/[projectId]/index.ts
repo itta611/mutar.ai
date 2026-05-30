@@ -6,16 +6,13 @@ import {
 } from "@hengen/db/repo"
 import { Hono } from "hono"
 
-import { getSession } from "../../session"
+import { sessionMiddleware, type SessionEnv } from "../../session"
 import { projectParamsSchema } from "../schema"
 
-export const projectRoutes = new Hono()
+export const projectRoutes = new Hono<SessionEnv>()
+  .use(sessionMiddleware)
   .get("/", zValidator("param", projectParamsSchema), async (c) => {
-    const session = await getSession(c.req.raw.headers)
-
-    if (!session) {
-      return c.json({ message: "Unauthorized" }, 401)
-    }
+    const session = c.get("session")
 
     const { projectId } = c.req.valid("param")
     const project = await findProjectDimensionsByUserId({
@@ -41,11 +38,7 @@ export const projectRoutes = new Hono()
     return c.json(project, 200)
   })
   .delete("/", zValidator("param", projectParamsSchema), async (c) => {
-    const session = await getSession(c.req.raw.headers)
-
-    if (!session) {
-      return c.json({ message: "Unauthorized" }, 401)
-    }
+    const session = c.get("session")
 
     const { projectId } = c.req.valid("param")
     const project = await deleteProjectByUserId({
@@ -60,11 +53,7 @@ export const projectRoutes = new Hono()
     return c.json({ ok: true }, 200)
   })
   .post("/restore", zValidator("param", projectParamsSchema), async (c) => {
-    const session = await getSession(c.req.raw.headers)
-
-    if (!session) {
-      return c.json({ message: "Unauthorized" }, 401)
-    }
+    const session = c.get("session")
 
     const { projectId } = c.req.valid("param")
     const project = await restoreProjectByUserId({

@@ -3,18 +3,15 @@ import { findProjectByUserId } from "@hengen/db/repo"
 import { Hono } from "hono"
 
 import { projectImageKey, readImageFromR2 } from "../../../r2"
-import { getSession } from "../../../session"
+import { sessionMiddleware, type SessionEnv } from "../../../session"
 import { projectParamsSchema } from "../../schema"
 
-export const projectImageRoutes = new Hono().get(
+export const projectImageRoutes = new Hono<SessionEnv>().get(
   "/",
+  sessionMiddleware,
   zValidator("param", projectParamsSchema),
   async (c) => {
-    const session = await getSession(c.req.raw.headers)
-
-    if (!session) {
-      return c.json({ message: "Unauthorized" }, 401)
-    }
+    const session = c.get("session")
 
     const { projectId } = c.req.valid("param")
     const project = await findProjectByUserId({

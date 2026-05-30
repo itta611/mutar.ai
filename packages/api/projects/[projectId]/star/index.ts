@@ -3,23 +3,20 @@ import { updateProjectStarredByUserId } from "@hengen/db/repo"
 import { Hono } from "hono"
 import { z } from "zod"
 
-import { getSession } from "../../../session"
+import { sessionMiddleware, type SessionEnv } from "../../../session"
 import { projectParamsSchema } from "../../schema"
 
 const updateProjectStarSchema = z.object({
   isStarred: z.boolean(),
 })
 
-export const projectStarRoutes = new Hono().put(
+export const projectStarRoutes = new Hono<SessionEnv>().put(
   "/",
+  sessionMiddleware,
   zValidator("param", projectParamsSchema),
   zValidator("json", updateProjectStarSchema),
   async (c) => {
-    const session = await getSession(c.req.raw.headers)
-
-    if (!session) {
-      return c.json({ message: "Unauthorized" }, 401)
-    }
+    const session = c.get("session")
 
     const { projectId } = c.req.valid("param")
     const { isStarred } = c.req.valid("json")

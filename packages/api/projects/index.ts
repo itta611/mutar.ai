@@ -11,20 +11,17 @@ import { Hono } from "hono"
 import { z } from "zod"
 
 import { env } from "@/lib/env"
-import { getSession } from "../session"
+import { sessionMiddleware, type SessionEnv } from "../session"
 
 const createProjectSchema = z.object({
   prompt: z.string().trim().min(12).max(1200),
   aspectRatio: z.enum(["auto", "16:9", "4:3", "3:4", "1:1"]),
 })
 
-export const projectsRoutes = new Hono()
+export const projectsRoutes = new Hono<SessionEnv>()
+  .use(sessionMiddleware)
   .get("/", async (c) => {
-    const session = await getSession(c.req.raw.headers)
-
-    if (!session) {
-      return c.json({ message: "Unauthorized" }, 401)
-    }
+    const session = c.get("session")
 
     const projects =
       c.req.query("trash") === "true"
@@ -36,11 +33,7 @@ export const projectsRoutes = new Hono()
     return c.json({ projects }, 200)
   })
   .post("/", zValidator("json", createProjectSchema), async (c) => {
-    const session = await getSession(c.req.raw.headers)
-
-    if (!session) {
-      return c.json({ message: "Unauthorized" }, 401)
-    }
+    const session = c.get("session")
 
     const projectId = randomUUID()
     const { aspectRatio, prompt } = c.req.valid("json")
