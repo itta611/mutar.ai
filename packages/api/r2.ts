@@ -57,7 +57,7 @@ export async function readImageFromR2(key: string) {
 
 export function projectImageKey(
   projectId: string,
-  kind: "original" | "cleaned"
+  kind: "original" | "cleaned" | "thumbnail"
 ) {
   return `projects/${projectId}/${kind}.png`
 }

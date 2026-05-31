@@ -11,12 +11,14 @@ import {
   editorProjectIdAtom,
   editorProjectTitleAtom,
 } from "@/atom/generate"
-import { resizeTextBox } from "@/hooks/editor-bbox"
+import { calculateLetterSpacing, resizeTextBox } from "@/hooks/editor-bbox"
 import { apiClient } from "@/lib/api-client"
+
+type ProjectBox = EditorBox & { lineHeight?: number }
 
 type EditorProject =
   | {
-      analysis: { boxes: EditorBox[]; summary: string }
+      analysis: { boxes: ProjectBox[]; summary: string }
       height: number
       id: string
       status: "ready"
@@ -78,7 +80,14 @@ export function useEditorProject() {
 
         setImageSize([project.width, project.height])
         setBoxes(
-          project.analysis.boxes.map((box) => resizeTextBox(box, box.label))
+          project.analysis.boxes.map(({ lineHeight, ...box }) => {
+            const nextBox = { ...box, lineheight: box.lineheight ?? lineHeight }
+
+            return resizeTextBox(
+              { ...nextBox, letterSpacing: calculateLetterSpacing(nextBox) },
+              box.label
+            )
+          })
         )
       } catch {
         setProjectTitle("")

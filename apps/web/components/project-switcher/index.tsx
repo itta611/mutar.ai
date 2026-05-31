@@ -16,7 +16,7 @@ import { Loader2Icon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 function preloadProjectImage(projectId: string) {
-  new window.Image().src = `/api/projects/${projectId}/image`
+  new window.Image().src = `/api/projects/${projectId}/image?kind=thumbnail`
 }
 
 function getProjectIdFromPathname() {
@@ -99,7 +99,7 @@ export function ProjectSwitcher() {
                 alt=""
                 className="h-full w-full object-cover"
                 height={80}
-                src={`/api/projects/${project.id}/image`}
+                src={`/api/projects/${project.id}/image?kind=thumbnail`}
                 unoptimized
                 width={80}
               />

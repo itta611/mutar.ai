@@ -121,11 +121,26 @@ export function createBoxTextNode(box: EditorBox, label = box.label) {
     fontFamily: fontFamilyMap[box.fontFamily ?? "gothic"],
     fontSize: box.fontSize,
     fontStyle: box.bold ? "bold" : "normal",
+    letterSpacing: box.letterSpacing ?? 0,
     lineHeight: box.lineheight ?? 1.4,
     text: label,
     width: box.wrapText ? rect.width : undefined,
     wrap: box.wrapText ? "char" : "none",
   })
+}
+
+export function calculateLetterSpacing(box: EditorBox) {
+  const rect = getBoxRect(box)
+  const textNode = createBoxTextNode({ ...box, letterSpacing: 0 })
+  const textWidth = textNode.getTextWidth()
+  const characterCount = Math.max(
+    ...box.label.split("\n").map((line) => Array.from(line).length)
+  )
+  const widthRatio = rect.width / textWidth
+
+  return widthRatio >= 1.2 && characterCount > 1
+    ? ((widthRatio - 1.2) * textWidth) / characterCount
+    : (box.letterSpacing ?? 0)
 }
 
 export function resizeTextBox(box: EditorBox, label: string) {

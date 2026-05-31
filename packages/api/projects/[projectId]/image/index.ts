@@ -26,9 +26,10 @@ export const projectImageRoutes = new Hono<SessionEnv>().get(
     }
 
     let asset: Awaited<ReturnType<typeof readImageFromR2>>
+    const kind = c.req.query("kind") === "thumbnail" ? "thumbnail" : "cleaned"
 
     try {
-      asset = await readImageFromR2(projectImageKey(projectId, "cleaned"))
+      asset = await readImageFromR2(projectImageKey(projectId, kind))
     } catch (error) {
       console.error("[hengen] failed to read project image", error)
       return c.json({ message: "Image not available" }, 404, {

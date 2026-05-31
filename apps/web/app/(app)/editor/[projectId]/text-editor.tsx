@@ -8,6 +8,7 @@ export function TextEditor({
   fontSize,
   fontWeight,
   height,
+  letterSpacing,
   lineheight,
   onClose,
   onChange,
@@ -22,6 +23,7 @@ export function TextEditor({
   fontSize: number
   fontWeight: number
   height: number
+  letterSpacing: number
   lineheight: number
   onClose: (value: string) => void
   onChange: (value: string) => void
@@ -53,6 +55,7 @@ export function TextEditor({
           fontWeight,
           height: height + 5,
           left: 0,
+          letterSpacing,
           lineHeight: lineheight,
           outline: "none",
           overflow: "hidden",

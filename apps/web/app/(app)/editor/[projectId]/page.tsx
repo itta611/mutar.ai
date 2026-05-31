@@ -31,7 +31,6 @@ import {
   resizeWrappedTextBox,
 } from "@/hooks/editor-bbox"
 import { useEditorProject } from "@/hooks/use-editor-project"
-import { useEditorProjectSync } from "@/hooks/use-editor-project-sync"
 
 type EditingText = {
   index: number
@@ -194,8 +193,6 @@ export default function Page({
   const [selectedIndex, setSelectedIndex] = useAtom(editorSelectedBoxIndexAtom)
   const [snapGuides, setSnapGuides] = useState<SnapGuide[]>([])
 
-  useEditorProjectSync()
-
   useEffect(() => {
     if (currentProjectId !== activeProjectId) {
       fetchProject(projectId)
@@ -203,6 +200,10 @@ export default function Page({
   }, [activeProjectId, currentProjectId, fetchProject, projectId])
 
   useEffect(() => {
+    if (!imageSize) {
+      return
+    }
+
     const image = new Image()
     image.src = `/api/projects/${activeProjectId}/image`
     image.onload = () => setImageElement({ image, projectId: activeProjectId })
@@ -210,7 +211,7 @@ export default function Page({
     return () => {
       image.onload = null
     }
-  }, [activeProjectId])
+  }, [activeProjectId, imageSize])
 
   useEffect(() => {
     const transformer = transformerRef.current
@@ -461,6 +462,7 @@ export default function Page({
                 fontSize={box.fontSize}
                 fontStyle={box.bold ? "bold" : "normal"}
                 height={rect.height}
+                letterSpacing={box.letterSpacing ?? 0}
                 lineHeight={box.lineheight ?? 1.4}
                 onClick={(event) => selectText(event, index)}
                 onDblClick={(event) => startEditing(event, index)}
@@ -498,6 +500,7 @@ export default function Page({
                   fontSize={box.fontSize}
                   fontWeight={box.bold ? 700 : 400}
                   height={rect.height}
+                  letterSpacing={box.letterSpacing ?? 0}
                   lineheight={box.lineheight ?? 1.4}
                   onChange={(value) => updateLabelDraft(index, value)}
                   onClose={(value) => updateLabel(index, value)}

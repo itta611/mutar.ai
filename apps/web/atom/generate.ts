@@ -10,6 +10,7 @@ export type EditorBox = {
   fontFamily?: "mincho" | "pop" | "gothic"
   fontSize: number
   label: string
+  letterSpacing?: number
   lineheight?: number
   wrapText?: boolean
 }

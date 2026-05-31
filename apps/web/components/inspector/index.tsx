@@ -29,7 +29,15 @@ function updateTextBox(
   boxes: EditorBox[],
   index: number,
   patch: Partial<
-    Pick<EditorBox, "bold" | "color" | "fontFamily" | "fontSize" | "lineheight">
+    Pick<
+      EditorBox,
+      | "bold"
+      | "color"
+      | "fontFamily"
+      | "fontSize"
+      | "letterSpacing"
+      | "lineheight"
+    >
   >
 ) {
   return boxes.map((box, boxIndex) =>
@@ -47,7 +55,12 @@ export function Inspector() {
     patch: Partial<
       Pick<
         EditorBox,
-        "bold" | "color" | "fontFamily" | "fontSize" | "lineheight"
+        | "bold"
+        | "color"
+        | "fontFamily"
+        | "fontSize"
+        | "letterSpacing"
+        | "lineheight"
       >
     >
   ) {
@@ -133,6 +146,23 @@ export function Inspector() {
               step={0.1}
               type="number"
               value={box.lineheight ?? 1.4}
+            />
+          </div>
+          <div className="block space-y-1.5">
+            <span className="text-xs font-medium text-muted-foreground">
+              字間
+            </span>
+            <Input
+              onChange={(event) => {
+                const letterSpacing = Number(event.currentTarget.value)
+
+                if (Number.isFinite(letterSpacing)) {
+                  updateBox({ letterSpacing })
+                }
+              }}
+              step={0.1}
+              type="number"
+              value={box.letterSpacing ?? 0}
             />
           </div>
           <div className="block space-y-1.5">

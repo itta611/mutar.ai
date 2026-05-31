@@ -15,6 +15,46 @@ import {
 } from "@/atom/generate"
 import { Button } from "@/components/ui/button"
 
+function getTextWidth(
+  context: CanvasRenderingContext2D,
+  text: string,
+  letterSpacing: number
+) {
+  return (
+    context.measureText(text).width + Array.from(text).length * letterSpacing
+  )
+}
+
+function fillText(
+  context: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  letterSpacing: number
+) {
+  if (letterSpacing === 0) {
+    context.fillText(text, x, y)
+    return
+  }
+
+  const chars = Array.from(text)
+  const width = getTextWidth(context, text, letterSpacing)
+  const textAlign = context.textAlign
+  let currentX =
+    textAlign === "right"
+      ? x - width
+      : textAlign === "center"
+        ? x - width / 2
+        : x
+
+  context.textAlign = "left"
+  for (const char of chars) {
+    context.fillText(char, currentX, y)
+    currentX += context.measureText(char).width + letterSpacing
+  }
+  context.textAlign = textAlign
+}
+
 export function Navbar() {
   const router = useRouter()
   const boxes = useAtomValue(editorBoxesAtom)
@@ -56,6 +96,7 @@ export function Navbar() {
         const boxWidth = Math.max(...xs) - left
         const boxHeight = Math.max(...ys) - top
         const fontSize = box.fontSize
+        const letterSpacing = box.letterSpacing ?? 0
         const lineheight = box.lineheight ?? 1.4
         const lineHeight = fontSize * lineheight
         const fontFamily = fontFamilyMap[box.fontFamily ?? "gothic"]
@@ -70,7 +111,7 @@ export function Navbar() {
 
                 if (
                   currentLine &&
-                  context.measureText(nextLine).width > boxWidth
+                  getTextWidth(context, nextLine, letterSpacing) > boxWidth
                 ) {
                   wrappedLines.push(currentLine)
                   currentLine = char
@@ -97,7 +138,7 @@ export function Navbar() {
         context.textBaseline = "middle"
 
         lines.forEach((line, index) => {
-          context.fillText(line, x, y + index * lineHeight)
+          fillText(context, line, x, y + index * lineHeight, letterSpacing)
         })
       }
 
