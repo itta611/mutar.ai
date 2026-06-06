@@ -15,7 +15,7 @@ export function Suggestion({
   onSelect: (content: string) => void
 }) {
   return (
-    <div className="flex gap-2 mt-2 justify-center flex-wrap">
+    <div className="flex gap-2 mt-4 justify-center flex-wrap">
       <SuggestionButton
         onClick={() =>
           onSelect(`SaaSの料金プラン比較画像を作成。
