@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 import { authClient } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
@@ -28,7 +29,6 @@ function getNameFromEmail(email: string) {
 export function AuthDialog() {
   const { closeAuthDialog, isAuthDialogOpen } = useAuthDialog()
   const [email, setEmail] = useState("")
-  const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busyMode, setBusyMode] = useState<"email" | "google" | null>(null)
 
@@ -70,7 +70,7 @@ export function AuthDialog() {
 
   async function handleMagicLink() {
     if (!email.trim()) {
-      setError("メールアドレスを入力してください。")
+      toast.error("メールアドレスを入力してください。")
       return
     }
 
@@ -90,7 +90,7 @@ export function AuthDialog() {
       }
 
       setBusyMode(null)
-      setError("ログインできませんでした。")
+      toast.error("ログインできませんでした。")
       return
     }
 
@@ -103,13 +103,14 @@ export function AuthDialog() {
     setBusyMode(null)
 
     if (result.error) {
-      setError(
+      toast.error(
         "マジックリンクを送信できませんでした。時間をおいて再度お試しください。"
       )
       return
     }
 
-    setMessage(
+    setEmail("")
+    toast.success(
       "マジックリンクをメールで送信しました。受信ボックスを確認してください。"
     )
   }
@@ -172,12 +173,6 @@ export function AuthDialog() {
             </Button>
           </form>
         </div>
-
-        {message ? (
-          <p className="mt-4 rounded-xl px-4 text-sm leading-6 text-black/70">
-            {message}
-          </p>
-        ) : null}
 
         {error ? (
           <p className="mt-4 rounded-xl px-4 text-sm leading-6 text-red-500">
