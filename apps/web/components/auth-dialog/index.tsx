@@ -146,24 +146,31 @@ export function AuthDialog() {
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          <Input
-            id="login-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@example.com"
-          />
-
-          <Button
-            type="button"
-            size="lg"
-            onClick={handleMagicLink}
-            disabled={busyMode === "email"}
+          <form
+            className="flex flex-col gap-3"
+            onSubmit={(event) => {
+              event.preventDefault()
+              handleMagicLink()
+            }}
           >
-            {busyMode === "email" ? "リンクを発行しています..." : "続ける"}
-          </Button>
+            <Input
+              id="login-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@example.com"
+            />
+
+            <Button
+              type="submit"
+              size="lg"
+              disabled={busyMode === "email"}
+            >
+              {busyMode === "email" ? "リンクを発行しています..." : "続ける"}
+            </Button>
+          </form>
         </div>
 
         {message ? (
