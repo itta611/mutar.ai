@@ -78,7 +78,11 @@ export function AuthDialog() {
     setError(null)
 
     if (email.trim().toLowerCase() === "test@test.com") {
-      const response = await fetch("/api/auth/beta-login", { method: "POST" })
+      const response = await fetch("/api/auth/beta-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      })
 
       if (response.ok) {
         window.location.href = callbackURL
