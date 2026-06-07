@@ -74,7 +74,6 @@ export function Inspector() {
   return (
     <div className="hidden w-72 border-l bg-background p-3 md:block">
       <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
-        <TypeIcon className="size-4" />
         インスペクタ
       </div>
       {box ? (
