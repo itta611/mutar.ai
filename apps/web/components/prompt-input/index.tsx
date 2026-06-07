@@ -69,7 +69,6 @@ export function PromptInput() {
               }
             }
           }}
-          defaultValue={defaultPrompt}
           className="min-h-10 resize-none rounded-none border-none px-1 pt-0 pb-2 shadow-none ring-0! outline-none leading-relaxed bg-transparent!"
           placeholder="作りたい資料画像を自然文で書いてください。"
         />
