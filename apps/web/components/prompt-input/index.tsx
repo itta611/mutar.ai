@@ -16,9 +16,6 @@ import { authClient } from "@/lib/auth-client"
 import { AspectSelect } from "./aspect-select"
 import { Suggestion } from "./suggestion"
 
-const defaultPrompt =
-  "企業の請求書処理を説明する業務フロー図の入った１枚のスライドを作成。「受領」「OCR読み取り」「承認」「支払い」「保存」の5ステップを左から右に配置。各ステップにアイコンを付け、スタイリッシュなデザイン。"
-
 export function PromptInput() {
   const generateProject = useGenerateProject()
   const { openAuthDialog } = useAuthDialog()
@@ -30,7 +27,7 @@ export function PromptInput() {
     prompt: string
   }>({
     defaultValues: {
-      prompt: defaultPrompt,
+      prompt: "",
       aspectRatio: "auto",
     },
   })
