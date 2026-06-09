@@ -11,7 +11,7 @@ import {
   editorProjectIdAtom,
   editorProjectTitleAtom,
 } from "@/atom/generate"
-import { calculateLetterSpacing, resizeTextBox } from "@/hooks/editor-bbox"
+import { resizeTextBox } from "@/hooks/editor-bbox"
 import { apiClient } from "@/lib/api-client"
 
 type ProjectBox = EditorBox & { lineHeight?: number }
@@ -83,10 +83,7 @@ export function useEditorProject() {
           project.analysis.boxes.map(({ lineHeight, ...box }) => {
             const nextBox = { ...box, lineheight: box.lineheight ?? lineHeight }
 
-            return resizeTextBox(
-              { ...nextBox, letterSpacing: calculateLetterSpacing(nextBox) },
-              box.label
-            )
+            return resizeTextBox(nextBox, box.label)
           })
         )
       } catch {
