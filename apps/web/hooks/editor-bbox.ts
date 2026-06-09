@@ -129,20 +129,6 @@ export function createBoxTextNode(box: EditorBox, label = box.label) {
   })
 }
 
-export function calculateLetterSpacing(box: EditorBox) {
-  const rect = getBoxRect(box)
-  const textNode = createBoxTextNode({ ...box, letterSpacing: 0 })
-  const textWidth = textNode.getTextWidth()
-  const characterCount = Math.max(
-    ...box.label.split("\n").map((line) => Array.from(line).length)
-  )
-  const widthRatio = rect.width / textWidth
-
-  return widthRatio >= 1.2 && characterCount > 1
-    ? ((widthRatio - 1.2) * textWidth) / characterCount
-    : (box.letterSpacing ?? 0)
-}
-
 export function resizeTextBox(box: EditorBox, label: string) {
   const nextBox = { ...box, label }
   const textNode = createBoxTextNode(nextBox, label)
