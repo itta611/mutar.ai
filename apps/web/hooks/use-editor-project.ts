@@ -81,7 +81,13 @@ export function useEditorProject() {
         setImageSize([project.width, project.height])
         setBoxes(
           project.analysis.boxes.map(({ lineHeight, ...box }) => {
-            const nextBox = { ...box, lineheight: box.lineheight ?? lineHeight }
+            const nextBox = {
+              ...box,
+              lineheight:
+                box.label.split("\n").length === 1
+                  ? 1
+                  : (box.lineheight ?? lineHeight),
+            }
 
             return resizeTextBox(nextBox, box.label)
           })
