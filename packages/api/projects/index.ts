@@ -16,6 +16,7 @@ import { sessionMiddleware, type SessionEnv } from "../session"
 const createProjectSchema = z.object({
   prompt: z.string().trim().min(12).max(1200),
   aspectRatio: z.enum(["auto", "16:9", "4:3", "3:4", "1:1"]),
+  referenceImages: z.array(z.string().startsWith("data:image/")).optional(),
 })
 
 export const projectsRoutes = new Hono<SessionEnv>()
@@ -36,7 +37,7 @@ export const projectsRoutes = new Hono<SessionEnv>()
     const session = c.get("session")
 
     const projectId = randomUUID()
-    const { aspectRatio, prompt } = c.req.valid("json")
+    const { aspectRatio, prompt, referenceImages } = c.req.valid("json")
 
     await createProject({
       id: projectId,
@@ -59,7 +60,12 @@ export const projectsRoutes = new Hono<SessionEnv>()
             "Content-Type": "application/json",
             Authorization: `Bearer ${env.HENGEN_WORKER_SECRET}`,
           },
-          body: JSON.stringify({ projectId, prompt, aspectRatio }),
+          body: JSON.stringify({
+            projectId,
+            prompt,
+            aspectRatio,
+            referenceImages,
+          }),
         }
       )
 
