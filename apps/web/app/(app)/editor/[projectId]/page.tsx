@@ -380,12 +380,40 @@ export default function Page({
     })
   }
 
+  function getIndexesInSelection(
+    stage: Konva.Stage,
+    start: { x: number; y: number },
+    end: { x: number; y: number }
+  ) {
+    const selectionBox = {
+      x: Math.min(start.x, end.x),
+      y: Math.min(start.y, end.y),
+      width: Math.abs(end.x - start.x),
+      height: Math.abs(end.y - start.y),
+    }
+
+    return boxes.flatMap((_, index) => {
+      const node = textRefs.current.get(index)
+
+      return node &&
+        Konva.Util.haveIntersection(
+          selectionBox,
+          node.getClientRect({ relativeTo: stage })
+        )
+        ? [index]
+        : []
+    })
+  }
+
   function updateSelection(event: Konva.KonvaEventObject<MouseEvent>) {
-    if (!selectionStartRef.current) {
+    const start = selectionStartRef.current
+    const stage = event.target.getStage()
+
+    if (!start || !stage) {
       return
     }
 
-    const position = event.target.getStage()?.getRelativePointerPosition()
+    const position = stage.getRelativePointerPosition()
 
     if (!position) {
       return
@@ -395,6 +423,9 @@ export default function Page({
     setSelectionRectangle((current) =>
       current ? { ...current, x2: position.x, y2: position.y } : null
     )
+    const indexes = getIndexesInSelection(stage, start, position)
+    setSelectedIndex(indexes[0] ?? null)
+    setSelectedIndexes(indexes)
   }
 
   function finishSelection(event: Konva.KonvaEventObject<MouseEvent>) {
@@ -407,23 +438,7 @@ export default function Page({
     }
 
     selectionStartRef.current = null
-    const selectionBox = {
-      x: Math.min(start.x, end.x),
-      y: Math.min(start.y, end.y),
-      width: Math.abs(end.x - start.x),
-      height: Math.abs(end.y - start.y),
-    }
-    const indexes = boxes.flatMap((_, index) => {
-      const node = textRefs.current.get(index)
-
-      return node &&
-        Konva.Util.haveIntersection(
-          selectionBox,
-          node.getClientRect({ relativeTo: stage })
-        )
-        ? [index]
-        : []
-    })
+    const indexes = getIndexesInSelection(stage, start, end)
 
     setSelectionRectangle(null)
     setSelectedIndex(indexes[0] ?? null)
