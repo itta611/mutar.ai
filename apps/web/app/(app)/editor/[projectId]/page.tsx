@@ -195,6 +195,9 @@ export default function Page({
     new Map<number, Konva.Transformer>()
   )
   const transformerRef = useRef<Konva.Transformer>(null)
+  const dragStartPositionsRef = useRef(
+    new Map<number, { x: number; y: number }>()
+  )
   const [imageElement, setImageElement] = useState<{
     image: HTMLImageElement
     projectId: string
@@ -435,29 +438,60 @@ export default function Page({
     event.cancelBubble = true
 
     const node = event.target as Konva.Text
-    const leftOffset = node.x() - textX
-    const topOffset = node.y()
+    const dragStartPositions = dragStartPositionsRef.current
+    const start = dragStartPositions.get(index)
+    const draggedIndexes = [...dragStartPositions.keys()]
+    const leftOffset = node.x() - (start?.x ?? textX)
+    const topOffset = node.y() - (start?.y ?? 0)
+    const isMultiSelection = draggedIndexes.length > 1
 
     setBoxes((current) =>
       current.map((box, boxIndex) => {
-        if (boxIndex !== index) {
+        if (!draggedIndexes.includes(boxIndex)) {
           return box
         }
 
         const rect = getBoxRect(box)
-        const nextPosition = snapBoxPosition(current, index, {
-          ...rect,
-          left: rect.left + leftOffset,
-          top: rect.top + topOffset,
-        })
+        const nextPosition = isMultiSelection
+          ? { left: rect.left + leftOffset, top: rect.top + topOffset }
+          : snapBoxPosition(current, index, {
+              ...rect,
+              left: rect.left + leftOffset,
+              top: rect.top + topOffset,
+            })
 
-        node.x(textX)
-        node.y(0)
+        const textNode = textRefs.current.get(boxIndex)
+        const position = dragStartPositions.get(boxIndex)
+        textNode?.position(position ?? { x: textX, y: 0 })
 
         return moveTextBox(box, nextPosition.left, nextPosition.top)
       })
     )
+    dragStartPositions.clear()
     setSnapGuides([])
+  }
+
+  function handleTextDragStart(
+    event: Konva.KonvaEventObject<DragEvent>,
+    index: number
+  ) {
+    event.cancelBubble = true
+
+    const indexes = selectedIndexes.includes(index) ? selectedIndexes : [index]
+
+    if (indexes.length === 1) {
+      setSelectedIndex(index)
+      setSelectedIndexes([index])
+    }
+
+    dragStartPositionsRef.current = new Map(
+      indexes.flatMap((selectedIndex) => {
+        const node = textRefs.current.get(selectedIndex)
+        return node
+          ? [[selectedIndex, { x: node.x(), y: node.y() }] as const]
+          : []
+      })
+    )
   }
 
   function handleTextDragMove(
@@ -471,6 +505,28 @@ export default function Page({
     const node = event.target as Konva.Text
 
     if (!box) {
+      return
+    }
+
+    const dragStartPositions = dragStartPositionsRef.current
+    const start = dragStartPositions.get(index)
+
+    if (dragStartPositions.size > 1 && start) {
+      const x = node.x() - start.x
+      const y = node.y() - start.y
+
+      dragStartPositions.forEach((position, selectedIndex) => {
+        if (selectedIndex === index) {
+          return
+        }
+
+        textRefs.current
+          .get(selectedIndex)
+          ?.position({ x: position.x + x, y: position.y + y })
+        getTextTransformer(selectedIndex)?.forceUpdate()
+      })
+      setSnapGuides([])
+      getTextTransformer(index)?.forceUpdate()
       return
     }
 
@@ -606,7 +662,7 @@ export default function Page({
                 onDblTap={(event) => startEditing(event, index)}
                 onDragEnd={(event) => handleTextDragEnd(event, index, textX)}
                 onDragMove={(event) => handleTextDragMove(event, index, textX)}
-                onDragStart={(event) => selectText(event, index)}
+                onDragStart={(event) => handleTextDragStart(event, index)}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
                 onTap={(event) => selectText(event, index)}
