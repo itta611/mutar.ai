@@ -191,6 +191,9 @@ export default function Page({
   const fetchProject = useEditorProject()
   const textRefs = useRef(new Map<number, Konva.Text>())
   const hoverTransformerRef = useRef<Konva.Transformer>(null)
+  const selectionTransformerRefs = useRef(
+    new Map<number, Konva.Transformer>()
+  )
   const transformerRef = useRef<Konva.Transformer>(null)
   const [imageElement, setImageElement] = useState<{
     image: HTMLImageElement
@@ -229,7 +232,7 @@ export default function Page({
   useEffect(() => {
     const transformer = transformerRef.current
     const indexes =
-      selectedIndexes.length > 0
+      selectedIndexes.length === 1
         ? selectedIndexes
         : selectedIndex === null && hoveredIndex !== null
           ? [hoveredIndex]
@@ -246,6 +249,12 @@ export default function Page({
       })
     )
     transformer.getLayer()?.batchDraw()
+
+    selectionTransformerRefs.current.forEach((selectionTransformer, index) => {
+      const textNode = textRefs.current.get(index)
+      selectionTransformer.nodes(textNode ? [textNode] : [])
+      selectionTransformer.getLayer()?.batchDraw()
+    })
   }, [
     boxes,
     editingText?.index,
@@ -299,6 +308,10 @@ export default function Page({
     )
   }
 
+  function getTextTransformer(index: number) {
+    return selectionTransformerRefs.current.get(index) ?? transformerRef.current
+  }
+
   function selectText(event: Konva.KonvaEventObject<Event>, index: number) {
     event.cancelBubble = true
     setSelectedIndex(index)
@@ -323,7 +336,12 @@ export default function Page({
       node;
       node = node.getParent()
     ) {
-      if (node === transformerRef.current) {
+      if (
+        node === transformerRef.current ||
+        [...selectionTransformerRefs.current.values()].includes(
+          node as Konva.Transformer
+        )
+      ) {
         return
       }
     }
@@ -466,7 +484,7 @@ export default function Page({
     node.x(textX + nextPosition.left - rect.left)
     node.y(nextPosition.top - rect.top)
     setSnapGuides(nextPosition.guides)
-    transformerRef.current?.forceUpdate()
+    getTextTransformer(index)?.forceUpdate()
   }
 
   function handleTextTransform(
@@ -484,7 +502,7 @@ export default function Page({
       index,
       rect.left + node.x() - textX,
       Math.max(1, node.width() * node.scaleX()),
-      transformerRef.current?.getActiveAnchor() ?? null
+      getTextTransformer(index)?.getActiveAnchor() ?? null
     )
     const nextBox = resizeWrappedTextBox(box, nextRect.left, nextRect.width)
 
@@ -495,7 +513,7 @@ export default function Page({
     node.height(getBoxRect(nextBox).height)
     node.wrap("char")
     setSnapGuides(nextRect.guides)
-    transformerRef.current?.forceUpdate()
+    getTextTransformer(index)?.forceUpdate()
   }
 
   function handleTextTransformEnd(
@@ -519,7 +537,7 @@ export default function Page({
           index,
           rect.left + node.x() - textX,
           Math.max(1, node.width() * node.scaleX()),
-          transformerRef.current?.getActiveAnchor() ?? null
+          getTextTransformer(index)?.getActiveAnchor() ?? null
         )
 
         node.scaleX(1)
@@ -668,6 +686,24 @@ export default function Page({
           ref={transformerRef}
           {...textTransformerStyle}
         />
+        {selectedIndexes.length > 1
+          ? selectedIndexes.map((index) => (
+              <Transformer
+                enabledAnchors={["middle-left", "middle-right"]}
+                key={index}
+                ref={(node) => {
+                  if (node) {
+                    selectionTransformerRefs.current.set(index, node)
+                    const textNode = textRefs.current.get(index)
+                    node.nodes(textNode ? [textNode] : [])
+                  } else {
+                    selectionTransformerRefs.current.delete(index)
+                  }
+                }}
+                {...textTransformerStyle}
+              />
+            ))
+          : null}
         <Transformer
           enabledAnchors={[]}
           listening={false}
