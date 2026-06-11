@@ -8,6 +8,7 @@ import {
   Image as KonvaImage,
   Layer,
   Line,
+  Rect,
   Text,
   Transformer,
 } from "react-konva"
@@ -39,6 +40,13 @@ type EditingText = {
 type SnapGuide = {
   direction: "horizontal" | "vertical"
   position: number
+}
+
+type SelectionRectangle = {
+  x1: number
+  x2: number
+  y1: number
+  y2: number
 }
 
 const snapOffset = 5
@@ -191,6 +199,11 @@ export default function Page({
   const [editingText, setEditingText] = useState<EditingText | null>(null)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [selectedIndex, setSelectedIndex] = useAtom(editorSelectedBoxIndexAtom)
+  const [selectedIndexes, setSelectedIndexes] = useState<number[]>([])
+  const [selectionRectangle, setSelectionRectangle] =
+    useState<SelectionRectangle | null>(null)
+  const selectionStartRef = useRef<{ x: number; y: number } | null>(null)
+  const selectionDraggedRef = useRef(false)
   const [snapGuides, setSnapGuides] = useState<SnapGuide[]>([])
 
   useEffect(() => {
@@ -215,24 +228,38 @@ export default function Page({
 
   useEffect(() => {
     const transformer = transformerRef.current
-    const transformerIndex = selectedIndex ?? hoveredIndex
-    const textNode =
-      transformerIndex === null ? null : textRefs.current.get(transformerIndex)
+    const indexes =
+      selectedIndexes.length > 0
+        ? selectedIndexes
+        : selectedIndex === null && hoveredIndex !== null
+          ? [hoveredIndex]
+          : []
 
     if (!transformer) {
       return
     }
 
-    transformer.nodes(textNode ? [textNode] : [])
+    transformer.nodes(
+      indexes.flatMap((index) => {
+        const node = textRefs.current.get(index)
+        return node ? [node] : []
+      })
+    )
     transformer.getLayer()?.batchDraw()
-  }, [boxes, editingText?.index, hoveredIndex, selectedIndex])
+  }, [
+    boxes,
+    editingText?.index,
+    hoveredIndex,
+    selectedIndex,
+    selectedIndexes,
+  ])
 
   useEffect(() => {
     const transformer = hoverTransformerRef.current
     const textNode =
       selectedIndex === null ||
       hoveredIndex === null ||
-      hoveredIndex === selectedIndex ||
+      selectedIndexes.includes(hoveredIndex) ||
       editingText?.index === hoveredIndex
         ? null
         : textRefs.current.get(hoveredIndex)
@@ -243,7 +270,13 @@ export default function Page({
 
     transformer.nodes(textNode ? [textNode] : [])
     transformer.getLayer()?.batchDraw()
-  }, [boxes, editingText?.index, hoveredIndex, selectedIndex])
+  }, [
+    boxes,
+    editingText?.index,
+    hoveredIndex,
+    selectedIndex,
+    selectedIndexes,
+  ])
 
   function updateLabel(index: number, label: string) {
     setBoxes((current) =>
@@ -254,6 +287,7 @@ export default function Page({
     setEditingText(null)
     setHoveredIndex(null)
     setSelectedIndex(null)
+    setSelectedIndexes([])
     setSnapGuides([])
   }
 
@@ -268,15 +302,22 @@ export default function Page({
   function selectText(event: Konva.KonvaEventObject<Event>, index: number) {
     event.cancelBubble = true
     setSelectedIndex(index)
+    setSelectedIndexes([index])
   }
 
   function startEditing(event: Konva.KonvaEventObject<Event>, index: number) {
     event.cancelBubble = true
     setSelectedIndex(index)
+    setSelectedIndexes([index])
     setEditingText({ index })
   }
 
   function clearTextSelection(event: Konva.KonvaEventObject<Event>) {
+    if (selectionDraggedRef.current) {
+      selectionDraggedRef.current = false
+      return
+    }
+
     for (
       let node: Konva.Node | null = event.target;
       node;
@@ -293,7 +334,79 @@ export default function Page({
 
     setHoveredIndex(null)
     setSelectedIndex(null)
+    setSelectedIndexes([])
     setSnapGuides([])
+  }
+
+  function startSelection(event: Konva.KonvaEventObject<MouseEvent>) {
+    if (event.target !== event.target.getStage()) {
+      return
+    }
+
+    const position = event.target.getStage()?.getRelativePointerPosition()
+
+    if (!position) {
+      return
+    }
+
+    selectionStartRef.current = position
+    selectionDraggedRef.current = false
+    setSelectionRectangle({
+      x1: position.x,
+      x2: position.x,
+      y1: position.y,
+      y2: position.y,
+    })
+  }
+
+  function updateSelection(event: Konva.KonvaEventObject<MouseEvent>) {
+    if (!selectionStartRef.current) {
+      return
+    }
+
+    const position = event.target.getStage()?.getRelativePointerPosition()
+
+    if (!position) {
+      return
+    }
+
+    selectionDraggedRef.current = true
+    setSelectionRectangle((current) =>
+      current ? { ...current, x2: position.x, y2: position.y } : null
+    )
+  }
+
+  function finishSelection(event: Konva.KonvaEventObject<MouseEvent>) {
+    const start = selectionStartRef.current
+    const stage = event.target.getStage()
+    const end = stage?.getRelativePointerPosition()
+
+    if (!start || !stage || !end) {
+      return
+    }
+
+    selectionStartRef.current = null
+    const selectionBox = {
+      x: Math.min(start.x, end.x),
+      y: Math.min(start.y, end.y),
+      width: Math.abs(end.x - start.x),
+      height: Math.abs(end.y - start.y),
+    }
+    const indexes = boxes.flatMap((_, index) => {
+      const node = textRefs.current.get(index)
+
+      return node &&
+        Konva.Util.haveIntersection(
+          selectionBox,
+          node.getClientRect({ relativeTo: stage })
+        )
+        ? [index]
+        : []
+    })
+
+    setSelectionRectangle(null)
+    setSelectedIndex(indexes[0] ?? null)
+    setSelectedIndexes(indexes)
   }
 
   function handleTextDragEnd(
@@ -426,12 +539,18 @@ export default function Page({
       activeProjectId={activeProjectId}
       imageElement={imageElement}
       imageSize={imageSize}
+      onClick={clearTextSelection}
+      onMouseDown={startSelection}
+      onMouseMove={updateSelection}
+      onMouseUp={finishSelection}
+      onTap={clearTextSelection}
     >
-      <Layer onClick={clearTextSelection} onTap={clearTextSelection}>
+      <Layer>
         {imageElement ? (
           <KonvaImage
             height={height}
             image={imageElement.image}
+            listening={false}
             width={width}
           />
         ) : null}
@@ -528,9 +647,23 @@ export default function Page({
             strokeWidth={1}
           />
         ))}
+        {selectionRectangle ? (
+          <Rect
+            fill="rgba(59, 130, 246, 0.2)"
+            height={Math.abs(selectionRectangle.y2 - selectionRectangle.y1)}
+            listening={false}
+            stroke="#3b82f6"
+            strokeWidth={1}
+            width={Math.abs(selectionRectangle.x2 - selectionRectangle.x1)}
+            x={Math.min(selectionRectangle.x1, selectionRectangle.x2)}
+            y={Math.min(selectionRectangle.y1, selectionRectangle.y2)}
+          />
+        ) : null}
         <Transformer
           enabledAnchors={
-            selectedIndex === null ? [] : ["middle-left", "middle-right"]
+            selectedIndexes.length === 1
+              ? ["middle-left", "middle-right"]
+              : []
           }
           ref={transformerRef}
           {...textTransformerStyle}

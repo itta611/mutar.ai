@@ -58,17 +58,26 @@ export function EditorStage({
   children,
   imageElement,
   imageSize,
+  onClick,
+  onMouseDown,
+  onMouseMove,
+  onMouseUp,
+  onTap,
 }: {
   activeProjectId: string
   children: ReactNode
   imageElement: ImageElement | null
   imageSize: [width: number, height: number] | null
+  onClick: (event: Konva.KonvaEventObject<Event>) => void
+  onMouseDown: (event: Konva.KonvaEventObject<MouseEvent>) => void
+  onMouseMove: (event: Konva.KonvaEventObject<MouseEvent>) => void
+  onMouseUp: (event: Konva.KonvaEventObject<MouseEvent>) => void
+  onTap: (event: Konva.KonvaEventObject<Event>) => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<Konva.Stage>(null)
   const lastTouchCenterRef = useRef<Point | null>(null)
   const lastTouchDistanceRef = useRef(0)
-  const touchDragStoppedRef = useRef(false)
   const [containerSize, setContainerSize] = useState<Size>({
     height: 0,
     width: 0,
@@ -189,23 +198,8 @@ export function EditorStage({
       return
     }
 
-    if (
-      touch1 &&
-      !touch2 &&
-      !stage.isDragging() &&
-      touchDragStoppedRef.current
-    ) {
-      stage.startDrag()
-      touchDragStoppedRef.current = false
-    }
-
     if (!touch1 || !touch2) {
       return
-    }
-
-    if (stage.isDragging()) {
-      stage.stopDrag()
-      touchDragStoppedRef.current = true
     }
 
     const rect = stage.container().getBoundingClientRect()
@@ -261,25 +255,15 @@ export function EditorStage({
     lastTouchCenterRef.current = null
   }
 
-  function updateStageDrag(event: Konva.KonvaEventObject<DragEvent>) {
-    if (event.target !== event.currentTarget) {
-      return
-    }
-
-    setStageTransform({
-      ...activeStageTransform,
-      x: event.target.x(),
-      y: event.target.y(),
-    })
-  }
-
   return (
     <div ref={containerRef} className="relative min-h-full overflow-hidden">
       <Stage
-        draggable
         height={containerSize.height}
-        onDragEnd={updateStageDrag}
-        onDragMove={updateStageDrag}
+        onClick={onClick}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onTap={onTap}
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}
         onWheel={handleWheel}
