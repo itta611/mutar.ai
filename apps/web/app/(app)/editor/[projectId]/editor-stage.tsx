@@ -31,6 +31,7 @@ type ImageElement = {
 const defaultViewportPadding = 80
 const projectSwitcherHeight = 96
 Konva.hitOnDragEnabled = true
+Konva.dragButtons = [0]
 
 function getImageViewportSize(containerSize: Size) {
   return {
@@ -78,6 +79,7 @@ export function EditorStage({
   const stageRef = useRef<Konva.Stage>(null)
   const lastTouchCenterRef = useRef<Point | null>(null)
   const lastTouchDistanceRef = useRef(0)
+  const panStartRef = useRef<Point | null>(null)
   const [containerSize, setContainerSize] = useState<Size>({
     height: 0,
     width: 0,
@@ -187,6 +189,52 @@ export function EditorStage({
     })
   }
 
+  function handleMouseDown(event: Konva.KonvaEventObject<MouseEvent>) {
+    if (event.evt.button !== 1 && event.evt.button !== 2) {
+      onMouseDown(event)
+      return
+    }
+
+    event.evt.preventDefault()
+    panStartRef.current = {
+      x: event.evt.clientX,
+      y: event.evt.clientY,
+    }
+  }
+
+  function handleMouseMove(event: Konva.KonvaEventObject<MouseEvent>) {
+    const start = panStartRef.current
+    const stage = stageRef.current
+
+    if (!start || !stage) {
+      onMouseMove(event)
+      return
+    }
+
+    const position = {
+      x: event.evt.clientX,
+      y: event.evt.clientY,
+    }
+
+    setStageTransform({
+      key: activeStageTransform.key,
+      scale: stage.scaleX(),
+      x: stage.x() + position.x - start.x,
+      y: stage.y() + position.y - start.y,
+    })
+    panStartRef.current = position
+  }
+
+  function handleMouseUp(event: Konva.KonvaEventObject<MouseEvent>) {
+    if (!panStartRef.current) {
+      onMouseUp(event)
+      return
+    }
+
+    event.evt.preventDefault()
+    panStartRef.current = null
+  }
+
   function handleTouchMove(event: Konva.KonvaEventObject<TouchEvent>) {
     event.evt.preventDefault()
 
@@ -256,13 +304,17 @@ export function EditorStage({
   }
 
   return (
-    <div ref={containerRef} className="relative min-h-full overflow-hidden">
+    <div
+      ref={containerRef}
+      className="relative min-h-full overflow-hidden"
+      onContextMenu={(event) => event.preventDefault()}
+    >
       <Stage
         height={containerSize.height}
         onClick={onClick}
-        onMouseDown={onMouseDown}
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
         onTap={onTap}
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}
