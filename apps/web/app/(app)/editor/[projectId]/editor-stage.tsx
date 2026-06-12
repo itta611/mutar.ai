@@ -177,7 +177,9 @@ export function EditorStage({
       direction = -direction
     }
 
-    const scaleBy = 1.05
+    const scaleBy = event.evt.ctrlKey
+      ? Math.exp(Math.abs(event.evt.deltaY) * 0.01)
+      : 1.05
     const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy
     const scale = Math.max(fitScale / 8, Math.min(fitScale * 16, newScale))
 
