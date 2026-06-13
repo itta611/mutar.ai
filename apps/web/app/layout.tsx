@@ -14,6 +14,7 @@ import { AuthDialogProvider } from "@/hooks/use-auth-dialog"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { AuthRedirect } from "./auth-redirect"
+import { Analytics } from "@vercel/analytics/next"
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -90,6 +91,7 @@ export default function RootLayout({
             </ThemeProvider>
           </AuthDialogProvider>
         </SidebarProvider>
+        <Analytics />
       </body>
     </html>
   )
