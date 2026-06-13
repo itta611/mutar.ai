@@ -9,14 +9,12 @@ import {
 } from "../ui/dropdown-menu"
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
 
-export type ProjectCount = 1 | 2 | 3 | 4
-
 export function CountSelect({
   selectedCount,
   onCountChange,
 }: {
-  selectedCount: ProjectCount
-  onCountChange: (count: ProjectCount) => void
+  selectedCount: number
+  onCountChange: (count: number) => void
 }) {
   return (
     <DropdownMenu>
@@ -36,6 +34,7 @@ export function CountSelect({
               onValueChange={(value) =>
                 onCountChange(Number(value) as ProjectCount)
               }
+              value={String(selectedCount)}
             >
               <TabsList className="w-full">
                 <TabsTrigger value="1">1枚</TabsTrigger>
