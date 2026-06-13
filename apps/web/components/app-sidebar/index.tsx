@@ -24,6 +24,7 @@ import {
   MoonIcon,
   PaletteIcon,
   SearchIcon,
+  SettingsIcon,
   StarIcon,
   SunIcon,
   Trash2Icon,
@@ -214,6 +215,11 @@ export function AppSidebar() {
                     </TabsList>
                   </Tabs>
                 </div>
+                <div className="h-px bg-border my-1 mx-1" />
+                <DropdownMenuItem>
+                  <SettingsIcon size={16} />
+                  設定
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={async () => {
                     await authClient.signOut()
