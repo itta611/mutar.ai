@@ -1,9 +1,12 @@
 import { ComponentProps } from "react"
+import { Button } from "../ui/button"
 
 const SuggestionButton = (props: ComponentProps<"button">) => {
   return (
-    <button
-      className="rounded-full text-sm h-8 px-4 text-muted-foreground transition cursor-pointer border bg-background hover:bg-muted text-ellipsis overflow-hidden text-nowrap shrink"
+    <Button
+      size="sm"
+      variant="outline"
+      className="rounded-full font-medium!"
       {...props}
     />
   )
