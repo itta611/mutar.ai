@@ -171,11 +171,7 @@ export function EditorStage({
       x: (pointer.x - stage.x()) / oldScale,
       y: (pointer.y - stage.y()) / oldScale,
     }
-    let direction = event.evt.deltaY > 0 ? -1 : 1
-
-    if (event.evt.ctrlKey) {
-      direction = -direction
-    }
+    const direction = event.evt.deltaY > 0 ? -1 : 1
 
     const scaleBy = event.evt.ctrlKey
       ? Math.exp(Math.abs(event.evt.deltaY) * 0.01)

@@ -204,7 +204,7 @@ export default function Page({
   } | null>(null)
   const [editingText, setEditingText] = useState<EditingText | null>(null)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  const [selectedIndex, setSelectedIndex] = useAtom(editorSelectedBoxIndexAtom)
+  const [, setSelectedIndex] = useAtom(editorSelectedBoxIndexAtom)
   const [selectedIndexes, setSelectedIndexes] = useState<number[]>([])
   const [selectionRectangle, setSelectionRectangle] =
     useState<SelectionRectangle | null>(null)
@@ -234,23 +234,12 @@ export default function Page({
 
   useEffect(() => {
     const transformer = transformerRef.current
-    const indexes =
-      selectedIndexes.length === 1
-        ? selectedIndexes
-        : selectedIndex === null && hoveredIndex !== null
-          ? [hoveredIndex]
-          : []
 
     if (!transformer) {
       return
     }
 
-    transformer.nodes(
-      indexes.flatMap((index) => {
-        const node = textRefs.current.get(index)
-        return node ? [node] : []
-      })
-    )
+    transformer.nodes([])
     transformer.getLayer()?.batchDraw()
 
     selectionTransformerRefs.current.forEach((selectionTransformer, index) => {
@@ -258,18 +247,11 @@ export default function Page({
       selectionTransformer.nodes(textNode ? [textNode] : [])
       selectionTransformer.getLayer()?.batchDraw()
     })
-  }, [
-    boxes,
-    editingText?.index,
-    hoveredIndex,
-    selectedIndex,
-    selectedIndexes,
-  ])
+  }, [boxes, selectedIndexes])
 
   useEffect(() => {
     const transformer = hoverTransformerRef.current
     const textNode =
-      selectedIndex === null ||
       hoveredIndex === null ||
       selectedIndexes.includes(hoveredIndex) ||
       editingText?.index === hoveredIndex
@@ -286,7 +268,6 @@ export default function Page({
     boxes,
     editingText?.index,
     hoveredIndex,
-    selectedIndex,
     selectedIndexes,
   ])
 
@@ -733,6 +714,7 @@ export default function Page({
                 : [0, guide.position, width, guide.position]
             }
             stroke="#6366f1"
+            strokeScaleEnabled={false}
             strokeWidth={1}
           />
         ))}
@@ -742,6 +724,7 @@ export default function Page({
             height={Math.abs(selectionRectangle.y2 - selectionRectangle.y1)}
             listening={false}
             stroke="#3b82f6"
+            strokeScaleEnabled={false}
             strokeWidth={1}
             width={Math.abs(selectionRectangle.x2 - selectionRectangle.x1)}
             x={Math.min(selectionRectangle.x1, selectionRectangle.x2)}
@@ -749,15 +732,11 @@ export default function Page({
           />
         ) : null}
         <Transformer
-          enabledAnchors={
-            selectedIndexes.length === 1
-              ? ["middle-left", "middle-right"]
-              : []
-          }
+          enabledAnchors={[]}
           ref={transformerRef}
           {...textTransformerStyle}
         />
-        {selectedIndexes.length > 1
+        {selectedIndexes.length > 0
           ? selectedIndexes.map((index) => (
               <Transformer
                 enabledAnchors={["middle-left", "middle-right"]}
