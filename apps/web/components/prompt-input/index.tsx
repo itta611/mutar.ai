@@ -1,6 +1,7 @@
 "use client"
 
 import { ImagePlusIcon, SparklesIcon, XIcon } from "lucide-react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useRef, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
@@ -15,6 +16,11 @@ import {
 import { authClient } from "@/lib/auth-client"
 import { AspectSelect } from "./aspect-select"
 import { Suggestion } from "./suggestion"
+
+type UploadedImage = {
+  dataUrl?: string
+  file: File
+}
 
 export function PromptInput() {
   const generateProject = useGenerateProject()
@@ -34,9 +40,12 @@ export function PromptInput() {
   const prompt = useWatch({ control, name: "prompt" })
   const aspect = useWatch({ control, name: "aspectRatio" })
   const [isGenerating, setIsGenerating] = useState(false)
-  const [images, setImages] = useState<File[]>([])
+  const [images, setImages] = useState<UploadedImage[]>([])
   const imageInputRef = useRef<HTMLInputElement>(null)
-  const canGenerate = !isGenerating && prompt.trim().length > 0
+  const canGenerate =
+    !isGenerating &&
+    prompt.trim().length > 0 &&
+    images.every((image) => image.dataUrl)
 
   async function handleGenerate(
     options: Omit<GenerateProjectInput, "referenceImages">
@@ -49,17 +58,7 @@ export function PromptInput() {
     setIsGenerating(true)
 
     try {
-      const referenceImages = await Promise.all(
-        images.map(
-          (image) =>
-            new Promise<string>((resolve, reject) => {
-              const reader = new FileReader()
-              reader.onload = () => resolve(reader.result as string)
-              reader.onerror = () => reject(reader.error)
-              reader.readAsDataURL(image)
-            })
-        )
-      )
+      const referenceImages = images.map((image) => image.dataUrl!)
       const projectId = await generateProject({ ...options, referenceImages })
       router.push(`/editor/${projectId}`)
     } catch {
@@ -95,7 +94,20 @@ export function PromptInput() {
               multiple
               onChange={(event) => {
                 const files = Array.from(event.currentTarget.files ?? [])
-                setImages((current) => [...current, ...files])
+                const uploadedImages = files.map((file) => ({ file }))
+                setImages((current) => [...current, ...uploadedImages])
+                uploadedImages.forEach((image) => {
+                  const reader = new FileReader()
+                  reader.onload = () =>
+                    setImages((current) =>
+                      current.map((currentImage) =>
+                        currentImage === image
+                          ? { ...image, dataUrl: reader.result as string }
+                          : currentImage
+                      )
+                    )
+                  reader.readAsDataURL(image.file)
+                })
                 event.currentTarget.value = ""
               }}
               ref={imageInputRef}
@@ -103,12 +115,11 @@ export function PromptInput() {
             />
             <Button
               onClick={() => imageInputRef.current?.click()}
-              size="sm"
+              size="icon-sm"
               type="button"
               variant="outline"
             >
               <ImagePlusIcon />
-              画像を添付
             </Button>
             <AspectSelect
               selectedAspect={aspect}
@@ -125,12 +136,23 @@ export function PromptInput() {
         <div className="mx-4.5 flex flex-wrap gap-2 rounded-b-2xl border-b border-l border-r bg-zinc-50 p-2">
           {images.map((image, index) => (
             <div
-              className="flex max-w-52 items-center gap-2 rounded-md bg-background p-2.5 text-xs border"
-              key={`${image.name}-${image.lastModified}-${index}`}
+              className="flex max-w-52 items-center gap-2.5 rounded-md bg-background p-1 pr-2.5 text-xs border"
+              key={`${image.file.name}-${image.file.lastModified}-${index}`}
             >
-              <span className="truncate">{image.name}</span>
+              <div className="size-8 shrink-0 overflow-hidden rounded">
+                {image.dataUrl ? (
+                  <Image
+                    alt=""
+                    className="size-full object-cover border"
+                    height={32}
+                    src={image.dataUrl}
+                    width={32}
+                  />
+                ) : null}
+              </div>
+              <span className="truncate">{image.file.name}</span>
               <button
-                aria-label={`${image.name}を削除`}
+                aria-label={`${image.file.name}を削除`}
                 className="shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
                 onClick={() =>
                   setImages((current) =>
