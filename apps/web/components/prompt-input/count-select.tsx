@@ -31,9 +31,7 @@ export function CountSelect({
           <DropdownMenuLabel>枚数</DropdownMenuLabel>
           <div className="px-1.5 pb-1.5">
             <Tabs
-              onValueChange={(value) =>
-                onCountChange(Number(value) as ProjectCount)
-              }
+              onValueChange={(value) => onCountChange(Number(value))}
               value={String(selectedCount)}
             >
               <TabsList className="w-full">

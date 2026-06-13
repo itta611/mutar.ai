@@ -15,7 +15,7 @@ import {
 } from "@/hooks/use-generate-project"
 import { authClient } from "@/lib/auth-client"
 import { AspectSelect } from "./aspect-select"
-import { CountSelect, type ProjectCount } from "./count-select"
+import { CountSelect } from "./count-select"
 import { Suggestion } from "./suggestion"
 
 type UploadedImage = {
@@ -31,7 +31,7 @@ export function PromptInput() {
   const user = session.data?.user
   const { control, handleSubmit, register, setValue } = useForm<{
     aspectRatio: EditorAspectRatio
-    count: ProjectCount
+    count: number
     prompt: string
   }>({
     defaultValues: {
