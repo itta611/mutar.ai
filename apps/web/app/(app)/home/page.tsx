@@ -1,6 +1,7 @@
+import { Suspense } from "react"
+import { GallerySkeleton } from "@/components/gallary"
 import LogoIcon from "@/components/logo-icon"
 import { PromptInput } from "@/components/prompt-input"
-import { Suspense } from "react"
 import { ProjectList } from "./project-list"
 
 export default async function Page() {
@@ -13,7 +14,7 @@ export default async function Page() {
         </div>
         <PromptInput />
       </div>
-      <Suspense>
+      <Suspense fallback={<GallerySkeleton />}>
         <ProjectList />
       </Suspense>
     </div>

@@ -38,6 +38,19 @@ type GeneratedImagesViewProps = {
   queryKey: readonly string[]
 }
 
+export function GallerySkeleton() {
+  return (
+    <div className="grid grid-cols-2 gap-x-8 gap-y-8 sm:grid-cols-3 xl:grid-cols-4">
+      {Array.from({ length: 8 }, (_, index) => (
+        <div key={index}>
+          <Skeleton className="aspect-[16/9] w-full rounded-xl" />
+          <Skeleton className="mx-1 my-4 h-4 w-2/3" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function Gallery({ initialImages, queryKey }: GeneratedImagesViewProps) {
   const [images, setImages] = useState(initialImages)
   const handleStarredChange = (input: { id: string; isStarred: boolean }) =>
