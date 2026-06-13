@@ -4,7 +4,9 @@ import { Button } from "../ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
 
@@ -23,8 +25,7 @@ export function AspectSelect({
   onAspectChange: (aspect: EditorAspectRatio) => void
 }) {
   const selectedAspectLabel =
-    aspects.find((aspect) => aspect.value === selectedAspect)?.label ??
-    "アスペクト比"
+    aspects.find((aspect) => aspect.value === selectedAspect)?.label ?? "自動"
 
   return (
     <DropdownMenu>
@@ -36,25 +37,28 @@ export function AspectSelect({
           </Button>
         }
       />
-      <DropdownMenuContent>
-        <DropdownMenuItem onClick={() => onAspectChange("auto")}>
-          <ProportionsIcon />
-          自動
-        </DropdownMenuItem>
-        {aspects.map((aspect) => (
-          <DropdownMenuItem
-            key={aspect.label}
-            onClick={() => onAspectChange(aspect.value)}
-          >
-            <div className="mr-0.5 flex size-4 items-center justify-center">
-              <div
-                className="rounded-xs border-[1.5px] border-muted-foreground/85"
-                style={{ height: aspect.height, width: aspect.width }}
-              />
-            </div>
-            {aspect.label}
+      <DropdownMenuContent className="min-w-40">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>アスペクト比</DropdownMenuLabel>
+          <DropdownMenuItem onClick={() => onAspectChange("auto")}>
+            <ProportionsIcon />
+            自動
           </DropdownMenuItem>
-        ))}
+          {aspects.map((aspect) => (
+            <DropdownMenuItem
+              key={aspect.label}
+              onClick={() => onAspectChange(aspect.value)}
+            >
+              <div className="mr-0.5 flex size-4 items-center justify-center">
+                <div
+                  className="rounded-xs border-[1.5px] border-muted-foreground/85"
+                  style={{ height: aspect.height, width: aspect.width }}
+                />
+              </div>
+              {aspect.label}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   )
