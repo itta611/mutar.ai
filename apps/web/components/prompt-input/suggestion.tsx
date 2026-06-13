@@ -15,7 +15,7 @@ export function Suggestion({
   onSelect: (content: string) => void
 }) {
   return (
-    <div className="mt-4">
+    <div className="mt-5">
       <div className="flex gap-2 justify-center space-y-2">
         <SuggestionButton
           onClick={() =>

@@ -84,15 +84,11 @@ export function PromptInput() {
               }
             }
           }}
-          className="min-h-10 resize-none rounded-none border-none px-1 pt-0 pb-2 shadow-none ring-0! outline-none leading-relaxed bg-transparent!"
+          className="min-h-14 resize-none rounded-none border-none px-1 pt-0 pb-2 shadow-none ring-0! outline-none leading-relaxed bg-transparent!"
           placeholder="作りたい資料画像を自然文で書いてください。"
         />
         <div className="flex items-end justify-between">
           <div className="flex gap-2">
-            <AspectSelect
-              selectedAspect={aspect}
-              onAspectChange={(aspect) => setValue("aspectRatio", aspect)}
-            />
             <input
               accept="image/*"
               className="hidden"
@@ -116,6 +112,10 @@ export function PromptInput() {
               <ImagePlusIcon />
               画像を添付
             </Button>
+            <AspectSelect
+              selectedAspect={aspect}
+              onAspectChange={(aspect) => setValue("aspectRatio", aspect)}
+            />
           </div>
           <Button type="submit" size="lg" disabled={!canGenerate}>
             <SparklesIcon data-icon="inline-end" />

@@ -75,7 +75,7 @@ export function Inspector() {
   }
 
   return (
-    <div className="hidden w-80 border-l bg-background px-5 py-6 md:block">
+    <div className="hidden w-80 border-l border-border/70` bg-background px-5 py-3 md:block">
       <div className="mb-7 text-sm font-semibold">インスペクタ</div>
       {box ? (
         <div className="space-y-6">

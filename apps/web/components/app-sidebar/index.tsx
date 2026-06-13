@@ -86,7 +86,7 @@ export function AppSidebar() {
   }, [])
 
   return (
-    <Sidebar className="border-border/70!!">
+    <Sidebar>
       <SidebarHeader className="h-13 py-0 gap-0">
         <div className="flex items-center h-full">
           <Link href="/" className="ml-2">
