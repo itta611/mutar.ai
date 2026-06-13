@@ -5,12 +5,10 @@ import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 
-import {
-  ProjectDropdownMenu,
-  useUpdateProjectStarred,
-} from "@/components/interface/project-dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useUpdateProjectStarred } from "@/hooks/use-update-project-starred"
 import { apiClient } from "@/lib/api-client"
+import { ProjectDropdownMenu } from "./project-dropdown-menu"
 
 export type GeneratedImage = {
   id: string
@@ -133,7 +131,9 @@ export function Gallery({ initialImages, queryKey }: GeneratedImagesViewProps) {
               onRestore={(id) =>
                 setImages((images) => images.filter((image) => image.id !== id))
               }
-              onStarredChange={handleStarredChange}
+              onStarredChange={(project, isStarred) =>
+                updateProjectStarredMutation.mutate({ project, isStarred })
+              }
             />
           </div>
         </div>

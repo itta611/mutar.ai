@@ -1,20 +1,5 @@
 "use client"
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarGroupLabel,
-} from "@/components/ui/sidebar"
-import { Logo } from "@/components/logo"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { authClient } from "@/lib/auth-client"
-import { apiClient } from "@/lib/api-client"
 import { useQuery } from "@tanstack/react-query"
 import {
   ChevronDown,
@@ -29,19 +14,35 @@ import {
   SunIcon,
   Trash2Icon,
 } from "lucide-react"
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
+import { ProjectDropdownMenu } from "@/components/gallary/project-dropdown-menu"
+import { Logo } from "@/components/logo"
+import { ProjectSearchDialog } from "@/components/project-search-dialog"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useTheme } from "next-themes"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { ProjectDropdownMenu } from "@/components/interface/project-dropdown-menu"
-import { ProjectSearchDialog } from "@/components/project-search-dialog"
+import { useUpdateProjectStarred } from "@/hooks/use-update-project-starred"
+import { apiClient } from "@/lib/api-client"
+import { authClient } from "@/lib/auth-client"
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
 
 async function listStarredProjects() {
@@ -70,6 +71,7 @@ export function AppSidebar() {
     queryFn: listStarredProjects,
     enabled: !!user,
   })
+  const updateProjectStarredMutation = useUpdateProjectStarred()
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -151,7 +153,15 @@ export function AppSidebar() {
                     className="justify-between pr-1"
                   >
                     {project.title}
-                    <ProjectDropdownMenu project={project} />
+                    <ProjectDropdownMenu
+                      project={project}
+                      onStarredChange={(project, isStarred) =>
+                        updateProjectStarredMutation.mutate({
+                          project,
+                          isStarred,
+                        })
+                      }
+                    />
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))

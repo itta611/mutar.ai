@@ -53,72 +53,6 @@ async function restoreProject(id: string) {
   return response.json()
 }
 
-async function updateProjectStarred({
-  project,
-  isStarred,
-}: {
-  project: ProjectDropdownMenuProject
-  isStarred: boolean
-}) {
-  const response = await apiClient.projects[":projectId"].star.$put({
-    param: { projectId: project.id },
-    json: { isStarred },
-  })
-
-  if (!response.ok) {
-    throw new Error("update_failed")
-  }
-
-  return response.json()
-}
-
-export function useUpdateProjectStarred(
-  onStarredChange?: (input: { id: string; isStarred: boolean }) => void
-) {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: updateProjectStarred,
-    onMutate: (input) => {
-      const previousProjects = queryClient.getQueryData<
-        ProjectDropdownMenuProject[]
-      >(["projects", "starred"])
-      const change = { id: input.project.id, isStarred: input.isStarred }
-
-      onStarredChange?.(change)
-      queryClient.setQueryData<ProjectDropdownMenuProject[]>(
-        ["projects", "starred"],
-        (projects = []) =>
-          input.isStarred
-            ? [{ ...input.project, isStarred: true }, ...projects]
-            : projects.filter((project) => project.id !== input.project.id)
-      )
-
-      return { previousProjects }
-    },
-    onError: (_error, input, context) => {
-      onStarredChange?.({
-        id: input.project.id,
-        isStarred: !input.isStarred,
-      })
-      queryClient.setQueryData(
-        ["projects", "starred"],
-        context?.previousProjects
-      )
-    },
-    onSuccess: (_data, input) => {
-      toast.success(
-        input.isStarred
-          ? "お気に入りに追加しました"
-          : "お気に入りから削除しました"
-      )
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["projects", "starred"] })
-    },
-  })
-}
-
 export function ProjectDropdownMenu({
   align = "start",
   onDelete,
@@ -129,7 +63,10 @@ export function ProjectDropdownMenu({
   align?: "start" | "center" | "end"
   onDelete?: (id: string) => void
   onRestore?: (id: string) => void
-  onStarredChange?: (input: { id: string; isStarred: boolean }) => void
+  onStarredChange: (
+    project: ProjectDropdownMenuProject,
+    isStarred: boolean
+  ) => void
   project: ProjectDropdownMenuProject
 }) {
   const queryClient = useQueryClient()
@@ -151,8 +88,6 @@ export function ProjectDropdownMenu({
       toast.success("プロジェクトを元に戻しました")
     },
   })
-  const updateProjectStarredMutation = useUpdateProjectStarred(onStarredChange)
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -186,10 +121,7 @@ export function ProjectDropdownMenu({
           onClick={(event) => {
             event.preventDefault()
             event.stopPropagation()
-            updateProjectStarredMutation.mutate({
-              project,
-              isStarred: !project.isStarred,
-            })
+            onStarredChange(project, !project.isStarred)
           }}
         >
           {project.isStarred ? <StarOffIcon /> : <StarIcon />}
