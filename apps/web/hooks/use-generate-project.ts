@@ -32,11 +32,12 @@ export function useGenerateProject() {
 
   return async function generateProject(input: GenerateProjectInput) {
     const data = await createProjectMutation.mutateAsync(input)
+    const projectId = data.projectIds.at(-1)!
 
-    setProjectId(data.projectId)
+    setProjectId(projectId)
     setProjectTitle("新規プロジェクト")
     setImageSize(null)
 
-    return data.projectId
+    return projectId
   }
 }

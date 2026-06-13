@@ -16,6 +16,7 @@ import { sessionMiddleware, type SessionEnv } from "../session"
 const createProjectSchema = z.object({
   prompt: z.string().trim().min(12).max(1200),
   aspectRatio: z.enum(["auto", "16:9", "4:3", "3:4", "1:1"]),
+  count: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
   referenceImages: z.array(z.string().startsWith("data:image/")).optional(),
 })
 
@@ -36,45 +37,50 @@ export const projectsRoutes = new Hono<SessionEnv>()
   .post("/", zValidator("json", createProjectSchema), async (c) => {
     const session = c.get("session")
 
-    const projectId = randomUUID()
-    const { aspectRatio, prompt, referenceImages } = c.req.valid("json")
+    const { aspectRatio, count, prompt, referenceImages } = c.req.valid("json")
+    const projectIds = Array.from({ length: count }, () => randomUUID())
 
-    await createProject({
-      id: projectId,
-      userId: session.user.id,
-      prompt,
-      title: "新規プロジェクト",
-      aspectRatio,
-      status: "generating",
-      width: 0,
-      height: 0,
-      analysis: { summary: "", boxes: [] },
-    })
+    await Promise.all(
+      projectIds.map((projectId) =>
+        createProject({
+          id: projectId,
+          userId: session.user.id,
+          prompt,
+          title: "新規プロジェクト",
+          aspectRatio,
+          status: "generating",
+          width: 0,
+          height: 0,
+          analysis: { summary: "", boxes: [] },
+        })
+      )
+    )
 
     try {
-      const response = await fetch(
-        new URL("/generate", env.HENGEN_WORKER_URL),
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${env.HENGEN_WORKER_SECRET}`,
-          },
-          body: JSON.stringify({
-            projectId,
-            prompt,
-            aspectRatio,
-            referenceImages,
-          }),
-        }
+      const responses = await Promise.all(
+        projectIds.map((projectId) =>
+          fetch(new URL("/generate", env.HENGEN_WORKER_URL), {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${env.HENGEN_WORKER_SECRET}`,
+            },
+            body: JSON.stringify({
+              projectId,
+              prompt,
+              aspectRatio,
+              referenceImages,
+            }),
+          })
+        )
       )
 
-      if (!response.ok) {
+      if (responses.some((response) => !response.ok)) {
         return c.json({ message: "Generation failed" }, 502)
       }
     } catch {
       return c.json({ message: "Generation failed" }, 502)
     }
 
-    return c.json({ projectId }, 200)
+    return c.json({ projectIds }, 200)
   })

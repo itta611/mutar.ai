@@ -1,6 +1,6 @@
 "use client"
 
-import { ImagePlusIcon, PaperclipIcon, SparklesIcon, XIcon } from "lucide-react"
+import { PaperclipIcon, SparklesIcon, XIcon } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useRef, useState } from "react"
@@ -15,6 +15,7 @@ import {
 } from "@/hooks/use-generate-project"
 import { authClient } from "@/lib/auth-client"
 import { AspectSelect } from "./aspect-select"
+import { CountSelect, type ProjectCount } from "./count-select"
 import { Suggestion } from "./suggestion"
 
 type UploadedImage = {
@@ -30,15 +31,18 @@ export function PromptInput() {
   const user = session.data?.user
   const { control, handleSubmit, register, setValue } = useForm<{
     aspectRatio: EditorAspectRatio
+    count: ProjectCount
     prompt: string
   }>({
     defaultValues: {
       prompt: "",
       aspectRatio: "auto",
+      count: 2,
     },
   })
   const prompt = useWatch({ control, name: "prompt" })
   const aspect = useWatch({ control, name: "aspectRatio" })
+  const count = useWatch({ control, name: "count" })
   const [isGenerating, setIsGenerating] = useState(false)
   const [images, setImages] = useState<UploadedImage[]>([])
   const imageInputRef = useRef<HTMLInputElement>(null)
@@ -83,7 +87,7 @@ export function PromptInput() {
               }
             }
           }}
-          className="min-h-16 resize-none rounded-none border-none px-1 pt-0 pb-2 shadow-none ring-0! outline-none leading-relaxed bg-transparent!"
+          className="min-h-14 resize-none rounded-none border-none px-1 pt-0 pb-2 shadow-none ring-0! outline-none leading-relaxed bg-transparent!"
           placeholder="作りたい資料画像を自然文で書いてください。"
         />
         <div className="flex items-end justify-between">
@@ -124,6 +128,10 @@ export function PromptInput() {
             <AspectSelect
               selectedAspect={aspect}
               onAspectChange={(aspect) => setValue("aspectRatio", aspect)}
+            />
+            <CountSelect
+              selectedCount={count}
+              onCountChange={(count) => setValue("count", count)}
             />
           </div>
           <Button type="submit" size="lg" disabled={!canGenerate}>
