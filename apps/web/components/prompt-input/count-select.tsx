@@ -1,17 +1,15 @@
-import { Layer, Layers2Icon, Layers2Icons2IconLayers2Icon } from "lucide-react"
+import { Layers2Icon } from "lucide-react"
 import { Button } from "../ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
+import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
 
 export type ProjectCount = 1 | 2 | 3 | 4
-
-const counts = [1, 2, 3, 4] as const
 
 export function CountSelect({
   selectedCount,
@@ -30,15 +28,23 @@ export function CountSelect({
           </Button>
         }
       />
-      <DropdownMenuContent className="min-w-40">
+      <DropdownMenuContent className="min-w-48">
         <DropdownMenuGroup>
           <DropdownMenuLabel>枚数</DropdownMenuLabel>
-          {counts.map((count) => (
-            <DropdownMenuItem key={count} onClick={() => onCountChange(count)}>
-              <Layers2Icon />
-              {count}枚
-            </DropdownMenuItem>
-          ))}
+          <div className="px-1.5 pb-1.5">
+            <Tabs
+              onValueChange={(value) =>
+                onCountChange(Number(value) as ProjectCount)
+              }
+            >
+              <TabsList className="w-full">
+                <TabsTrigger value="1">1枚</TabsTrigger>
+                <TabsTrigger value="2">2枚</TabsTrigger>
+                <TabsTrigger value="3">3枚</TabsTrigger>
+                <TabsTrigger value="4">4枚</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
