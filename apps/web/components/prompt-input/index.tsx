@@ -1,6 +1,6 @@
 "use client"
 
-import { ImagePlusIcon, SparklesIcon, XIcon } from "lucide-react"
+import { ImagePlusIcon, PaperclipIcon, SparklesIcon, XIcon } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useRef, useState } from "react"
@@ -119,7 +119,7 @@ export function PromptInput() {
               type="button"
               variant="outline"
             >
-              <ImagePlusIcon />
+              <PaperclipIcon />
             </Button>
             <AspectSelect
               selectedAspect={aspect}
