@@ -93,7 +93,7 @@ export function Gallery({ initialImages, queryKey }: GeneratedImagesViewProps) {
                   event.preventDefault()
                   event.stopPropagation()
                   updateProjectStarredMutation.mutate({
-                    id: image.id,
+                    project: image,
                     isStarred: false,
                   })
                 }}

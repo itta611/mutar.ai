@@ -25,6 +25,8 @@ export type ProjectDropdownMenuProject = {
   isStarred: boolean
   deletedAt: Date | string | null
   prompt: string
+  status: string
+  title: string
 }
 
 async function deleteProject(id: string) {
@@ -52,14 +54,14 @@ async function restoreProject(id: string) {
 }
 
 async function updateProjectStarred({
-  id,
+  project,
   isStarred,
 }: {
-  id: string
+  project: ProjectDropdownMenuProject
   isStarred: boolean
 }) {
   const response = await apiClient.projects[":projectId"].star.$put({
-    param: { projectId: id },
+    param: { projectId: project.id },
     json: { isStarred },
   })
 
@@ -77,14 +79,42 @@ export function useUpdateProjectStarred(
 
   return useMutation({
     mutationFn: updateProjectStarred,
+    onMutate: (input) => {
+      const previousProjects = queryClient.getQueryData<
+        ProjectDropdownMenuProject[]
+      >(["projects", "starred"])
+      const change = { id: input.project.id, isStarred: input.isStarred }
+
+      onStarredChange?.(change)
+      queryClient.setQueryData<ProjectDropdownMenuProject[]>(
+        ["projects", "starred"],
+        (projects = []) =>
+          input.isStarred
+            ? [{ ...input.project, isStarred: true }, ...projects]
+            : projects.filter((project) => project.id !== input.project.id)
+      )
+
+      return { previousProjects }
+    },
+    onError: (_error, input, context) => {
+      onStarredChange?.({
+        id: input.project.id,
+        isStarred: !input.isStarred,
+      })
+      queryClient.setQueryData(
+        ["projects", "starred"],
+        context?.previousProjects
+      )
+    },
     onSuccess: (_data, input) => {
-      onStarredChange?.(input)
-      queryClient.invalidateQueries({ queryKey: ["projects", "starred"] })
       toast.success(
         input.isStarred
           ? "お気に入りに追加しました"
           : "お気に入りから削除しました"
       )
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects", "starred"] })
     },
   })
 }
@@ -157,7 +187,7 @@ export function ProjectDropdownMenu({
             event.preventDefault()
             event.stopPropagation()
             updateProjectStarredMutation.mutate({
-              id: project.id,
+              project,
               isStarred: !project.isStarred,
             })
           }}
