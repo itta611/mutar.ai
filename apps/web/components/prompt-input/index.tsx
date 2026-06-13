@@ -84,7 +84,7 @@ export function PromptInput() {
               }
             }
           }}
-          className="min-h-14 resize-none rounded-none border-none px-1 pt-0 pb-2 shadow-none ring-0! outline-none leading-relaxed bg-transparent!"
+          className="min-h-16 resize-none rounded-none border-none px-1 pt-0 pb-2 shadow-none ring-0! outline-none leading-relaxed bg-transparent!"
           placeholder="作りたい資料画像を自然文で書いてください。"
         />
         <div className="flex items-end justify-between">
@@ -94,10 +94,8 @@ export function PromptInput() {
               className="hidden"
               multiple
               onChange={(event) => {
-                setImages((current) => [
-                  ...current,
-                  ...Array.from(event.currentTarget.files ?? []),
-                ])
+                const files = Array.from(event.currentTarget.files ?? [])
+                setImages((current) => [...current, ...files])
                 event.currentTarget.value = ""
               }}
               ref={imageInputRef}
@@ -122,31 +120,31 @@ export function PromptInput() {
             {isGenerating ? "生成中" : "生成"}
           </Button>
         </div>
-        {images.length > 0 ? (
-          <div className="-mx-3.5 -mb-3.5 mt-3 flex flex-wrap gap-2 rounded-b-[22px] border-t bg-muted/50 p-3.5">
-            {images.map((image, index) => (
-              <div
-                className="flex max-w-52 items-center gap-2 rounded-md bg-background px-2.5 py-1.5 text-xs"
-                key={`${image.name}-${image.lastModified}-${index}`}
-              >
-                <span className="truncate">{image.name}</span>
-                <button
-                  aria-label={`${image.name}を削除`}
-                  className="shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
-                  onClick={() =>
-                    setImages((current) =>
-                      current.filter((_, imageIndex) => imageIndex !== index)
-                    )
-                  }
-                  type="button"
-                >
-                  <XIcon className="size-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
-        ) : null}
       </form>
+      {images.length > 0 ? (
+        <div className="mx-4.5 flex flex-wrap gap-2 rounded-b-2xl border-b border-l border-r bg-zinc-50 p-2">
+          {images.map((image, index) => (
+            <div
+              className="flex max-w-52 items-center gap-2 rounded-md bg-background p-2.5 text-xs border"
+              key={`${image.name}-${image.lastModified}-${index}`}
+            >
+              <span className="truncate">{image.name}</span>
+              <button
+                aria-label={`${image.name}を削除`}
+                className="shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                onClick={() =>
+                  setImages((current) =>
+                    current.filter((_, imageIndex) => imageIndex !== index)
+                  )
+                }
+                type="button"
+              >
+                <XIcon className="size-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : null}
       <Suggestion onSelect={(content) => setValue("prompt", content)} />
     </div>
   )
