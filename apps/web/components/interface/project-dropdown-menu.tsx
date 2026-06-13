@@ -70,6 +70,25 @@ async function updateProjectStarred({
   return response.json()
 }
 
+export function useUpdateProjectStarred(
+  onStarredChange?: (input: { id: string; isStarred: boolean }) => void
+) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: updateProjectStarred,
+    onSuccess: (_data, input) => {
+      onStarredChange?.(input)
+      queryClient.invalidateQueries({ queryKey: ["projects", "starred"] })
+      toast.success(
+        input.isStarred
+          ? "お気に入りに追加しました"
+          : "お気に入りから削除しました"
+      )
+    },
+  })
+}
+
 export function ProjectDropdownMenu({
   align = "start",
   onDelete,
@@ -102,18 +121,7 @@ export function ProjectDropdownMenu({
       toast.success("プロジェクトを元に戻しました")
     },
   })
-  const updateProjectStarredMutation = useMutation({
-    mutationFn: updateProjectStarred,
-    onSuccess: (_data, input) => {
-      onStarredChange?.(input)
-      queryClient.invalidateQueries({ queryKey: ["projects", "starred"] })
-      toast.success(
-        input.isStarred
-          ? "お気に入りに追加しました"
-          : "お気に入りから削除しました"
-      )
-    },
-  })
+  const updateProjectStarredMutation = useUpdateProjectStarred(onStarredChange)
 
   return (
     <DropdownMenu>

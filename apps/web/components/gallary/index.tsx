@@ -1,11 +1,14 @@
 "use client"
 
-import { useState } from "react"
-import { LoaderCircleIcon } from "lucide-react"
+import { LoaderCircleIcon, StarIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useState } from "react"
 
-import { ProjectDropdownMenu } from "@/components/interface/project-dropdown-menu"
+import {
+  ProjectDropdownMenu,
+  useUpdateProjectStarred,
+} from "@/components/interface/project-dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
 import { apiClient } from "@/lib/api-client"
 
@@ -37,6 +40,19 @@ type GeneratedImagesViewProps = {
 
 export function Gallery({ initialImages, queryKey }: GeneratedImagesViewProps) {
   const [images, setImages] = useState(initialImages)
+  const handleStarredChange = (input: { id: string; isStarred: boolean }) =>
+    setImages((images) =>
+      queryKey[1] === "starred" && !input.isStarred
+        ? images.filter((image) => image.id !== input.id)
+        : images.map((image) =>
+            image.id === input.id
+              ? { ...image, isStarred: input.isStarred }
+              : image
+          )
+    )
+  const updateProjectStarredMutation =
+    useUpdateProjectStarred(handleStarredChange)
+
   if (images.length === 0) {
     return (
       <div className="flex min-h-80 flex-col items-center justify-center gap-4 text-muted-foreground">
@@ -51,22 +67,41 @@ export function Gallery({ initialImages, queryKey }: GeneratedImagesViewProps) {
       {images.map((image) => (
         <div
           key={image.id}
-          className="transition-transform duration-150 ease-out active:scale-[0.98]"
+          className="transition-transform duration-150 ease-out"
         >
-          <Link href={`/editor/${image.id}`} className="block">
-            {image.status === "ready" ? (
-              <Image
-                src={`/api/projects/${image.id}/image?kind=thumbnail`}
-                alt=""
-                width={300}
-                height={300}
-                unoptimized
-                className="aspect-[16/9] w-full rounded-xl object-cover"
-              />
-            ) : (
-              <Skeleton className="aspect-[16/9] w-full rounded-xl" />
-            )}
-          </Link>
+          <div className="relative">
+            <Link href={`/editor/${image.id}`} className="block">
+              {image.status === "ready" ? (
+                <Image
+                  src={`/api/projects/${image.id}/image?kind=thumbnail`}
+                  alt=""
+                  width={300}
+                  height={300}
+                  unoptimized
+                  className="aspect-[16/9] w-full rounded-xl object-cover"
+                />
+              ) : (
+                <Skeleton className="aspect-[16/9] w-full rounded-xl" />
+              )}
+            </Link>
+            {image.isStarred ? (
+              <button
+                type="button"
+                aria-label="お気に入りから削除"
+                className="cursor-pointer absolute top-2 right-2 rounded-full p-1.5 text-amber-400"
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  updateProjectStarredMutation.mutate({
+                    id: image.id,
+                    isStarred: false,
+                  })
+                }}
+              >
+                <StarIcon className="size-5 fill-current" />
+              </button>
+            ) : null}
+          </div>
           <div className="flex items-center justify-between px-1 py-2.5 rounded-b-xl bg-background">
             {image.status !== "ready" ? (
               <LoaderCircleIcon className="mr-2 size-4 shrink-0 animate-spin text-muted-foreground" />
@@ -85,17 +120,7 @@ export function Gallery({ initialImages, queryKey }: GeneratedImagesViewProps) {
               onRestore={(id) =>
                 setImages((images) => images.filter((image) => image.id !== id))
               }
-              onStarredChange={(input) =>
-                setImages((images) =>
-                  queryKey[1] === "starred" && !input.isStarred
-                    ? images.filter((image) => image.id !== input.id)
-                    : images.map((image) =>
-                        image.id === input.id
-                          ? { ...image, isStarred: input.isStarred }
-                          : image
-                      )
-                )
-              }
+              onStarredChange={handleStarredChange}
             />
           </div>
         </div>
