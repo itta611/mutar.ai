@@ -116,7 +116,7 @@ export function Inspector() {
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-foreground">文字サイズ</span>
             <Input
-              className="w-24 bg-muted/50 text-center"
+              className="w-24 text-center"
               min={1}
               onChange={(event) => {
                 const fontSize = Number(event.currentTarget.value)

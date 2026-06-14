@@ -17,6 +17,7 @@ import { authClient } from "@/lib/auth-client"
 import { AspectSelect } from "./aspect-select"
 import { CountSelect } from "./count-select"
 import { FileUpload, type UploadedImage } from "./file-upload"
+import { StyleSelect } from "./style-select"
 import { Suggestion } from "./suggestion"
 import { cn } from "@/lib/utils"
 
@@ -40,6 +41,7 @@ export function PromptInput() {
   const prompt = useWatch({ control, name: "prompt" })
   const aspect = useWatch({ control, name: "aspectRatio" })
   const count = useWatch({ control, name: "count" })
+  const [style, setStyle] = useState(1)
   const [isGenerating, setIsGenerating] = useState(false)
   const [images, setImages] = useState<UploadedImage[]>([])
   const canGenerate =
@@ -101,6 +103,10 @@ export function PromptInput() {
                 onCountChange={(count) =>
                   setValue("count", count as GenerateProjectInput["count"])
                 }
+              />
+              <StyleSelect
+                selectedStyle={style}
+                onStyleChange={setStyle}
               />
             </div>
             <Button

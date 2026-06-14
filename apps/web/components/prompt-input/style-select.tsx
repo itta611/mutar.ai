@@ -1,4 +1,4 @@
-import { ChevronDown, Layers2Icon } from "lucide-react"
+import { ChevronDown, PaletteIcon } from "lucide-react"
 import { Button } from "../ui/button"
 import {
   DropdownMenu,
@@ -9,31 +9,31 @@ import {
 } from "../ui/dropdown-menu"
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
 
-export function CountSelect({
-  selectedCount,
-  onCountChange,
+export function StyleSelect({
+  selectedStyle,
+  onStyleChange,
 }: {
-  selectedCount: number
-  onCountChange: (count: number) => void
+  selectedStyle: number
+  onStyleChange: (style: number) => void
 }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
           <Button variant="ghost" size="sm">
-            <Layers2Icon />
-            {selectedCount}枚
+            <PaletteIcon />
+            スタイル
             <ChevronDown />
           </Button>
         }
       />
       <DropdownMenuContent className="min-w-48">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>枚数</DropdownMenuLabel>
+          <DropdownMenuLabel>スタイル</DropdownMenuLabel>
           <div className="px-1.5 pb-1.5">
             <Tabs
-              onValueChange={(value) => onCountChange(Number(value))}
-              value={String(selectedCount)}
+              onValueChange={(value) => onStyleChange(Number(value))}
+              value={String(selectedStyle)}
             >
               <TabsList className="w-full">
                 <TabsTrigger value="1">1</TabsTrigger>

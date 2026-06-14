@@ -25,7 +25,7 @@ function ColorPicker({
         render={
           <Button
             aria-label="カラー"
-            className="border-border"
+            className="border-border size-7!"
             size="icon-sm"
             style={{ backgroundColor: value }}
             type="button"
