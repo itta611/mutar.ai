@@ -90,7 +90,7 @@ export function PromptInput() {
             placeholder="作りたい資料画像を自然文で書いてください。"
           />
           <div className="flex items-end justify-between">
-            <div className="flex gap-2">
+            <div className="flex gap-0.5">
               <FileUpload images={images} setImages={setImages} />
               <AspectSelect
                 selectedAspect={aspect}

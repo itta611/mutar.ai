@@ -1,4 +1,4 @@
-import { ProportionsIcon } from "lucide-react"
+import { ChevronDown, ProportionsIcon } from "lucide-react"
 import type { EditorAspectRatio } from "@/atom/generate"
 import { Button } from "../ui/button"
 import {
@@ -31,9 +31,10 @@ export function AspectSelect({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="outline" size="sm">
+          <Button variant="ghost" size="sm">
             <ProportionsIcon />
             {selectedAspectLabel}
+            <ChevronDown />
           </Button>
         }
       />

@@ -1,4 +1,4 @@
-import { Layers2Icon } from "lucide-react"
+import { ChevronDown, Layers2Icon } from "lucide-react"
 import { Button } from "../ui/button"
 import {
   DropdownMenu,
@@ -20,9 +20,10 @@ export function CountSelect({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="outline" size="sm">
+          <Button variant="ghost" size="sm">
             <Layers2Icon />
             {selectedCount}枚
+            <ChevronDown />
           </Button>
         }
       />
