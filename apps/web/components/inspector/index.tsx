@@ -9,6 +9,7 @@ import {
   type EditorBox,
 } from "@/atom/generate"
 import { Button } from "@/components/ui/button"
+import { ColorPicker } from "@/components/ui/color-picker"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -184,14 +185,30 @@ export function Inspector() {
           </div>
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-foreground">フォントカラー</span>
-            <Input
-              className="size-9 cursor-pointer rounded-md border-0 bg-muted p-1"
-              onChange={(event) =>
-                updateBox({ color: event.currentTarget.value })
-              }
-              type="color"
-              value={box.color?.startsWith("#") ? box.color : "#000000"}
-            />
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    aria-label="フォントカラー"
+                    className="border-border"
+                    size="icon-sm"
+                    style={{
+                      backgroundColor: box.color?.startsWith("#")
+                        ? box.color
+                        : "#000000",
+                    }}
+                    type="button"
+                    variant="outline"
+                  />
+                }
+              />
+              <DropdownMenuContent className="w-auto p-0">
+                <ColorPicker
+                  onValueChange={(color) => updateBox({ color })}
+                  value={box.color?.startsWith("#") ? box.color : "#000000"}
+                />
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-foreground">太字</span>
