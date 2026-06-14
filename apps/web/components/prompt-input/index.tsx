@@ -1,9 +1,9 @@
 "use client"
 
-import { PaperclipIcon, SparklesIcon, XIcon } from "lucide-react"
+import { SparklesIcon, XIcon } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import type { EditorAspectRatio } from "@/atom/generate"
 import { Button } from "@/components/ui/button"
@@ -16,13 +16,9 @@ import {
 import { authClient } from "@/lib/auth-client"
 import { AspectSelect } from "./aspect-select"
 import { CountSelect } from "./count-select"
+import { FileUpload, type UploadedImage } from "./file-upload"
 import { Suggestion } from "./suggestion"
 import { cn } from "@/lib/utils"
-
-type UploadedImage = {
-  dataUrl?: string
-  file: File
-}
 
 export function PromptInput() {
   const generateProject = useGenerateProject()
@@ -46,7 +42,6 @@ export function PromptInput() {
   const count = useWatch({ control, name: "count" })
   const [isGenerating, setIsGenerating] = useState(false)
   const [images, setImages] = useState<UploadedImage[]>([])
-  const imageInputRef = useRef<HTMLInputElement>(null)
   const canGenerate =
     !isGenerating &&
     prompt.trim().length > 0 &&
@@ -96,51 +91,7 @@ export function PromptInput() {
           />
           <div className="flex items-end justify-between">
             <div className="flex gap-2">
-              <input
-                accept="image/*"
-                className="hidden"
-                multiple
-                onChange={(event) => {
-                  const files = Array.from(event.currentTarget.files ?? [])
-                  const fileKeys = new Set(
-                    images.map(
-                      ({ file }) => `${file.name}-${file.size}-${file.lastModified}`
-                    )
-                  )
-                  const uploadedImages = files
-                    .filter((file) => {
-                      const key = `${file.name}-${file.size}-${file.lastModified}`
-                      if (fileKeys.has(key)) return false
-                      fileKeys.add(key)
-                      return true
-                    })
-                    .map((file) => ({ file }))
-                  setImages((current) => [...current, ...uploadedImages])
-                  uploadedImages.forEach((image) => {
-                    const reader = new FileReader()
-                    reader.onload = () =>
-                      setImages((current) =>
-                        current.map((currentImage) =>
-                          currentImage === image
-                            ? { ...image, dataUrl: reader.result as string }
-                            : currentImage
-                        )
-                      )
-                    reader.readAsDataURL(image.file)
-                  })
-                  event.currentTarget.value = ""
-                }}
-                ref={imageInputRef}
-                type="file"
-              />
-              <Button
-                onClick={() => imageInputRef.current?.click()}
-                size="icon-sm"
-                type="button"
-                variant="outline"
-              >
-                <PaperclipIcon />
-              </Button>
+              <FileUpload images={images} setImages={setImages} />
               <AspectSelect
                 selectedAspect={aspect}
                 onAspectChange={(aspect) => setValue("aspectRatio", aspect)}
