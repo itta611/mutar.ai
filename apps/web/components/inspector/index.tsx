@@ -185,30 +185,10 @@ export function Inspector() {
           </div>
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-foreground">フォントカラー</span>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    aria-label="フォントカラー"
-                    className="border-border"
-                    size="icon-sm"
-                    style={{
-                      backgroundColor: box.color?.startsWith("#")
-                        ? box.color
-                        : "#000000",
-                    }}
-                    type="button"
-                    variant="outline"
-                  />
-                }
-              />
-              <DropdownMenuContent className="w-auto p-0">
-                <ColorPicker
-                  onValueChange={(color) => updateBox({ color })}
-                  value={box.color?.startsWith("#") ? box.color : "#000000"}
-                />
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ColorPicker
+              onValueChange={(color) => updateBox({ color })}
+              value={box.color?.startsWith("#") ? box.color : "#000000"}
+            />
           </div>
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-foreground">太字</span>
