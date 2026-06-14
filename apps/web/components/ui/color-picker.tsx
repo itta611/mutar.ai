@@ -1,64 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import { type HsvColor, HsvColorPicker } from "react-colorful"
+import { HexColorInput, HexColorPicker } from "react-colorful"
 
-import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
-
-function hexToHsv(hex: string): HsvColor {
-  const value = Number.parseInt(hex.slice(1), 16)
-  const r = ((value >> 16) & 255) / 255
-  const g = ((value >> 8) & 255) / 255
-  const b = (value & 255) / 255
-  const max = Math.max(r, g, b)
-  const min = Math.min(r, g, b)
-  const delta = max - min
-  let h = 0
-
-  if (delta) {
-    if (max === r) h = ((g - b) / delta) % 6
-    else if (max === g) h = (b - r) / delta + 2
-    else h = (r - g) / delta + 4
-    h = h * 60
-    if (h < 0) h += 360
-  }
-
-  return {
-    h: Math.round(h),
-    s: max === 0 ? 0 : Math.round((delta / max) * 100),
-    v: Math.round(max * 100),
-  }
-}
-
-function hsvToHex({ h, s, v }: HsvColor) {
-  const hue = (h % 360) / 60
-  const saturation = s / 100
-  const brightness = v / 100
-  const chroma = brightness * saturation
-  const x = chroma * (1 - Math.abs((hue % 2) - 1))
-  const match = brightness - chroma
-  const [r, g, b] =
-    hue < 1
-      ? [chroma, x, 0]
-      : hue < 2
-        ? [x, chroma, 0]
-        : hue < 3
-          ? [0, chroma, x]
-          : hue < 4
-            ? [0, x, chroma]
-            : hue < 5
-              ? [x, 0, chroma]
-              : [chroma, 0, x]
-
-  return `#${[r, g, b]
-    .map((color) =>
-      Math.round((color + match) * 255)
-        .toString(16)
-        .padStart(2, "0")
-    )
-    .join("")}`
-}
 
 function ColorPicker({
   className,
@@ -69,52 +13,26 @@ function ColorPicker({
   onValueChange: (value: string) => void
   value: string
 }) {
-  const [color, setColor] = useState(() => hexToHsv(value))
-  const [hexInput, setHexInput] = useState(value)
-
-  function handleChange(nextColor: HsvColor) {
-    if (
-      nextColor.h < 0 ||
-      nextColor.h > 360 ||
-      nextColor.s < 0 ||
-      nextColor.s > 100 ||
-      nextColor.v < 0 ||
-      nextColor.v > 100
-    ) {
-      return
-    }
-
-    const hex = hsvToHex(nextColor)
-    setColor(nextColor)
-    setHexInput(hex)
-    onValueChange(hex)
-  }
-
-  function handleHexChange() {
-    if (!/^#[0-9a-f]{6}$/i.test(hexInput)) return
-    const nextColor = hexToHsv(hexInput)
-    setColor(nextColor)
-    onValueChange(hexInput)
-  }
-
   return (
     <div
       className={cn(
-        "space-y-4 rounded-lg bg-popover p-4 [&_.react-colorful]:h-40 [&_.react-colorful]:w-full",
+        String.raw`space-y-3 bg-popover [&_.react-colorful\_\_pointer]:border-5! [&_.react-colorful\_\_pointer]:size-5!`,
+        String.raw`[&_.react-colorful\_\_saturation]:border-b-0! [&_.react-colorful\_\_saturation]:rounded-lg!`,
+        String.raw`[&_.react-colorful\_\_hue]:rounded-full! [&_.react-colorful\_\_hue]:mt-2! [&_.react-colorful\_\_hue]:border-x-12 [&_.react-colorful\_\_hue]:border-[#ff0000]`,
         className
       )}
     >
-      <HsvColorPicker color={color} onChange={handleChange} />
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-xs text-muted-foreground">カラーコード</span>
-        <Input
-          className="w-24 font-mono uppercase"
-          onBlur={handleHexChange}
-          onChange={(event) => setHexInput(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") handleHexChange()
-          }}
-          value={hexInput}
+      <HexColorPicker onChange={onValueChange} color={value} />
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-muted-foreground pl-2">カラーコード</span>
+        <HexColorInput
+          className={cn(
+            "h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-2.5 py-1 text-base transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
+            "w-21 font-mono uppercase"
+          )}
+          color={value}
+          onChange={onValueChange}
+          prefixed
         />
       </div>
     </div>
