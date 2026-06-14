@@ -74,7 +74,7 @@ export function PromptInput() {
     <div>
       <form
         onSubmit={handleSubmit(handleGenerate)}
-        className="rounded-3xl border-2 border-primary p-3.5 shadow-lg/6 bg-background dark:bg-secondary"
+        className="rounded-[20px] border-2 border-primary p-2.5 shadow-lg/6 bg-background dark:bg-secondary"
       >
         <Textarea
           id="generation-prompt"
@@ -87,7 +87,7 @@ export function PromptInput() {
               }
             }
           }}
-          className="min-h-14 resize-none rounded-none border-none px-1 pt-0 pb-2 shadow-none ring-0! outline-none leading-relaxed bg-transparent!"
+          className="min-h-14 resize-none rounded-none border-none px-2 pt-1 pb-2 shadow-none ring-0! outline-none leading-relaxed bg-transparent!"
           placeholder="作りたい資料画像を自然文で書いてください。"
         />
         <div className="flex items-end justify-between">
@@ -134,7 +134,12 @@ export function PromptInput() {
               onCountChange={(count) => setValue("count", count)}
             />
           </div>
-          <Button type="submit" size="lg" disabled={!canGenerate}>
+          <Button
+            type="submit"
+            size="lg"
+            disabled={!canGenerate}
+            className="border-0"
+          >
             <SparklesIcon data-icon="inline-end" />
             {isGenerating ? "生成中" : "生成"}
           </Button>
