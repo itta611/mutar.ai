@@ -32,7 +32,7 @@ export function PromptInput() {
   const user = session.data?.user
   const { control, handleSubmit, register, setValue } = useForm<{
     aspectRatio: EditorAspectRatio
-    count: number
+    count: GenerateProjectInput["count"]
     prompt: string
   }>({
     defaultValues: {
@@ -102,7 +102,19 @@ export function PromptInput() {
                 multiple
                 onChange={(event) => {
                   const files = Array.from(event.currentTarget.files ?? [])
-                  const uploadedImages = files.map((file) => ({ file }))
+                  const fileKeys = new Set(
+                    images.map(
+                      ({ file }) => `${file.name}-${file.size}-${file.lastModified}`
+                    )
+                  )
+                  const uploadedImages = files
+                    .filter((file) => {
+                      const key = `${file.name}-${file.size}-${file.lastModified}`
+                      if (fileKeys.has(key)) return false
+                      fileKeys.add(key)
+                      return true
+                    })
+                    .map((file) => ({ file }))
                   setImages((current) => [...current, ...uploadedImages])
                   uploadedImages.forEach((image) => {
                     const reader = new FileReader()
@@ -135,7 +147,9 @@ export function PromptInput() {
               />
               <CountSelect
                 selectedCount={count}
-                onCountChange={(count) => setValue("count", count)}
+                onCountChange={(count) =>
+                  setValue("count", count as GenerateProjectInput["count"])
+                }
               />
             </div>
             <Button
