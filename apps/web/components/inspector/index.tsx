@@ -8,7 +8,7 @@ import {
   editorSelectedBoxIndexAtom,
   type EditorBox,
 } from "@/atom/generate"
-import { ColorPickerWithInput } from "@/components/ui/color-picker"
+import { ColorPicker, ColorPickerWithInput } from "@/components/ui/color-picker"
 import {
   Select,
   SelectContent,
@@ -25,11 +25,6 @@ const fonts = [
   { label: "ゴシック", value: "gothic" },
   { label: "明朝", value: "mincho" },
   { label: "丸ゴシック", value: "pop" },
-] as const
-
-const fontWeights = [
-  { label: "標準", value: "normal" },
-  { label: "太字", value: "bold" },
 ] as const
 
 function updateTextBox(
@@ -163,20 +158,22 @@ export function Inspector() {
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-foreground">字体</span>
             <Select
-              items={fontWeights}
+              items={[
+                { label: "標準", value: "normal" },
+                { label: "太字", value: "bold" },
+              ]}
               onValueChange={(value) => updateBox({ bold: value === "bold" })}
               value={box.bold ? "bold" : "normal"}
             >
               <SelectTrigger className="min-w-27">
-                <SelectValue />
+                <SelectValue className={box.bold ? "font-bold" : undefined} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {fontWeights.map((fontWeight) => (
-                    <SelectItem key={fontWeight.value} value={fontWeight.value}>
-                      {fontWeight.label}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="normal">標準</SelectItem>
+                  <SelectItem value="bold" className="font-bold">
+                    太字
+                  </SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
