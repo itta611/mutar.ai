@@ -49,8 +49,7 @@ export function AuthDialog() {
     return null
   }
 
-  const callbackURL =
-    typeof window === "undefined" ? "/" : window.location.toString()
+  const callbackURL = "/home"
 
   async function handleGoogleLogin() {
     setBusyMode("google")
