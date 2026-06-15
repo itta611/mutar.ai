@@ -22,7 +22,7 @@ export function StyleSelect({
         render={
           <Button variant="ghost" size="sm">
             <PaletteIcon />
-            スタイル
+            <span className="not-sm:hidden">スタイル</span>
             <ChevronDown />
           </Button>
         }

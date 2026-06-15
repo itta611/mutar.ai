@@ -70,11 +70,13 @@ export function PromptInput() {
   }
   return (
     <>
-      <div className="drop-shadow-lg/3">
+      <div
+      // className={images.length > 0 ? "drop-shadow-xl/5" : "drop-shadow-lg/5"}
+      >
         <form
           onSubmit={handleSubmit(handleGenerate)}
           className={cn(
-            "rounded-[20px] border-2 border-primary p-2.5 bg-background dark:bg-zinc-900 relative z-20"
+            "rounded-[20px] border-2 shadow-lg/5 border-primary p-2.5 bg-background dark:bg-zinc-900 relative z-20"
           )}
         >
           <Textarea
@@ -104,10 +106,7 @@ export function PromptInput() {
                   setValue("count", count as GenerateProjectInput["count"])
                 }
               />
-              <StyleSelect
-                selectedStyle={style}
-                onStyleChange={setStyle}
-              />
+              <StyleSelect selectedStyle={style} onStyleChange={setStyle} />
             </div>
             <Button
               type="submit"

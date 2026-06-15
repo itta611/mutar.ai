@@ -1,12 +1,16 @@
 import { ComponentProps } from "react"
 import { Button } from "../ui/button"
+import { cn } from "@/lib/utils"
 
-const SuggestionButton = (props: ComponentProps<"button">) => {
+const SuggestionButton = ({
+  className,
+  ...props
+}: ComponentProps<"button">) => {
   return (
     <Button
       size="sm"
       variant="outline"
-      className="rounded-full font-medium!"
+      className={cn("rounded-full font-medium!", className)}
       {...props}
     />
   )
@@ -19,7 +23,7 @@ export function Suggestion({
 }) {
   return (
     <div className="mt-5">
-      <div className="flex gap-2 justify-center space-y-2">
+      <div className="flex gap-2 sm:justify-center flex-wrap">
         <SuggestionButton
           onClick={() =>
             onSelect(`SaaSの料金プラン比較画像を作成。
@@ -53,8 +57,6 @@ export function Suggestion({
         >
           カフェのキャンペーン用ポスター
         </SuggestionButton>
-      </div>
-      <div className="flex gap-2 justify-center">
         <SuggestionButton
           onClick={() =>
             onSelect(
@@ -76,6 +78,7 @@ export function Suggestion({
 黒背景にネオンブルーの光、近未来的でかっこいいデザイン。`
             )
           }
+          className="not-sm:hidden"
         >
           テックイベントの告知ポスター
         </SuggestionButton>
@@ -88,6 +91,7 @@ export function Suggestion({
 スマホ画面、チェックリスト、カレンダー、通知アイコンを含めた、SaaS風の広告ビジュアル。`
             )
           }
+          className="not-sm:hidden"
         >
           スマホアプリの紹介画像
         </SuggestionButton>

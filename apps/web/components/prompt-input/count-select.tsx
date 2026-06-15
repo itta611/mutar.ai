@@ -22,7 +22,7 @@ export function CountSelect({
         render={
           <Button variant="ghost" size="sm">
             <Layers2Icon />
-            {selectedCount}枚
+            <span className="not-sm:hidden">{selectedCount}枚</span>
             <ChevronDown />
           </Button>
         }

@@ -33,7 +33,7 @@ export function AspectSelect({
         render={
           <Button variant="ghost" size="sm">
             <ProportionsIcon />
-            {selectedAspectLabel}
+            <span className="not-sm:hidden">{selectedAspectLabel}</span>
             <ChevronDown />
           </Button>
         }
