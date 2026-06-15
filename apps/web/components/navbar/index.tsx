@@ -2,18 +2,17 @@
 
 import { DownloadIcon, PencilLine, XIcon } from "lucide-react"
 import { useAtomValue } from "jotai"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
+import { useQuery } from "@tanstack/react-query"
 
 import {
   editorBoxesAtom,
   fontFamilyMap,
-  editorImageSizeAtom,
-  editorProjectIdAtom,
-  editorProjectTitleAtom,
 } from "@/atom/generate"
 import { Button } from "@/components/ui/button"
+import { editorProjectQuery } from "@/hooks/use-editor-project"
 
 function getTextWidth(
   context: CanvasRenderingContext2D,
@@ -57,10 +56,14 @@ function fillText(
 
 export function Navbar() {
   const router = useRouter()
+  const { projectId } = useParams<{ projectId: string }>()
   const boxes = useAtomValue(editorBoxesAtom)
-  const imageSize = useAtomValue(editorImageSizeAtom)
-  const projectId = useAtomValue(editorProjectIdAtom)
-  const projectName = useAtomValue(editorProjectTitleAtom)
+  const { data: project } = useQuery(editorProjectQuery(projectId))
+  const imageSize =
+    project?.status === "ready"
+      ? ([project.width, project.height] as const)
+      : null
+  const projectName = project?.title ?? ""
   const [isSaving, setIsSaving] = useState(false)
 
   async function handleSaveImage() {

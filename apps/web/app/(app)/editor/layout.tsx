@@ -1,7 +1,6 @@
 import { ProjectSwitcher } from "@/components/project-switcher"
 import { Inspector } from "@/components/inspector"
 import { EditorNavigationButtons } from "./navigation-buttons"
-import { EditorSync } from "./sync"
 import { Navbar } from "@/components/navbar"
 
 export default function EditorLayout({
@@ -14,7 +13,6 @@ export default function EditorLayout({
       <Navbar />
       <div className="relative h-full flex">
         <div className="grow relative dark:bg-background bg-zinc-50">
-          <EditorSync />
           {children}
           <EditorNavigationButtons />
           <ProjectSwitcher />

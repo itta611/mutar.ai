@@ -1,15 +1,13 @@
 "use client"
 
+import { useQuery } from "@tanstack/react-query"
 import { useSetAtom } from "jotai"
-import { useCallback } from "react"
-import { useQueryClient } from "@tanstack/react-query"
+import { useEffect } from "react"
 
 import {
   type EditorBox,
   editorBoxesAtom,
-  editorImageSizeAtom,
-  editorProjectIdAtom,
-  editorProjectTitleAtom,
+  editorSelectedBoxIndexAtom,
 } from "@/atom/generate"
 import { resizeTextBox } from "@/hooks/editor-bbox"
 import { apiClient } from "@/lib/api-client"
@@ -51,53 +49,47 @@ export function editorProjectQuery(projectId: string) {
   }
 }
 
-export function useEditorProject() {
-  const queryClient = useQueryClient()
+export function useEditorProject(projectId: string) {
   const setBoxes = useSetAtom(editorBoxesAtom)
-  const setImageSize = useSetAtom(editorImageSizeAtom)
-  const setProjectId = useSetAtom(editorProjectIdAtom)
-  const setProjectTitle = useSetAtom(editorProjectTitleAtom)
+  const setSelectedIndex = useSetAtom(editorSelectedBoxIndexAtom)
+  const query = useQuery({
+    ...editorProjectQuery(projectId),
+    refetchInterval: (query) => {
+      const status = query.state.data?.status
 
-  return useCallback(
-    async (projectId: string, options?: { force?: boolean }) => {
-      setProjectId(projectId)
+      return status && status !== "ready" && status !== "error" ? 5000 : false
+    },
+  })
+  const project = query.data
 
-      try {
-        const query = editorProjectQuery(projectId)
-        const cached = queryClient.getQueryData<EditorProject>(query.queryKey)
-        const project =
-          cached?.status === "ready" && !options?.force
-            ? cached
-            : await queryClient.fetchQuery({ ...query, staleTime: 0 })
+  useEffect(() => {
+    setSelectedIndex(null)
 
-        setProjectTitle(project.title)
+    if (!project || query.isError || project.status !== "ready") {
+      setBoxes([])
+      return
+    }
 
-        if (project.status !== "ready") {
-          setImageSize(null)
-          setBoxes([])
-          return
+    setBoxes(
+      project.analysis.boxes.map(({ lineHeight, ...box }) => {
+        const nextBox = {
+          ...box,
+          lineheight:
+            box.label.split("\n").length === 1
+              ? 1
+              : (box.lineheight ?? lineHeight),
         }
 
-        setImageSize([project.width, project.height])
-        setBoxes(
-          project.analysis.boxes.map(({ lineHeight, ...box }) => {
-            const nextBox = {
-              ...box,
-              lineheight:
-                box.label.split("\n").length === 1
-                  ? 1
-                  : (box.lineheight ?? lineHeight),
-            }
+        return resizeTextBox(nextBox, box.label)
+      })
+    )
+  }, [
+    project,
+    projectId,
+    query.isError,
+    setBoxes,
+    setSelectedIndex,
+  ])
 
-            return resizeTextBox(nextBox, box.label)
-          })
-        )
-      } catch {
-        setProjectTitle("")
-        setImageSize(null)
-        setBoxes([])
-      }
-    },
-    [queryClient, setBoxes, setImageSize, setProjectId, setProjectTitle]
-  )
+  return query
 }

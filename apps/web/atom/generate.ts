@@ -24,8 +24,5 @@ export const fontFamilyMap: Record<
   pop: '"M PLUS Rounded 1c", sans-serif',
 }
 
-export const editorProjectIdAtom = atom<string | null>(null)
-export const editorProjectTitleAtom = atom<string>("")
-export const editorImageSizeAtom = atom<ImageSize | null>(null)
 export const editorBoxesAtom = atom<EditorBox[]>([])
 export const editorSelectedBoxIndexAtom = atom<number | null>(null)

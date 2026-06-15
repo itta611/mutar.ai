@@ -17,11 +17,10 @@ import { EditorStage } from "./editor-stage"
 import { TextEditor } from "./text-editor"
 import {
   editorBoxesAtom,
-  editorImageSizeAtom,
-  editorProjectIdAtom,
   editorSelectedBoxIndexAtom,
   fontFamilyMap,
   type EditorBox,
+  type ImageSize,
 } from "@/atom/generate"
 import {
   createBoxTextNode,
@@ -183,12 +182,19 @@ export default function Page({
   params: Promise<{ projectId: string }>
 }) {
   const { projectId } = use(params)
-  const currentProjectId = useAtomValue(editorProjectIdAtom)
-  const activeProjectId = currentProjectId ?? projectId
-  const imageSize = useAtomValue(editorImageSizeAtom)
+
+  return <Editor key={projectId} projectId={projectId} />
+}
+
+function Editor({ projectId }: { projectId: string }) {
   const boxes = useAtomValue(editorBoxesAtom)
   const setBoxes = useSetAtom(editorBoxesAtom)
-  const fetchProject = useEditorProject()
+  const { data: project } = useEditorProject(projectId)
+  const isProjectReady = project?.status === "ready"
+  const readyProject = isProjectReady ? project : null
+  const imageSize: ImageSize | null = readyProject
+    ? [readyProject.width, readyProject.height]
+    : null
   const textRefs = useRef(new Map<number, Konva.Text>())
   const hoverTransformerRef = useRef<Konva.Transformer>(null)
   const selectionTransformerRefs = useRef(
@@ -213,24 +219,18 @@ export default function Page({
   const [snapGuides, setSnapGuides] = useState<SnapGuide[]>([])
 
   useEffect(() => {
-    if (currentProjectId !== activeProjectId) {
-      fetchProject(projectId)
-    }
-  }, [activeProjectId, currentProjectId, fetchProject, projectId])
-
-  useEffect(() => {
-    if (!imageSize) {
+    if (!isProjectReady) {
       return
     }
 
     const image = new Image()
-    image.src = `/api/projects/${activeProjectId}/image`
-    image.onload = () => setImageElement({ image, projectId: activeProjectId })
+    image.src = `/api/projects/${projectId}/image`
+    image.onload = () => setImageElement({ image, projectId })
 
     return () => {
       image.onload = null
     }
-  }, [activeProjectId, imageSize])
+  }, [isProjectReady, projectId])
 
   useEffect(() => {
     const transformer = transformerRef.current
@@ -606,7 +606,7 @@ export default function Page({
 
   return (
     <EditorStage
-      activeProjectId={activeProjectId}
+      activeProjectId={projectId}
       imageElement={imageElement}
       imageSize={imageSize}
       onClick={clearTextSelection}
