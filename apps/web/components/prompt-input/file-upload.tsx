@@ -7,6 +7,38 @@ export type UploadedImage = {
   file: File
 }
 
+export function addImageFiles(
+  files: File[],
+  images: UploadedImage[],
+  setImages: Dispatch<SetStateAction<UploadedImage[]>>
+) {
+  const fileKeys = new Set(
+    images.map(({ file }) => `${file.name}-${file.size}-${file.lastModified}`)
+  )
+  const uploadedImages = files
+    .filter((file) => {
+      const key = `${file.name}-${file.size}-${file.lastModified}`
+      if (fileKeys.has(key)) return false
+      fileKeys.add(key)
+      return true
+    })
+    .map((file) => ({ file }))
+
+  setImages((current) => [...current, ...uploadedImages])
+  uploadedImages.forEach((image) => {
+    const reader = new FileReader()
+    reader.onload = () =>
+      setImages((current) =>
+        current.map((currentImage) =>
+          currentImage === image
+            ? { ...image, dataUrl: reader.result as string }
+            : currentImage
+        )
+      )
+    reader.readAsDataURL(image.file)
+  })
+}
+
 export function FileUpload({
   images,
   setImages,
@@ -23,33 +55,11 @@ export function FileUpload({
         className="hidden"
         multiple
         onChange={(event) => {
-          const fileKeys = new Set(
-            images.map(
-              ({ file }) => `${file.name}-${file.size}-${file.lastModified}`
-            )
+          addImageFiles(
+            Array.from(event.currentTarget.files ?? []),
+            images,
+            setImages
           )
-          const uploadedImages = Array.from(event.currentTarget.files ?? [])
-            .filter((file) => {
-              const key = `${file.name}-${file.size}-${file.lastModified}`
-              if (fileKeys.has(key)) return false
-              fileKeys.add(key)
-              return true
-            })
-            .map((file) => ({ file }))
-
-          setImages((current) => [...current, ...uploadedImages])
-          uploadedImages.forEach((image) => {
-            const reader = new FileReader()
-            reader.onload = () =>
-              setImages((current) =>
-                current.map((currentImage) =>
-                  currentImage === image
-                    ? { ...image, dataUrl: reader.result as string }
-                    : currentImage
-                )
-              )
-            reader.readAsDataURL(image.file)
-          })
           event.currentTarget.value = ""
         }}
         ref={inputRef}

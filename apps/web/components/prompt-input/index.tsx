@@ -16,7 +16,11 @@ import {
 import { authClient } from "@/lib/auth-client"
 import { AspectSelect } from "./aspect-select"
 import { CountSelect } from "./count-select"
-import { FileUpload, type UploadedImage } from "./file-upload"
+import {
+  addImageFiles,
+  FileUpload,
+  type UploadedImage,
+} from "./file-upload"
 import { StyleSelect } from "./style-select"
 import { Suggestion } from "./suggestion"
 import { cn } from "@/lib/utils"
@@ -89,6 +93,14 @@ export function PromptInput() {
                   event.currentTarget.form?.requestSubmit()
                 }
               }
+            }}
+            onPaste={(event) => {
+              const files = Array.from(event.clipboardData.files).filter(
+                (file) => file.type.startsWith("image/")
+              )
+              if (files.length === 0) return
+              event.preventDefault()
+              addImageFiles(files, images, setImages)
             }}
             className="min-h-14 resize-none rounded-none border-none px-2 pt-1 pb-2 shadow-none ring-0! outline-none leading-relaxed bg-transparent!"
             placeholder="作りたい資料画像を自然文で書いてください。"
