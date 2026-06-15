@@ -9,7 +9,7 @@ import {
   type EditorBox,
 } from "@/atom/generate"
 import { Button } from "@/components/ui/button"
-import { ColorPicker } from "@/components/ui/color-picker"
+import { ColorPicker, ColorPickerWithInput } from "@/components/ui/color-picker"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,20 +76,19 @@ export function Inspector() {
   }
 
   return (
-    <div className="hidden w-80 border-l border-border/70` bg-background px-5 py-3 md:block">
+    <div className="hidden w-80 border-l border-border/70 bg-background px-5 py-3 md:block">
       <div className="mb-7 text-sm font-semibold">インスペクタ</div>
       {box ? (
-        <div className="space-y-6">
+        <div className="space-y-5">
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-foreground">フォント</span>
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
                   <Button
-                    className="min-w-28 justify-between bg-muted/50"
-                    size="sm"
+                    className="min-w-27 justify-between"
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                   >
                     {selectedFont?.label ?? "ゴシック"}
                   </Button>
@@ -116,7 +115,7 @@ export function Inspector() {
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-foreground">文字サイズ</span>
             <Input
-              className="w-24 text-center"
+              className="w-27"
               min={1}
               onChange={(event) => {
                 const fontSize = Number(event.currentTarget.value)
@@ -128,6 +127,52 @@ export function Inspector() {
               type="number"
               value={box.fontSize}
             />
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-sm text-foreground">行間</span>
+            <Input
+              className="w-27"
+              min={0.1}
+              onChange={(event) => {
+                const lineheight = Number(event.currentTarget.value)
+
+                if (Number.isFinite(lineheight) && lineheight > 0) {
+                  updateBox({ lineheight })
+                }
+              }}
+              step={0.1}
+              type="number"
+              value={box.lineheight ?? 1.4}
+            />
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-sm text-foreground">字間</span>
+            <Input
+              className="w-27"
+              onChange={(event) => {
+                const letterSpacing = Number(event.currentTarget.value)
+
+                if (Number.isFinite(letterSpacing)) {
+                  updateBox({ letterSpacing })
+                }
+              }}
+              step={0.1}
+              type="number"
+              value={box.letterSpacing ?? 0}
+            />
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-sm text-foreground">太字</span>
+            <Button
+              aria-pressed={box.bold ?? false}
+              className="min-w-20"
+              onClick={() => updateBox({ bold: !(box.bold ?? false) })}
+              size="sm"
+              type="button"
+              variant={box.bold ? "secondary" : "ghost"}
+            >
+              {box.bold ? "オン" : "オフ"}
+            </Button>
           </div>
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-foreground">文字揃え</span>
@@ -151,57 +196,11 @@ export function Inspector() {
             </Tabs>
           </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm text-foreground">行間</span>
-            <Input
-              className="w-24 bg-muted/50 text-center"
-              min={0.1}
-              onChange={(event) => {
-                const lineheight = Number(event.currentTarget.value)
-
-                if (Number.isFinite(lineheight) && lineheight > 0) {
-                  updateBox({ lineheight })
-                }
-              }}
-              step={0.1}
-              type="number"
-              value={box.lineheight ?? 1.4}
-            />
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-sm text-foreground">字間</span>
-            <Input
-              className="w-24 bg-muted/50 text-center"
-              onChange={(event) => {
-                const letterSpacing = Number(event.currentTarget.value)
-
-                if (Number.isFinite(letterSpacing)) {
-                  updateBox({ letterSpacing })
-                }
-              }}
-              step={0.1}
-              type="number"
-              value={box.letterSpacing ?? 0}
-            />
-          </div>
-          <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-foreground">フォントカラー</span>
-            <ColorPicker
+            <ColorPickerWithInput
               onValueChange={(color) => updateBox({ color })}
               value={box.color?.startsWith("#") ? box.color : "#000000"}
             />
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <span className="text-sm text-foreground">太字</span>
-            <Button
-              aria-pressed={box.bold ?? false}
-              className="min-w-20"
-              onClick={() => updateBox({ bold: !(box.bold ?? false) })}
-              size="sm"
-              type="button"
-              variant={box.bold ? "secondary" : "ghost"}
-            >
-              {box.bold ? "オン" : "オフ"}
-            </Button>
           </div>
         </div>
       ) : (

@@ -23,13 +23,11 @@ function ColorPicker({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button
+          <button
             aria-label="カラー"
-            className="border-border size-7!"
-            size="icon-sm"
+            className="border size-5! rounded-xs"
             style={{ backgroundColor: value }}
             type="button"
-            variant="outline"
           />
         }
       />
@@ -61,4 +59,18 @@ function ColorPicker({
   )
 }
 
-export { ColorPicker }
+function ColorPickerWithInput(props: Parameters<typeof ColorPicker>[0]) {
+  return (
+    <div className="flex items-center gap-1.75 w-27 border rounded-md p-2 h-9">
+      <ColorPicker {...props} />
+      <HexColorInput
+        className="text-sm grow shrink basis-0 w-0 outline-0 font-mono uppercase"
+        color={props.value}
+        onChange={props.onValueChange}
+        prefixed
+      />
+    </div>
+  )
+}
+
+export { ColorPicker, ColorPickerWithInput }
