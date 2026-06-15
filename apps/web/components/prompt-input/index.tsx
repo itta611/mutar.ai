@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
+import { toast } from "sonner"
 import type { EditorAspectRatio } from "@/atom/generate"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -50,8 +51,8 @@ export function PromptInput() {
   const [images, setImages] = useState<UploadedImage[]>([])
   const canGenerate =
     !isGenerating &&
-    prompt.trim().length > 0 &&
-    images.every((image) => image.dataUrl)
+    images.every((image) => image.dataUrl) &&
+    (prompt.trim().length > 0 || images.length > 0)
 
   async function handleGenerate(
     options: Omit<GenerateProjectInput, "referenceImages">
@@ -68,7 +69,7 @@ export function PromptInput() {
       const projectId = await generateProject({ ...options, referenceImages })
       router.push(`/editor/${projectId}`)
     } catch {
-      alert("生成に失敗しました。")
+      toast.error("生成に失敗しました。")
       setIsGenerating(false)
     }
   }

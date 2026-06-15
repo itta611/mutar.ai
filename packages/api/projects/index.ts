@@ -13,12 +13,17 @@ import { z } from "zod"
 import { env } from "@/lib/env"
 import { sessionMiddleware, type SessionEnv } from "../session"
 
-const createProjectSchema = z.object({
-  prompt: z.string().trim().min(12).max(1200),
-  aspectRatio: z.enum(["auto", "16:9", "4:3", "3:4", "1:1"]),
-  count: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
-  referenceImages: z.array(z.string().startsWith("data:image/")).optional(),
-})
+const createProjectSchema = z
+  .object({
+    prompt: z.string().trim().max(1200),
+    aspectRatio: z.enum(["auto", "16:9", "4:3", "3:4", "1:1"]),
+    count: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
+    referenceImages: z.array(z.string().startsWith("data:image/")).optional(),
+  })
+  .refine(
+    ({ prompt, referenceImages }) =>
+      prompt.length > 0 || (referenceImages?.length ?? 0) > 0
+  )
 
 export const projectsRoutes = new Hono<SessionEnv>()
   .use(sessionMiddleware)
