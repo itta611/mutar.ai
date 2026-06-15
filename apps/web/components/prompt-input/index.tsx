@@ -120,7 +120,7 @@ export function PromptInput() {
           </div>
         </form>
         {images.length > 0 ? (
-          <div className="mx-0.5 flex flex-wrap gap-2 rounded-b-2xl border-b border-l border-r bg-zinc-50 dark:bg-zinc-800 p-2 pt-6 relative -top-4 z-10">
+          <div className="mx-0.5 flex flex-wrap gap-2 rounded-b-2xl border-b border-l border-r bg-zinc-50 dark:bg-zinc-800 p-2 pt-6 relative -top-4 -mb-4 z-10">
             {images.map((image, index) => (
               <div
                 className="flex max-w-52 items-center gap-2.5 rounded-lg bg-background p-1 pr-2.5 text-xs border"
