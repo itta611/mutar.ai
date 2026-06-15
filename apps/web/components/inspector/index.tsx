@@ -8,15 +8,15 @@ import {
   editorSelectedBoxIndexAtom,
   type EditorBox,
 } from "@/atom/generate"
-import { Button } from "@/components/ui/button"
-import { ColorPicker, ColorPickerWithInput } from "@/components/ui/color-picker"
+import { ColorPickerWithInput } from "@/components/ui/color-picker"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { resizeTextBox } from "@/hooks/editor-bbox"
@@ -25,6 +25,11 @@ const fonts = [
   { label: "ゴシック", value: "gothic" },
   { label: "明朝", value: "mincho" },
   { label: "丸ゴシック", value: "pop" },
+] as const
+
+const fontWeights = [
+  { label: "標準", value: "normal" },
+  { label: "太字", value: "bold" },
 ] as const
 
 function updateTextBox(
@@ -52,7 +57,6 @@ export function Inspector() {
   const selectedIndex = useAtomValue(editorSelectedBoxIndexAtom)
   const [boxes, setBoxes] = useAtom(editorBoxesAtom)
   const box = selectedIndex === null ? null : boxes[selectedIndex]
-  const selectedFont = fonts.find((font) => font.value === box?.fontFamily)
 
   function updateBox(
     patch: Partial<
@@ -82,35 +86,30 @@ export function Inspector() {
         <div className="space-y-5">
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-foreground">フォント</span>
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    className="min-w-27 justify-between"
-                    type="button"
-                    variant="outline"
-                  >
-                    {selectedFont?.label ?? "ゴシック"}
-                  </Button>
+            <Select
+              items={fonts}
+              onValueChange={(fontFamily) => {
+                if (fontFamily) {
+                  updateBox({
+                    fontFamily: fontFamily as EditorBox["fontFamily"],
+                  })
                 }
-              />
-              <DropdownMenuContent>
-                <DropdownMenuRadioGroup
-                  onValueChange={(fontFamily) =>
-                    updateBox({
-                      fontFamily: fontFamily as EditorBox["fontFamily"],
-                    })
-                  }
-                  value={box.fontFamily ?? "gothic"}
-                >
+              }}
+              value={box.fontFamily ?? "gothic"}
+            >
+              <SelectTrigger className="min-w-27">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
                   {fonts.map((font) => (
-                    <DropdownMenuRadioItem key={font.value} value={font.value}>
+                    <SelectItem key={font.value} value={font.value}>
                       {font.label}
-                    </DropdownMenuRadioItem>
+                    </SelectItem>
                   ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-foreground">文字サイズ</span>
@@ -162,17 +161,25 @@ export function Inspector() {
             />
           </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm text-foreground">太字</span>
-            <Button
-              aria-pressed={box.bold ?? false}
-              className="min-w-20"
-              onClick={() => updateBox({ bold: !(box.bold ?? false) })}
-              size="sm"
-              type="button"
-              variant={box.bold ? "secondary" : "ghost"}
+            <span className="text-sm text-foreground">字体</span>
+            <Select
+              items={fontWeights}
+              onValueChange={(value) => updateBox({ bold: value === "bold" })}
+              value={box.bold ? "bold" : "normal"}
             >
-              {box.bold ? "オン" : "オフ"}
-            </Button>
+              <SelectTrigger className="min-w-27">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {fontWeights.map((fontWeight) => (
+                    <SelectItem key={fontWeight.value} value={fontWeight.value}>
+                      {fontWeight.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-foreground">文字揃え</span>
