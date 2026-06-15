@@ -203,7 +203,7 @@ export function Inspector() {
             </Tabs>
           </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm text-foreground">フォントカラー</span>
+            <span className="text-sm text-foreground">文字色</span>
             <ColorPickerWithInput
               onValueChange={(color) => updateBox({ color })}
               value={box.color?.startsWith("#") ? box.color : "#000000"}
