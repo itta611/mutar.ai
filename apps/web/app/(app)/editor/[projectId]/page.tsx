@@ -301,6 +301,22 @@ function Editor({ projectId }: { projectId: string }) {
 
   function selectText(event: Konva.KonvaEventObject<Event>, index: number) {
     event.cancelBubble = true
+
+    if (
+      event.evt instanceof MouseEvent &&
+      (event.evt.shiftKey || event.evt.metaKey || event.evt.ctrlKey)
+    ) {
+      setSelectedIndexes((current) => {
+        const indexes = current.includes(index)
+          ? current.filter((selectedIndex) => selectedIndex !== index)
+          : [...current, index]
+
+        setSelectedIndex(indexes[0] ?? null)
+        return indexes
+      })
+      return
+    }
+
     setSelectedIndex(index)
     setSelectedIndexes([index])
   }
