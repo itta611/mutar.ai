@@ -54,6 +54,22 @@ function getCenter(p1: Point, p2: Point) {
   }
 }
 
+function getCenteredStageTransform(
+  key: string,
+  imageViewportSize: Size,
+  imageSize: [width: number, height: number],
+  scale: number
+) {
+  const [width, height] = imageSize
+
+  return {
+    key,
+    scale,
+    x: defaultViewportPadding + (imageViewportSize.width - width * scale) / 2,
+    y: defaultViewportPadding + (imageViewportSize.height - height * scale) / 2,
+  }
+}
+
 export function EditorStage({
   activeProjectId,
   children,
@@ -87,6 +103,8 @@ export function EditorStage({
   const [stageTransform, setStageTransform] = useState<StageTransform | null>(
     null
   )
+  const imageWidth = imageSize?.[0]
+  const imageHeight = imageSize?.[1]
 
   useLayoutEffect(() => {
     const container = containerRef.current
@@ -97,8 +115,32 @@ export function EditorStage({
 
     const updateSize = () => {
       const rect = container.getBoundingClientRect()
+      const nextContainerSize = { height: rect.height, width: rect.width }
 
-      setContainerSize({ height: rect.height, width: rect.width })
+      setContainerSize(nextContainerSize)
+
+      if (
+        imageWidth === undefined ||
+        imageHeight === undefined ||
+        imageElement?.projectId !== activeProjectId
+      ) {
+        return
+      }
+
+      const stage = stageRef.current
+
+      if (!stage) {
+        return
+      }
+
+      setStageTransform(
+        getCenteredStageTransform(
+          `${activeProjectId}:${imageWidth}:${imageHeight}`,
+          getImageViewportSize(nextContainerSize),
+          [imageWidth, imageHeight],
+          stage.scaleX()
+        )
+      )
     }
 
     updateSize()
@@ -107,7 +149,7 @@ export function EditorStage({
     resizeObserver.observe(container)
 
     return () => resizeObserver.disconnect()
-  }, [])
+  }, [activeProjectId, imageElement?.projectId, imageHeight, imageWidth])
 
   const imageViewportSize = getImageViewportSize(containerSize)
 
@@ -118,7 +160,7 @@ export function EditorStage({
     )
 
     return (
-      <div className="relative min-h-full" ref={containerRef}>
+      <div className="relative h-full min-w-0" ref={containerRef}>
         <Skeleton
           className="absolute"
           style={{
@@ -141,16 +183,13 @@ export function EditorStage({
     imageViewportSize.width / width,
     imageViewportSize.height / height
   )
-  const stageTransformKey = `${activeProjectId}:${width}:${height}:${containerSize.width}:${containerSize.height}`
-  const defaultStageTransform = {
-    key: stageTransformKey,
-    scale: fitScale,
-    x:
-      defaultViewportPadding + (imageViewportSize.width - width * fitScale) / 2,
-    y:
-      defaultViewportPadding +
-      (imageViewportSize.height - height * fitScale) / 2,
-  }
+  const stageTransformKey = `${activeProjectId}:${width}:${height}`
+  const defaultStageTransform = getCenteredStageTransform(
+    stageTransformKey,
+    imageViewportSize,
+    imageSize,
+    fitScale
+  )
   const activeStageTransform =
     stageTransform?.key === stageTransformKey
       ? stageTransform
@@ -304,7 +343,7 @@ export function EditorStage({
   return (
     <div
       ref={containerRef}
-      className="relative min-h-full overflow-hidden"
+      className="relative h-full min-w-0 overflow-hidden"
       onContextMenu={(event) => event.preventDefault()}
     >
       <Stage

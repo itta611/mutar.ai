@@ -16,8 +16,8 @@ export default function RootLayout({
   return (
     <Providers>
       <AppSidebar />
-      <div className="w-full h-dvh flex flex-col">
-        <div className="grow bg-background">{children}</div>
+      <div className="flex h-dvh w-full min-w-0 flex-col">
+        <div className="min-h-0 min-w-0 grow bg-background">{children}</div>
       </div>
     </Providers>
   )

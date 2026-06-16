@@ -9,10 +9,10 @@ export default function EditorLayout({
   children: React.ReactNode
 }>) {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full min-h-0 min-w-0 flex-col">
       <Navbar />
-      <div className="relative h-full flex">
-        <div className="grow relative dark:bg-background bg-zinc-50">
+      <div className="relative flex h-full min-h-0 min-w-0">
+        <div className="relative min-h-0 min-w-0 grow bg-zinc-50 dark:bg-background">
           {children}
           <EditorNavigationButtons />
           <ProjectSwitcher />
