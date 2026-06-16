@@ -17,11 +17,7 @@ import {
 import { authClient } from "@/lib/auth-client"
 import { AspectSelect } from "./aspect-select"
 import { CountSelect } from "./count-select"
-import {
-  addImageFiles,
-  FileUpload,
-  type UploadedImage,
-} from "./file-upload"
+import { addImageFiles, FileUpload, type UploadedImage } from "./file-upload"
 import { StyleSelect } from "./style-select"
 import { Suggestion } from "./suggestion"
 import { cn } from "@/lib/utils"
@@ -75,99 +71,95 @@ export function PromptInput() {
   }
   return (
     <>
-      <div
-      // className={images.length > 0 ? "drop-shadow-xl/5" : "drop-shadow-lg/5"}
+      <form
+        onSubmit={handleSubmit(handleGenerate)}
+        className={cn(
+          "rounded-[20px] border-2 shadow-lg/5 border-primary p-2.5 bg-background dark:bg-zinc-900 relative z-20"
+        )}
       >
-        <form
-          onSubmit={handleSubmit(handleGenerate)}
-          className={cn(
-            "rounded-[20px] border-2 shadow-lg/5 border-primary p-2.5 bg-background dark:bg-zinc-900 relative z-20"
-          )}
-        >
-          <Textarea
-            id="generation-prompt"
-            {...register("prompt")}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
-                event.preventDefault()
-                if (canGenerate) {
-                  event.currentTarget.form?.requestSubmit()
-                }
-              }
-            }}
-            onPaste={(event) => {
-              const files = Array.from(event.clipboardData.files).filter(
-                (file) => file.type.startsWith("image/")
-              )
-              if (files.length === 0) return
+        <Textarea
+          id="generation-prompt"
+          {...register("prompt")}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
               event.preventDefault()
-              addImageFiles(files, images, setImages)
-            }}
-            className="min-h-14 resize-none rounded-none border-none px-2 pt-1 pb-2 shadow-none ring-0! outline-none leading-relaxed bg-transparent!"
-            placeholder="作りたい資料画像を自然文で書いてください。"
-          />
-          <div className="flex items-end justify-between">
-            <div className="flex gap-0.5">
-              <FileUpload images={images} setImages={setImages} />
-              <AspectSelect
-                selectedAspect={aspect}
-                onAspectChange={(aspect) => setValue("aspectRatio", aspect)}
-              />
-              <CountSelect
-                selectedCount={count}
-                onCountChange={(count) =>
-                  setValue("count", count as GenerateProjectInput["count"])
-                }
-              />
-              <StyleSelect selectedStyle={style} onStyleChange={setStyle} />
-            </div>
-            <Button
-              type="submit"
-              size="lg"
-              disabled={!canGenerate}
-              className="border-0"
+              if (canGenerate) {
+                event.currentTarget.form?.requestSubmit()
+              }
+            }
+          }}
+          onPaste={(event) => {
+            const files = Array.from(event.clipboardData.files).filter((file) =>
+              file.type.startsWith("image/")
+            )
+            if (files.length === 0) return
+            event.preventDefault()
+            addImageFiles(files, images, setImages)
+          }}
+          className="min-h-14 resize-none rounded-none border-none px-2 pt-1 pb-2 shadow-none ring-0! outline-none leading-relaxed bg-transparent!"
+          placeholder="作りたい資料画像を自然文で書いてください。"
+        />
+        <div className="flex items-end justify-between">
+          <div className="flex gap-0.5">
+            <FileUpload images={images} setImages={setImages} />
+            <AspectSelect
+              selectedAspect={aspect}
+              onAspectChange={(aspect) => setValue("aspectRatio", aspect)}
+            />
+            <CountSelect
+              selectedCount={count}
+              onCountChange={(count) =>
+                setValue("count", count as GenerateProjectInput["count"])
+              }
+            />
+            <StyleSelect selectedStyle={style} onStyleChange={setStyle} />
+          </div>
+          <Button
+            type="submit"
+            size="lg"
+            disabled={!canGenerate}
+            className="border-0"
+          >
+            <SparklesIcon data-icon="inline-end" />
+            {isGenerating ? "生成中" : "生成"}
+          </Button>
+        </div>
+      </form>
+      {images.length > 0 ? (
+        <div className="mx-0.5 flex flex-wrap gap-2 rounded-b-2xl border-b border-l border-r bg-zinc-50 dark:bg-zinc-800 p-2 pt-6 relative -top-4 -mb-4 z-10">
+          {images.map((image, index) => (
+            <div
+              className="flex max-w-52 items-center gap-2.5 rounded-lg bg-background p-1 pr-2.5 text-xs border"
+              key={`${image.file.name}-${image.file.lastModified}-${index}`}
             >
-              <SparklesIcon data-icon="inline-end" />
-              {isGenerating ? "生成中" : "生成"}
-            </Button>
-          </div>
-        </form>
-        {images.length > 0 ? (
-          <div className="mx-0.5 flex flex-wrap gap-2 rounded-b-2xl border-b border-l border-r bg-zinc-50 dark:bg-zinc-800 p-2 pt-6 relative -top-4 -mb-4 z-10">
-            {images.map((image, index) => (
-              <div
-                className="flex max-w-52 items-center gap-2.5 rounded-lg bg-background p-1 pr-2.5 text-xs border"
-                key={`${image.file.name}-${image.file.lastModified}-${index}`}
-              >
-                <div className="size-8 shrink-0 overflow-hidden rounded">
-                  {image.dataUrl ? (
-                    <Image
-                      alt=""
-                      className="size-full object-cover border"
-                      height={32}
-                      src={image.dataUrl}
-                      width={32}
-                    />
-                  ) : null}
-                </div>
-                <span className="truncate">{image.file.name}</span>
-                <button
-                  aria-label={`${image.file.name}を削除`}
-                  className="shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
-                  onClick={() =>
-                    setImages((current) =>
-                      current.filter((_, imageIndex) => imageIndex !== index)
-                    )
-                  }
-                  type="button"
-                >
-                  <XIcon className="size-3.5" />
-                </button>
+              <div className="size-8 shrink-0 overflow-hidden rounded">
+                {image.dataUrl ? (
+                  <Image
+                    alt=""
+                    className="size-full object-cover border"
+                    height={32}
+                    src={image.dataUrl}
+                    width={32}
+                  />
+                ) : null}
               </div>
-            ))}
-          </div>
-        ) : null}
-      </div>
+              <span className="truncate">{image.file.name}</span>
+              <button
+                aria-label={`${image.file.name}を削除`}
+                className="shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+                onClick={() =>
+                  setImages((current) =>
+                    current.filter((_, imageIndex) => imageIndex !== index)
+                  )
+                }
+                type="button"
+              >
+                <XIcon className="size-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : null}
       <Suggestion onSelect={(content) => setValue("prompt", content)} />
     </>
   )
