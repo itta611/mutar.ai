@@ -8,6 +8,7 @@ import {
   type EditorBox,
   editorBoxesAtom,
   editorSelectedBoxIndexAtom,
+  editorSelectedBoxIndexesAtom,
 } from "@/atom/generate"
 import { resizeTextBox } from "@/hooks/editor-bbox"
 import { apiClient } from "@/lib/api-client"
@@ -52,6 +53,7 @@ export function editorProjectQuery(projectId: string) {
 export function useEditorProject(projectId: string) {
   const setBoxes = useSetAtom(editorBoxesAtom)
   const setSelectedIndex = useSetAtom(editorSelectedBoxIndexAtom)
+  const setSelectedIndexes = useSetAtom(editorSelectedBoxIndexesAtom)
   const query = useQuery({
     ...editorProjectQuery(projectId),
     refetchInterval: (query) => {
@@ -64,6 +66,7 @@ export function useEditorProject(projectId: string) {
 
   useEffect(() => {
     setSelectedIndex(null)
+    setSelectedIndexes([])
 
     if (!project || query.isError || project.status !== "ready") {
       setBoxes([])
@@ -89,6 +92,7 @@ export function useEditorProject(projectId: string) {
     query.isError,
     setBoxes,
     setSelectedIndex,
+    setSelectedIndexes,
   ])
 
   return query

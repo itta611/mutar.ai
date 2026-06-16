@@ -4,11 +4,12 @@ import { useAtom, useAtomValue } from "jotai"
 import { AlignCenter, AlignLeft, AlignRight } from "lucide-react"
 
 import {
-  editorBoxesAtom,
-  editorSelectedBoxIndexAtom,
   type EditorBox,
+  editorBoxesAtom,
+  editorSelectedBoxIndexesAtom,
 } from "@/atom/generate"
-import { ColorPicker, ColorPickerWithInput } from "@/components/ui/color-picker"
+import { ColorPickerWithInput } from "@/components/ui/color-picker"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -17,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { resizeTextBox } from "@/hooks/editor-bbox"
 
@@ -27,57 +27,90 @@ const fonts = [
   { label: "丸ゴシック", value: "pop" },
 ] as const
 
+type TextStylePatch = Partial<
+  Pick<
+    EditorBox,
+    | "align"
+    | "bold"
+    | "color"
+    | "fontFamily"
+    | "fontSize"
+    | "letterSpacing"
+    | "lineheight"
+  >
+>
+
+function getCommonValue<T>(
+  boxes: EditorBox[],
+  getValue: (box: EditorBox) => T
+): T | "" {
+  const firstBox = boxes[0]
+
+  if (!firstBox) {
+    return ""
+  }
+
+  const firstValue = getValue(firstBox)
+
+  return boxes.every((box) => getValue(box) === firstValue) ? firstValue : ""
+}
+
 function updateTextBox(
   boxes: EditorBox[],
-  index: number,
-  patch: Partial<
-    Pick<
-      EditorBox,
-      | "align"
-      | "bold"
-      | "color"
-      | "fontFamily"
-      | "fontSize"
-      | "letterSpacing"
-      | "lineheight"
-    >
-  >
+  indexes: number[],
+  patch: TextStylePatch
 ) {
+  const selectedIndexes = new Set(indexes)
+
   return boxes.map((box, boxIndex) =>
-    boxIndex === index ? resizeTextBox({ ...box, ...patch }, box.label) : box
+    selectedIndexes.has(boxIndex)
+      ? resizeTextBox({ ...box, ...patch }, box.label)
+      : box
   )
 }
 
 export function Inspector() {
-  const selectedIndex = useAtomValue(editorSelectedBoxIndexAtom)
+  const selectedIndexes = useAtomValue(editorSelectedBoxIndexesAtom)
   const [boxes, setBoxes] = useAtom(editorBoxesAtom)
-  const box = selectedIndex === null ? null : boxes[selectedIndex]
+  const selectedBoxes = selectedIndexes.flatMap((index) =>
+    boxes[index] ? [boxes[index]] : []
+  )
+  const fontFamily = getCommonValue(
+    selectedBoxes,
+    (box) => box.fontFamily ?? "gothic"
+  )
+  const fontSize = getCommonValue(selectedBoxes, (box) => box.fontSize)
+  const lineheight = getCommonValue(
+    selectedBoxes,
+    (box) => box.lineheight ?? 1.4
+  )
+  const letterSpacing = getCommonValue(
+    selectedBoxes,
+    (box) => box.letterSpacing ?? 0
+  )
+  const fontWeight = getCommonValue(selectedBoxes, (box) =>
+    box.bold ? "bold" : "normal"
+  )
+  const align = getCommonValue(selectedBoxes, (box) => box.align ?? "center")
+  const commonColor = getCommonValue(
+    selectedBoxes,
+    (box) => box.color ?? "#000000"
+  )
+  const color =
+    commonColor === "" || commonColor.startsWith("#") ? commonColor : "#000000"
 
-  function updateBox(
-    patch: Partial<
-      Pick<
-        EditorBox,
-        | "align"
-        | "bold"
-        | "color"
-        | "fontFamily"
-        | "fontSize"
-        | "letterSpacing"
-        | "lineheight"
-      >
-    >
-  ) {
-    if (selectedIndex === null) {
+  function updateBox(patch: TextStylePatch) {
+    if (selectedIndexes.length === 0) {
       return
     }
 
-    setBoxes((current) => updateTextBox(current, selectedIndex, patch))
+    setBoxes((current) => updateTextBox(current, selectedIndexes, patch))
   }
 
   return (
     <div className="hidden w-80 border-l border-border/70 bg-background px-5 py-3 md:block">
       <div className="mb-7 text-sm font-semibold">インスペクタ</div>
-      {box ? (
+      {selectedBoxes.length > 0 ? (
         <div className="space-y-5">
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-foreground">フォント</span>
@@ -90,7 +123,7 @@ export function Inspector() {
                   })
                 }
               }}
-              value={box.fontFamily ?? "gothic"}
+              value={fontFamily}
             >
               <SelectTrigger className="min-w-27">
                 <SelectValue />
@@ -119,7 +152,7 @@ export function Inspector() {
                 }
               }}
               type="number"
-              value={box.fontSize}
+              value={fontSize}
             />
           </div>
           <div className="flex items-center justify-between gap-4">
@@ -136,7 +169,7 @@ export function Inspector() {
               }}
               step={0.1}
               type="number"
-              value={box.lineheight ?? 1.4}
+              value={lineheight}
             />
           </div>
           <div className="flex items-center justify-between gap-4">
@@ -152,7 +185,7 @@ export function Inspector() {
               }}
               step={0.1}
               type="number"
-              value={box.letterSpacing ?? 0}
+              value={letterSpacing}
             />
           </div>
           <div className="flex items-center justify-between gap-4">
@@ -163,10 +196,12 @@ export function Inspector() {
                 { label: "太字", value: "bold" },
               ]}
               onValueChange={(value) => updateBox({ bold: value === "bold" })}
-              value={box.bold ? "bold" : "normal"}
+              value={fontWeight}
             >
               <SelectTrigger className="min-w-27">
-                <SelectValue className={box.bold ? "font-bold" : undefined} />
+                <SelectValue
+                  className={fontWeight === "bold" ? "font-bold" : undefined}
+                />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -184,7 +219,7 @@ export function Inspector() {
               onValueChange={(align) =>
                 updateBox({ align: align as EditorBox["align"] })
               }
-              value={box.align ?? "center"}
+              value={align}
             >
               <TabsList>
                 <TabsTrigger aria-label="左揃え" value="left">
@@ -203,7 +238,7 @@ export function Inspector() {
             <span className="text-sm text-foreground">文字色</span>
             <ColorPickerWithInput
               onValueChange={(color) => updateBox({ color })}
-              value={box.color?.startsWith("#") ? box.color : "#000000"}
+              value={color}
             />
           </div>
         </div>

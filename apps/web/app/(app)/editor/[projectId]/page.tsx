@@ -18,6 +18,7 @@ import { TextEditor } from "./text-editor"
 import {
   editorBoxesAtom,
   editorSelectedBoxIndexAtom,
+  editorSelectedBoxIndexesAtom,
   fontFamilyMap,
   type EditorBox,
   type ImageSize,
@@ -211,7 +212,9 @@ function Editor({ projectId }: { projectId: string }) {
   const [editingText, setEditingText] = useState<EditingText | null>(null)
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [, setSelectedIndex] = useAtom(editorSelectedBoxIndexAtom)
-  const [selectedIndexes, setSelectedIndexes] = useState<number[]>([])
+  const [selectedIndexes, setSelectedIndexes] = useAtom(
+    editorSelectedBoxIndexesAtom
+  )
   const [selectionRectangle, setSelectionRectangle] =
     useState<SelectionRectangle | null>(null)
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null)
