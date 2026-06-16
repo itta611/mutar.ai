@@ -3,18 +3,23 @@ import { Button } from "../ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
-import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
+import { ColorPickerWithInput } from "../ui/color-picker"
+import { Checkbox } from "../ui/checkbox"
+
+export type PromptStyle = {
+  themeColor: string
+  backgroundColor: string
+  transparentBackground: boolean
+}
 
 export function StyleSelect({
-  selectedStyle,
+  style,
   onStyleChange,
 }: {
-  selectedStyle: number
-  onStyleChange: (style: number) => void
+  style: PromptStyle
+  onStyleChange: (style: PromptStyle) => void
 }) {
   return (
     <DropdownMenu>
@@ -27,8 +32,47 @@ export function StyleSelect({
           </Button>
         }
       />
-      <DropdownMenuContent className="min-w-48">
-        <div className="flex-col p-1.5">{/* <div className="f" */}</div>
+      <DropdownMenuContent className="min-w-68 grid auto-rows-[36px] grid-cols-[1fr_auto] items-center justify-between gap-y-2 p-4">
+        <label className="text-sm text-muted-foreground" htmlFor="theme-color">
+          テーマ
+        </label>
+        <ColorPickerWithInput
+          id="theme-color"
+          onValueChange={(themeColor) =>
+            onStyleChange({ ...style, themeColor })
+          }
+          value={style.themeColor}
+        />
+        <label
+          className="text-sm text-muted-foreground"
+          htmlFor="background-color"
+        >
+          背景色
+        </label>
+        <ColorPickerWithInput
+          id="background-color"
+          onValueChange={(backgroundColor) =>
+            onStyleChange({ ...style, backgroundColor })
+          }
+          value={style.backgroundColor}
+        />
+        <label
+          className="text-sm text-muted-foreground"
+          htmlFor="transparent-background"
+        >
+          背景を透過
+        </label>
+        <Checkbox
+          checked={style.transparentBackground}
+          className="ml-1"
+          id="transparent-background"
+          onCheckedChange={(transparentBackground) =>
+            onStyleChange({
+              ...style,
+              transparentBackground: transparentBackground === true,
+            })
+          }
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   )

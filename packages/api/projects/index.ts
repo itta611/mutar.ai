@@ -18,6 +18,13 @@ const createProjectBaseSchema = z.object({
   aspectRatio: z.enum(["auto", "16:9", "4:3", "3:4", "1:1"]),
   count: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
   referenceImages: z.array(z.string().startsWith("data:image/")).optional(),
+  style: z
+    .object({
+      themeColor: z.string(),
+      backgroundColor: z.string(),
+      transparentBackground: z.boolean(),
+    })
+    .optional(),
 })
 
 const createProjectSchema = z.union([
@@ -46,7 +53,8 @@ export const projectsRoutes = new Hono<SessionEnv>()
   .post("/", zValidator("json", createProjectSchema), async (c) => {
     const session = c.get("session")
 
-    const { aspectRatio, count, prompt, referenceImages } = c.req.valid("json")
+    const { aspectRatio, count, prompt, referenceImages, style } =
+      c.req.valid("json")
     const projectIds = Array.from({ length: count }, () => randomUUID())
 
     await Promise.all(
@@ -79,6 +87,7 @@ export const projectsRoutes = new Hono<SessionEnv>()
               prompt,
               aspectRatio,
               referenceImages,
+              style,
             }),
           })
         )

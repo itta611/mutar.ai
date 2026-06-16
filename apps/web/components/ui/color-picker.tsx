@@ -2,7 +2,6 @@
 
 import { HexColorInput, HexColorPicker } from "react-colorful"
 
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +15,7 @@ function ColorPicker({
   value,
 }: {
   className?: string
+  id?: string
   onValueChange: (value: string) => void
   value: string
 }) {
@@ -61,11 +61,12 @@ function ColorPicker({
 
 function ColorPickerWithInput(props: Parameters<typeof ColorPicker>[0]) {
   return (
-    <div className="flex items-center gap-1.75 w-27 border rounded-md p-2 h-9">
+    <div className="flex items-center gap-1.75 w-27 bg-zinc-100 rounded-md p-2 h-9">
       <ColorPicker {...props} />
       <HexColorInput
         className="text-sm grow shrink basis-0 w-0 outline-0 font-mono uppercase"
         color={props.value}
+        id={props.id}
         onChange={props.onValueChange}
       />
     </div>

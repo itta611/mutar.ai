@@ -18,7 +18,7 @@ import { authClient } from "@/lib/auth-client"
 import { AspectSelect } from "./aspect-select"
 import { CountSelect } from "./count-select"
 import { addImageFiles, FileUpload, type UploadedImage } from "./file-upload"
-import { StyleSelect } from "./style-select"
+import { type PromptStyle, StyleSelect } from "./style-select"
 import { Suggestion } from "./suggestion"
 import { cn } from "@/lib/utils"
 
@@ -42,7 +42,11 @@ export function PromptInput() {
   const prompt = useWatch({ control, name: "prompt" })
   const aspect = useWatch({ control, name: "aspectRatio" })
   const count = useWatch({ control, name: "count" })
-  const [style, setStyle] = useState(1)
+  const [style, setStyle] = useState<PromptStyle>({
+    themeColor: "#191714",
+    backgroundColor: "#ffffff",
+    transparentBackground: false,
+  })
   const [isGenerating, setIsGenerating] = useState(false)
   const [images, setImages] = useState<UploadedImage[]>([])
   const canGenerate =
@@ -62,7 +66,11 @@ export function PromptInput() {
 
     try {
       const referenceImages = images.map((image) => image.dataUrl!)
-      const projectId = await generateProject({ ...options, referenceImages })
+      const projectId = await generateProject({
+        ...options,
+        referenceImages,
+        style,
+      })
       router.push(`/editor/${projectId}`)
     } catch {
       toast.error("生成に失敗しました。")
@@ -112,7 +120,7 @@ export function PromptInput() {
                 setValue("count", count as GenerateProjectInput["count"])
               }
             />
-            <StyleSelect selectedStyle={style} onStyleChange={setStyle} />
+            <StyleSelect style={style} onStyleChange={setStyle} />
           </div>
           <Button
             type="submit"
