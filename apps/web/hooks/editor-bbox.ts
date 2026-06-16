@@ -91,25 +91,17 @@ function createTextMeasurer(style: TextStyle) {
   })
 }
 
-function getTextNodeTopInset(
-  textNode: Pick<Konva.Text, "fontSize" | "lineHeight">,
-  measurer: Pick<Konva.Text, "measureSize">
-) {
+export function getTextStyleBottomInset(style: TextStyle) {
+  const measurer = createTextMeasurer(style)
   const metrics = measurer.measureSize("Hg")
-  const lineHeight = textNode.fontSize() * textNode.lineHeight()
+  const lineHeight = style.fontSize * style.lineheight
   const ascent =
     metrics.fontBoundingBoxAscent ?? metrics.actualBoundingBoxAscent
   const descent =
     metrics.fontBoundingBoxDescent ?? metrics.actualBoundingBoxDescent
   const baseline = (ascent - descent) / 2 + lineHeight / 2
 
-  return Math.max(0, baseline - metrics.actualBoundingBoxAscent)
-}
-
-export function getTextStyleTopInset(style: TextStyle) {
-  const measurer = createTextMeasurer(style)
-
-  return getTextNodeTopInset(measurer, measurer)
+  return Math.max(0, baseline + metrics.actualBoundingBoxDescent - lineHeight)
 }
 
 export function createBoxTextNode(box: EditorBox, label = box.label) {

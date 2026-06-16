@@ -26,7 +26,7 @@ import {
 import {
   createBoxTextNode,
   getBoxRect,
-  getTextStyleTopInset,
+  getTextStyleBottomInset,
   moveTextBox,
   resizeTextBox,
   resizeWrappedTextBox,
@@ -654,14 +654,14 @@ function Editor({ projectId }: { projectId: string }) {
               : box.align === "right"
                 ? rect.width - textWidth
                 : rect.width / 2 - textWidth / 2
-          const topInset = getTextStyleTopInset({
+          const bottomInset = getTextStyleBottomInset({
             bold: box.bold ?? false,
             fontFamily,
             fontSize: box.fontSize,
             lineheight: box.lineheight ?? 1.4,
           })
           return (
-            <Group key={index} x={rect.left} y={rect.top - topInset}>
+            <Group key={index} x={rect.left} y={rect.top}>
               <Text
                 align={box.align ?? "center"}
                 draggable={editingText?.index !== index}
@@ -669,7 +669,7 @@ function Editor({ projectId }: { projectId: string }) {
                 fontFamily={fontFamily}
                 fontSize={box.fontSize}
                 fontStyle={box.bold ? "bold" : "normal"}
-                height={rect.height}
+                height={rect.height + bottomInset}
                 letterSpacing={box.letterSpacing ?? 0}
                 lineHeight={box.lineheight ?? 1.4}
                 onClick={(event) => selectText(event, index)}
