@@ -20,7 +20,7 @@ export function StyleSelect({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" size="sm" className="pr-1.5">
+          <Button variant="ghost" size="sm" className="pr-2">
             <PaletteIcon />
             <span className="not-sm:hidden">スタイル</span>
             <ChevronDown />
@@ -28,22 +28,7 @@ export function StyleSelect({
         }
       />
       <DropdownMenuContent className="min-w-48">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>スタイル</DropdownMenuLabel>
-          <div className="px-1.5 pb-1.5">
-            <Tabs
-              onValueChange={(value) => onStyleChange(Number(value))}
-              value={String(selectedStyle)}
-            >
-              <TabsList className="w-full">
-                <TabsTrigger value="1">1</TabsTrigger>
-                <TabsTrigger value="2">2</TabsTrigger>
-                <TabsTrigger value="3">3</TabsTrigger>
-                <TabsTrigger value="4">4</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        </DropdownMenuGroup>
+        <div className="flex-col p-1.5">{/* <div className="f" */}</div>
       </DropdownMenuContent>
     </DropdownMenu>
   )

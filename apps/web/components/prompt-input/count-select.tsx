@@ -20,7 +20,7 @@ export function CountSelect({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" size="sm" className="pr-1.5">
+          <Button variant="ghost" size="sm" className="pr-2">
             <Layers2Icon />
             <span className="not-sm:hidden">{selectedCount}枚</span>
             <ChevronDown />

@@ -31,7 +31,7 @@ export function AspectSelect({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" size="sm" className="pr-1.5">
+          <Button variant="ghost" size="sm" className="pr-2">
             <ProportionsIcon />
             <span className="not-sm:hidden">{selectedAspectLabel}</span>
             <ChevronDown />

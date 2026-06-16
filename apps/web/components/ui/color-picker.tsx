@@ -67,7 +67,6 @@ function ColorPickerWithInput(props: Parameters<typeof ColorPicker>[0]) {
         className="text-sm grow shrink basis-0 w-0 outline-0 font-mono uppercase"
         color={props.value}
         onChange={props.onValueChange}
-        prefixed
       />
     </div>
   )
