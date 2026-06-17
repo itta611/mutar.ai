@@ -57,8 +57,11 @@ export function SettingsDialog({
     enabled: open,
   })
   const router = useRouter()
+  const remainingCredits = creditUsage
+    ? Math.max(0, creditUsage.quota - creditUsage.used)
+    : 0
   const creditPercent = creditUsage
-    ? Math.min(100, (creditUsage.used / creditUsage.quota) * 100)
+    ? Math.min(100, (remainingCredits / creditUsage.quota) * 100)
     : 0
 
   const handleDeleteAccount = async () => {
@@ -133,7 +136,7 @@ export function SettingsDialog({
             </div>
             <h3 className="mt-10 mb-5 text-2xl font-medium">Account</h3>
             <div className="mb-5 rounded-xl border bg-card p-5">
-              <div className="mb-2 text-base">クレジット使用量</div>
+              <div className="mb-2 text-base">残りクレジット</div>
               <div className="text-sm text-muted-foreground">
                 基準日: 毎月{creditUsage?.resetDay ?? "-"}日
               </div>
@@ -145,7 +148,7 @@ export function SettingsDialog({
                   />
                 </div>
                 <div className="w-20 text-right text-sm text-muted-foreground">
-                  {creditUsage ? `${creditUsage.used}/${creditUsage.quota}` : "-"}
+                  {creditUsage ? `${remainingCredits}/${creditUsage.quota}` : "-"}
                 </div>
               </div>
             </div>
