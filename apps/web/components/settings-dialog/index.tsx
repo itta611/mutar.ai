@@ -8,11 +8,12 @@ import { AccountSettingsPage } from "./account"
 import { PreferencesSettingsPage } from "./preferences"
 
 const navItems = [
-  { group: "Account", items: ["Preferences", "Account"] },
-  { group: "Workspace", items: ["General", "Members", "Mentions", "Billing"] },
+  {
+    title: "一般",
+    component: <PreferencesSettingsPage />,
+  },
+  { title: "アカウント", component: <AccountSettingsPage /> },
 ]
-
-type SettingsTab = "Preferences" | "Account"
 
 export function SettingsDialog({
   onOpenChange,
@@ -21,46 +22,37 @@ export function SettingsDialog({
   onOpenChange: (open: boolean) => void
   open: boolean
 }) {
-  const [activeTab, setActiveTab] = useState<SettingsTab>("Preferences")
+  const [activeTab, setActiveTab] = useState(0)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="grid h-[min(760px,calc(100dvh-4rem))] max-w-250! grid-cols-1 gap-0 overflow-hidden p-0 sm:grid-cols-[240px_1fr]">
         <DialogTitle className="sr-only">設定</DialogTitle>
         <aside className="border-b bg-muted/40 p-4 sm:border-r sm:border-b-0">
-          {navItems.map((group) => (
-            <div className="mb-5" key={group.group}>
-              <div className="mb-2 px-2 text-sm font-medium text-muted-foreground">
-                {group.group}
-              </div>
-              <div className="grid gap-1">
-                {group.items.map((item) => (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (item === "Preferences" || item === "Account") {
-                        setActiveTab(item)
-                      }
-                    }}
-                    className={cn(
-                      "h-9 rounded-md px-2 text-left text-sm",
-                      item === activeTab && "bg-accent text-accent-foreground"
-                    )}
-                    key={item}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
+          <div className="grid gap-1">
+            {navItems.map((item, index) => (
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab(index)
+                }}
+                className={cn(
+                  "h-9 rounded-md px-2 text-left text-sm cursor-pointer hover:bg-accent",
+                  activeTab === index && "bg-accent text-accent-foreground"
+                )}
+                key={item.title}
+              >
+                {item.title}
+              </button>
+            ))}
+          </div>
         </aside>
         <div className="overflow-y-auto p-6 sm:p-10">
-          {activeTab === "Preferences" ? (
-            <PreferencesSettingsPage open={open} />
-          ) : (
-            <AccountSettingsPage />
-          )}
+          <h2 className="mb-10 text-2xl font-bold">
+            {navItems[activeTab].title}
+          </h2>
+
+          {navItems[activeTab].component}
         </div>
       </DialogContent>
     </Dialog>

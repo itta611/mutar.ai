@@ -3,12 +3,15 @@
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { apiClient } from "@/lib/api-client"
 import { authClient } from "@/lib/auth-client"
+import { SettingSection } from "./setting-section"
+import { UsageCard } from "./usage-card"
 
 type AccountFormValues = {
   name: string
@@ -46,6 +49,7 @@ export function AccountSettingsPage() {
     }
 
     router.refresh()
+    toast.success("名前を変更しました。")
   })
 
   const handleDeleteAccount = async () => {
@@ -68,27 +72,30 @@ export function AccountSettingsPage() {
   }
 
   return (
-    <>
-      <h2 className="mb-10 text-3xl font-medium">Account</h2>
-      <form className="mb-5 bg-card p-5" onSubmit={handleUpdateAccount}>
-        <div className="mb-4 text-base">名前</div>
-        <div className="mb-4 max-w-90 flex gap-2">
-          <Input {...accountForm.register("name")} />
-          <Button disabled={isSavingName} type="submit">
-            保存
-          </Button>
-        </div>
-        {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
-      </form>
-      <div className="bg-card p-5">
-        <div className="mb-4 text-base">アカウント削除</div>
-        <p className="mb-5 text-sm text-muted-foreground">
-          アカウントと作成したプロジェクトを削除します。
-        </p>
+    <div className="space-y-12">
+      <SettingSection title="名前">
+        <form className="space-y-4" onSubmit={handleUpdateAccount}>
+          <div className="max-w-90 flex gap-2">
+            <Input {...accountForm.register("name")} />
+            <Button disabled={isSavingName} type="submit">
+              保存
+            </Button>
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+        </form>
+      </SettingSection>
+      <SettingSection title="メールアドレス" description={user?.email} />
+      <SettingSection title="クレジット使用量">
+        <UsageCard />
+      </SettingSection>
+      <SettingSection
+        title="アカウント削除"
+        description="アカウントと作成したプロジェクトを削除します。"
+      >
         <Button onClick={() => setConfirmOpen(true)} variant="destructive">
           アカウントを削除
         </Button>
-      </div>
+      </SettingSection>
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="max-w-100!">
           <DialogTitle className="text-lg">
@@ -116,6 +123,6 @@ export function AccountSettingsPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   )
 }

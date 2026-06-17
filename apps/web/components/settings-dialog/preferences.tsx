@@ -1,9 +1,6 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
-
 import { Switch } from "@/components/ui/switch"
-import { apiClient } from "@/lib/api-client"
 
 const settings = [
   {
@@ -20,33 +17,10 @@ const settings = [
   },
 ]
 
-async function getCreditUsage() {
-  const response = await apiClient.credits.$get()
-
-  if (!response.ok) {
-    throw new Error("request_failed")
-  }
-
-  return response.json()
-}
-
-export function PreferencesSettingsPage({ open }: { open: boolean }) {
-  const { data: creditUsage } = useQuery({
-    queryKey: ["credit-usage"],
-    queryFn: getCreditUsage,
-    enabled: open,
-  })
-  const remainingCredits = creditUsage
-    ? Math.max(0, creditUsage.quota - creditUsage.used)
-    : 0
-  const creditPercent = creditUsage
-    ? Math.min(100, (remainingCredits / creditUsage.quota) * 100)
-    : 0
-
+export function PreferencesSettingsPage() {
   return (
     <>
-      <h2 className="mb-10 text-3xl font-medium">Preferences</h2>
-      <h3 className="mb-5 text-2xl font-medium">Canvas</h3>
+      <h3 className="mb-5 text-lg font-bold">エディタ</h3>
       <div className="overflow-hidden rounded-xl border bg-card">
         {settings.map((setting) => (
           <div
@@ -65,24 +39,6 @@ export function PreferencesSettingsPage({ open }: { open: boolean }) {
             <Switch aria-label={setting.title} defaultChecked />
           </div>
         ))}
-      </div>
-      <h3 className="mt-10 mb-5 text-2xl font-medium">Credits</h3>
-      <div className="mb-5 rounded-xl border bg-card p-5">
-        <div className="mb-2 text-base">残りクレジット</div>
-        <div className="text-sm text-muted-foreground">
-          基準日: 毎月{creditUsage?.resetDay ?? "-"}日
-        </div>
-        <div className="mt-4 flex items-center gap-4">
-          <div className="h-2 grow rounded-full bg-muted">
-            <div
-              className="h-full rounded-full bg-foreground"
-              style={{ width: `${creditPercent}%` }}
-            />
-          </div>
-          <div className="w-20 text-right text-sm text-muted-foreground">
-            {creditUsage ? `${remainingCredits}/${creditUsage.quota}` : "-"}
-          </div>
-        </div>
       </div>
     </>
   )
