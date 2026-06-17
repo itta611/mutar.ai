@@ -1,10 +1,9 @@
 "use client"
 
 import Konva from "konva"
+import Image from "next/image"
 import { type ReactNode, useLayoutEffect, useRef, useState } from "react"
 import { Stage } from "react-konva"
-
-import { Skeleton } from "@/components/ui/skeleton"
 
 type StageTransform = {
   key: string
@@ -161,8 +160,11 @@ export function EditorStage({
 
     return (
       <div className="relative h-full min-w-0" ref={containerRef}>
-        <Skeleton
-          className="absolute"
+        <Image
+          alt=""
+          className="absolute object-contain"
+          height={600}
+          src={`/api/projects/${activeProjectId}/image?kind=thumbnail`}
           style={{
             height: skeletonScale * 3,
             left:
@@ -173,6 +175,8 @@ export function EditorStage({
               (imageViewportSize.height - skeletonScale * 3) / 2,
             width: skeletonScale * 4,
           }}
+          unoptimized
+          width={800}
         />
       </div>
     )

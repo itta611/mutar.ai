@@ -56,6 +56,7 @@ export function useEditorProject(projectId: string) {
   const setSelectedIndexes = useSetAtom(editorSelectedBoxIndexesAtom)
   const query = useQuery({
     ...editorProjectQuery(projectId),
+    refetchOnMount: "always",
     refetchInterval: (query) => {
       const status = query.state.data?.status
 
