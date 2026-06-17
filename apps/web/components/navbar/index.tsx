@@ -160,6 +160,7 @@ export function Navbar() {
     <nav className="shrink-0 flex h-13 items-center bg-sidebar border-b border-border/70 pr-4 pl-2 gap-2">
       <Button
         aria-label="ホームに戻る"
+        className="hidden sm:inline-flex"
         onClick={() => router.push("/home")}
         size="icon-lg"
         type="button"
