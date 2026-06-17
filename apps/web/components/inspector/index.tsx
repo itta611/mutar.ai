@@ -6,6 +6,7 @@ import { AlignCenter, AlignLeft, AlignRight } from "lucide-react"
 import {
   type EditorBox,
   editorBoxesAtom,
+  editorSaveBoxesAtom,
   editorSelectedBoxIndexesAtom,
 } from "@/atom/generate"
 import { ColorPickerWithInput } from "@/components/ui/color-picker"
@@ -71,6 +72,7 @@ function updateTextBox(
 
 export function Inspector() {
   const selectedIndexes = useAtomValue(editorSelectedBoxIndexesAtom)
+  const saveBoxes = useAtomValue(editorSaveBoxesAtom)
   const [boxes, setBoxes] = useAtom(editorBoxesAtom)
   const selectedBoxes = selectedIndexes.flatMap((index) =>
     boxes[index] ? [boxes[index]] : []
@@ -99,12 +101,20 @@ export function Inspector() {
   const color =
     commonColor === "" || commonColor.startsWith("#") ? commonColor : "#000000"
 
-  function updateBox(patch: TextStylePatch) {
+  function updateBox(patch: TextStylePatch, save = false) {
     if (selectedIndexes.length === 0) {
       return
     }
 
-    setBoxes((current) => updateTextBox(current, selectedIndexes, patch))
+    setBoxes((current) => {
+      const next = updateTextBox(current, selectedIndexes, patch)
+
+      if (save) {
+        saveBoxes?.(next)
+      }
+
+      return next
+    })
   }
 
   return (
@@ -118,9 +128,12 @@ export function Inspector() {
               items={fonts}
               onValueChange={(fontFamily) => {
                 if (fontFamily) {
-                  updateBox({
-                    fontFamily: fontFamily as EditorBox["fontFamily"],
-                  })
+                  updateBox(
+                    {
+                      fontFamily: fontFamily as EditorBox["fontFamily"],
+                    },
+                    true
+                  )
                 }
               }}
               value={fontFamily}
@@ -151,6 +164,7 @@ export function Inspector() {
                   updateBox({ fontSize })
                 }
               }}
+              onBlur={() => saveBoxes?.(boxes)}
               type="number"
               value={fontSize}
             />
@@ -167,6 +181,7 @@ export function Inspector() {
                   updateBox({ lineheight })
                 }
               }}
+              onBlur={() => saveBoxes?.(boxes)}
               step={0.1}
               type="number"
               value={lineheight}
@@ -183,6 +198,7 @@ export function Inspector() {
                   updateBox({ letterSpacing })
                 }
               }}
+              onBlur={() => saveBoxes?.(boxes)}
               step={0.1}
               type="number"
               value={letterSpacing}
@@ -195,7 +211,9 @@ export function Inspector() {
                 { label: "標準", value: "normal" },
                 { label: "太字", value: "bold" },
               ]}
-              onValueChange={(value) => updateBox({ bold: value === "bold" })}
+              onValueChange={(value) =>
+                updateBox({ bold: value === "bold" }, true)
+              }
               value={fontWeight}
             >
               <SelectTrigger className="min-w-27">
@@ -217,7 +235,7 @@ export function Inspector() {
             <span className="text-sm text-foreground">文字揃え</span>
             <Tabs
               onValueChange={(align) =>
-                updateBox({ align: align as EditorBox["align"] })
+                updateBox({ align: align as EditorBox["align"] }, true)
               }
               value={align}
             >
@@ -238,6 +256,7 @@ export function Inspector() {
             <span className="text-sm text-foreground">文字色</span>
             <ColorPickerWithInput
               onValueChange={(color) => updateBox({ color })}
+              onBlur={() => saveBoxes?.(boxes)}
               value={color}
             />
           </div>

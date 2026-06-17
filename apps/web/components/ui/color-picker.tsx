@@ -11,16 +11,24 @@ import { cn } from "@/lib/utils"
 
 function ColorPicker({
   className,
+  onBlur,
   onValueChange,
   value,
 }: {
   className?: string
   id?: string
+  onBlur?: () => void
   onValueChange: (value: string) => void
   value: string
 }) {
   return (
-    <DropdownMenu>
+    <DropdownMenu
+      onOpenChange={(open) => {
+        if (!open) {
+          onBlur?.()
+        }
+      }}
+    >
       <DropdownMenuTrigger
         render={
           <button
@@ -51,6 +59,7 @@ function ColorPicker({
             )}
             color={value}
             onChange={onValueChange}
+            onBlur={onBlur}
             prefixed
           />
         </div>
@@ -68,6 +77,7 @@ function ColorPickerWithInput(props: Parameters<typeof ColorPicker>[0]) {
         color={props.value}
         id={props.id}
         onChange={props.onValueChange}
+        onBlur={props.onBlur}
       />
     </div>
   )

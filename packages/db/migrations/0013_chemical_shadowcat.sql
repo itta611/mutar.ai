@@ -1,0 +1,1 @@
+ALTER TABLE "user" RENAME COLUMN "creditLimit" TO "creditQuota";

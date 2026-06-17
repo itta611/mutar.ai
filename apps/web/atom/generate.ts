@@ -25,5 +25,8 @@ export const fontFamilyMap: Record<
 }
 
 export const editorBoxesAtom = atom<EditorBox[]>([])
+export const editorSaveBoxesAtom = atom<((boxes: EditorBox[]) => void) | null>(
+  null
+)
 export const editorSelectedBoxIndexAtom = atom<number | null>(null)
 export const editorSelectedBoxIndexesAtom = atom<number[]>([])

@@ -3,11 +3,17 @@ import {
   deleteProjectByUserId,
   findProjectDimensionsByUserId,
   restoreProjectByUserId,
+  updateProjectAnalysisByUserId,
 } from "@hengen/db/repo"
 import { Hono } from "hono"
+import { z } from "zod"
 
 import { sessionMiddleware, type SessionEnv } from "../../session"
 import { projectParamsSchema } from "../schema"
+
+const updateProjectSchema = z.object({
+  boxes: z.array(z.unknown()),
+})
 
 export const projectRoutes = new Hono<SessionEnv>()
   .use(sessionMiddleware)
@@ -37,6 +43,24 @@ export const projectRoutes = new Hono<SessionEnv>()
 
     return c.json(project, 200)
   })
+  .put(
+    "/",
+    zValidator("json", updateProjectSchema),
+    zValidator("param", projectParamsSchema),
+    async (c) => {
+      const session = c.get("session")
+      const { boxes } = c.req.valid("json")
+      const { projectId } = c.req.valid("param")
+
+      await updateProjectAnalysisByUserId({
+        boxes,
+        projectId,
+        userId: session.user.id,
+      })
+
+      return c.json({ ok: true }, 200)
+    }
+  )
   .delete("/", zValidator("param", projectParamsSchema), async (c) => {
     const session = c.get("session")
 

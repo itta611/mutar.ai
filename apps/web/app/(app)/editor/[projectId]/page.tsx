@@ -2,7 +2,7 @@
 
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import Konva from "konva"
-import { use, useEffect, useRef, useState } from "react"
+import { use, useCallback, useEffect, useRef, useState } from "react"
 import {
   Group,
   Image as KonvaImage,
@@ -17,6 +17,7 @@ import { EditorStage } from "./editor-stage"
 import { TextEditor } from "./text-editor"
 import {
   editorBoxesAtom,
+  editorSaveBoxesAtom,
   editorSelectedBoxIndexAtom,
   editorSelectedBoxIndexesAtom,
   fontFamilyMap,
@@ -32,6 +33,7 @@ import {
   resizeWrappedTextBox,
 } from "@/hooks/editor-bbox"
 import { useEditorProject } from "@/hooks/use-editor-project"
+import { apiClient } from "@/lib/api-client"
 
 type EditingText = {
   index: number
@@ -190,6 +192,7 @@ export default function Page({
 function Editor({ projectId }: { projectId: string }) {
   const boxes = useAtomValue(editorBoxesAtom)
   const setBoxes = useSetAtom(editorBoxesAtom)
+  const setSaveBoxes = useSetAtom(editorSaveBoxesAtom)
   const { data: project } = useEditorProject(projectId)
   const isProjectReady = project?.status === "ready"
   const readyProject = isProjectReady ? project : null
@@ -220,6 +223,29 @@ function Editor({ projectId }: { projectId: string }) {
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null)
   const selectionDraggedRef = useRef(false)
   const [snapGuides, setSnapGuides] = useState<SnapGuide[]>([])
+  const saveBoxes = useCallback(
+    (boxes: EditorBox[]) => {
+      void apiClient.projects[":projectId"].$put({
+        param: { projectId },
+        json: { boxes },
+      })
+    },
+    [projectId]
+  )
+
+  function updateBoxesAndSave(update: (boxes: EditorBox[]) => EditorBox[]) {
+    setBoxes((current) => {
+      const next = update(current)
+      saveBoxes(next)
+      return next
+    })
+  }
+
+  useEffect(() => {
+    setSaveBoxes(() => saveBoxes)
+
+    return () => setSaveBoxes(null)
+  }, [saveBoxes, setSaveBoxes])
 
   useEffect(() => {
     if (!isProjectReady) {
@@ -275,7 +301,7 @@ function Editor({ projectId }: { projectId: string }) {
   ])
 
   function updateLabel(index: number, label: string) {
-    setBoxes((current) =>
+    updateBoxesAndSave((current) =>
       current.map((box, boxIndex) =>
         boxIndex === index ? resizeTextBox(box, label) : box
       )
@@ -460,7 +486,7 @@ function Editor({ projectId }: { projectId: string }) {
     const topOffset = node.y() - (start?.y ?? 0)
     const isMultiSelection = draggedIndexes.length > 1
 
-    setBoxes((current) =>
+    updateBoxesAndSave((current) =>
       current.map((box, boxIndex) => {
         if (!draggedIndexes.includes(boxIndex)) {
           return box
@@ -596,7 +622,7 @@ function Editor({ projectId }: { projectId: string }) {
 
     const node = event.target as Konva.Text
 
-    setBoxes((current) =>
+    updateBoxesAndSave((current) =>
       current.map((currentBox, boxIndex) => {
         if (boxIndex !== index) {
           return currentBox

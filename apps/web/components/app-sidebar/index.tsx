@@ -21,6 +21,7 @@ import { useEffect, useState } from "react"
 import { ProjectDropdownMenu } from "@/components/gallary/project-dropdown-menu"
 import { Logo } from "@/components/logo"
 import { ProjectSearchDialog } from "@/components/project-search-dialog"
+import { SettingsDialog } from "@/components/settings-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -61,6 +62,7 @@ async function listStarredProjects() {
 
 export function AppSidebar() {
   const [searchOpen, setSearchOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
   const { setTheme } = useTheme()
@@ -226,7 +228,7 @@ export function AppSidebar() {
                   </Tabs>
                 </div>
                 <div className="h-px bg-border my-1 mx-1" />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
                   <SettingsIcon size={16} />
                   設定
                 </DropdownMenuItem>
@@ -245,6 +247,7 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarFooter>
       <ProjectSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
     </Sidebar>
   )
 }

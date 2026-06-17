@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "creditLimit" integer DEFAULT 4 NOT NULL;
