@@ -14,7 +14,7 @@ function resetDate(year: number, month: number, resetDay: number) {
 }
 
 function getCreditPeriodStart(createdAt: Date, now = new Date()) {
-  const resetDay = Math.min(createdAt.getUTCDate(), 30)
+  const resetDay = createdAt.getUTCDate()
   let periodStart = resetDate(now.getUTCFullYear(), now.getUTCMonth(), resetDay)
 
   if (periodStart > now) {
