@@ -654,6 +654,7 @@ function Editor({ projectId }: { projectId: string }) {
       activeProjectId={projectId}
       imageElement={imageElement}
       imageSize={imageSize}
+      showThumbnail={!project || isProjectReady}
       onClick={clearTextSelection}
       onMouseDown={startSelection}
       onMouseMove={updateSelection}

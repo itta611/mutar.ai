@@ -5,6 +5,8 @@ import Image from "next/image"
 import { type ReactNode, useLayoutEffect, useRef, useState } from "react"
 import { Stage } from "react-konva"
 
+import { Skeleton } from "@/components/ui/skeleton"
+
 type StageTransform = {
   key: string
   x: number
@@ -74,6 +76,7 @@ export function EditorStage({
   children,
   imageElement,
   imageSize,
+  showThumbnail,
   onClick,
   onMouseDown,
   onMouseMove,
@@ -84,6 +87,7 @@ export function EditorStage({
   children: ReactNode
   imageElement: ImageElement | null
   imageSize: [width: number, height: number] | null
+  showThumbnail: boolean
   onClick: (event: Konva.KonvaEventObject<Event>) => void
   onMouseDown: (event: Konva.KonvaEventObject<MouseEvent>) => void
   onMouseMove: (event: Konva.KonvaEventObject<MouseEvent>) => void
@@ -160,24 +164,40 @@ export function EditorStage({
 
     return (
       <div className="relative h-full min-w-0" ref={containerRef}>
-        <Image
-          alt=""
-          className="absolute object-contain"
-          height={600}
-          src={`/api/projects/${activeProjectId}/image?kind=thumbnail`}
-          style={{
-            height: skeletonScale * 3,
-            left:
-              defaultViewportPadding +
-              (imageViewportSize.width - skeletonScale * 4) / 2,
-            top:
-              defaultViewportPadding +
-              (imageViewportSize.height - skeletonScale * 3) / 2,
-            width: skeletonScale * 4,
-          }}
-          unoptimized
-          width={800}
-        />
+        {showThumbnail ? (
+          <Image
+            alt=""
+            className="absolute object-contain"
+            height={600}
+            src={`/api/projects/${activeProjectId}/image?kind=thumbnail`}
+            style={{
+              height: skeletonScale * 3,
+              left:
+                defaultViewportPadding +
+                (imageViewportSize.width - skeletonScale * 4) / 2,
+              top:
+                defaultViewportPadding +
+                (imageViewportSize.height - skeletonScale * 3) / 2,
+              width: skeletonScale * 4,
+            }}
+            unoptimized
+            width={800}
+          />
+        ) : (
+          <Skeleton
+            className="absolute"
+            style={{
+              height: skeletonScale * 3,
+              left:
+                defaultViewportPadding +
+                (imageViewportSize.width - skeletonScale * 4) / 2,
+              top:
+                defaultViewportPadding +
+                (imageViewportSize.height - skeletonScale * 3) / 2,
+              width: skeletonScale * 4,
+            }}
+          />
+        )}
       </div>
     )
   }
