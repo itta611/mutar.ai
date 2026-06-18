@@ -84,10 +84,10 @@ export function AccountSettingsPage() {
           {error && <p className="text-sm text-destructive">{error}</p>}
         </form>
       </SettingSection>
-      <SettingSection title="メールアドレス" description={user?.email} />
       <SettingSection title="クレジット使用量">
         <UsageCard />
       </SettingSection>
+      <SettingSection title="メールアドレス" description={user?.email} />
       <SettingSection
         title="アカウント削除"
         description="アカウントと作成したプロジェクトを削除します。"

@@ -2,6 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { apiClient } from "@/lib/api-client"
+import { Button } from "../ui/button"
+import { Progress } from "../ui/progress"
+import { FlameIcon } from "lucide-react"
 
 async function getCreditUsage() {
   const response = await apiClient.credits.$get()
@@ -40,25 +43,25 @@ function UsageCard() {
     : "-"
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between text-sm font-medium">
+    <div className="border rounded-xl px-5 space-y-4.5 py-4">
+      <div className="flex items-center justify-between text-sm font-medium h-8">
         今月の使用量
-        <span>
+      </div>
+      <div className="flex items-center justify-between gap-5 text-sm">
+        <div className="w-12">
           {creditUsage ? `${creditUsage.used} / ${creditUsage.quota}` : "-"}
+        </div>
+        <Progress className="grow" value={creditPercent} />
+        <span className="text-muted-foreground">
+          {creditPercent.toFixed(0)}%
         </span>
       </div>
-      <div className="flex items-center justify-between gap-6 text-sm text-muted-foreground">
-        <div className="h-2 grow rounded-full bg-muted">
-          <div
-            className="h-full rounded-full bg-primary"
-            style={{ width: `${creditPercent}%` }}
-          />
-        </div>
-        <span>残り{(100 - creditPercent).toFixed(0)}%</span>
+      <div className="flex items-center justify-between">
+        <span className="text-muted-foreground">
+          次回 {nextResetDate} にリセットされます。
+        </span>
+        <Button>アップグレード</Button>
       </div>
-      <span className="text-muted-foreground">
-        次回リセット: {nextResetDate}
-      </span>
     </div>
   )
 }

@@ -6,13 +6,15 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { AccountSettingsPage } from "./account"
 import { PreferencesSettingsPage } from "./preferences"
+import { Settings2Icon, User2Icon } from "lucide-react"
 
 const navItems = [
+  { title: "アカウント", component: <AccountSettingsPage />, Icon: User2Icon },
   {
     title: "一般",
     component: <PreferencesSettingsPage />,
+    Icon: Settings2Icon,
   },
-  { title: "アカウント", component: <AccountSettingsPage /> },
 ]
 
 export function SettingsDialog({
@@ -37,11 +39,12 @@ export function SettingsDialog({
                   setActiveTab(index)
                 }}
                 className={cn(
-                  "h-9 rounded-md px-2 text-left text-sm cursor-pointer hover:bg-accent",
+                  "h-9 rounded-md px-2 text-left text-sm cursor-pointer hover:bg-accent inline-flex items-center",
                   activeTab === index && "bg-accent text-accent-foreground"
                 )}
                 key={item.title}
               >
+                {<item.Icon className="size-4 mr-2 inline" />}
                 {item.title}
               </button>
             ))}
