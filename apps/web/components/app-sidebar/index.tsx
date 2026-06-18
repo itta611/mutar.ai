@@ -94,7 +94,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="h-13 py-0 gap-0">
         <div className="flex items-center h-full">
-          <Link href="/" className="ml-2">
+          <Link href="/home" className="ml-2">
             <Logo width={120} />
           </Link>
         </div>

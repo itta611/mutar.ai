@@ -10,7 +10,6 @@ import { Checkbox } from "../ui/checkbox"
 
 export type PromptStyle = {
   themeColor: string
-  backgroundColor: string
   transparentBackground: boolean
 }
 
@@ -42,19 +41,6 @@ export function StyleSelect({
             onStyleChange({ ...style, themeColor })
           }
           value={style.themeColor}
-        />
-        <label
-          className="text-sm text-muted-foreground"
-          htmlFor="background-color"
-        >
-          背景色
-        </label>
-        <ColorPickerWithInput
-          id="background-color"
-          onValueChange={(backgroundColor) =>
-            onStyleChange({ ...style, backgroundColor })
-          }
-          value={style.backgroundColor}
         />
         <label
           className="text-sm text-muted-foreground"

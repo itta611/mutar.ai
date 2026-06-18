@@ -44,7 +44,6 @@ export function PromptInput() {
   const count = useWatch({ control, name: "count" })
   const [style, setStyle] = useState<PromptStyle>({
     themeColor: "#191714",
-    backgroundColor: "#ffffff",
     transparentBackground: false,
   })
   const [isGenerating, setIsGenerating] = useState(false)

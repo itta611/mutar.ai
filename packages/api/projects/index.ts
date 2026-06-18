@@ -21,7 +21,6 @@ const createProjectBaseSchema = z.object({
   style: z
     .object({
       themeColor: z.string(),
-      backgroundColor: z.string(),
       transparentBackground: z.boolean(),
     })
     .optional(),
