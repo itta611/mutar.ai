@@ -77,7 +77,7 @@ export function AccountSettingsPage() {
         <form className="space-y-4" onSubmit={handleUpdateAccount}>
           <div className="max-w-90 flex gap-2">
             <Input {...accountForm.register("name")} />
-            <Button disabled={isSavingName} type="submit">
+            <Button disabled={isSavingName} type="submit" variant="outline">
               保存
             </Button>
           </div>

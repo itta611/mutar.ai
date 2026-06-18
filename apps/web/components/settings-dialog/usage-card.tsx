@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query"
 import { apiClient } from "@/lib/api-client"
 import { Button } from "../ui/button"
 import { Progress } from "../ui/progress"
-import { FlameIcon } from "lucide-react"
 
 async function getCreditUsage() {
   const response = await apiClient.credits.$get()
@@ -43,13 +42,11 @@ function UsageCard() {
     : "-"
 
   return (
-    <div className="border rounded-xl px-5 space-y-4.5 py-4">
-      <div className="flex items-center justify-between text-sm font-medium h-8">
-        今月の使用量
-      </div>
+    <div className="border rounded-2xl px-5 space-y-4.5 py-4">
+      <div className="text-sm h-8">今月の使用量</div>
       <div className="flex items-center justify-between gap-5 text-sm">
         <div className="w-12">
-          {creditUsage ? `${creditUsage.used} / ${creditUsage.quota}` : "-"}
+          {creditUsage ? `${creditUsage.used} / ${creditUsage.quota}` : "- / -"}
         </div>
         <Progress className="grow" value={creditPercent} />
         <span className="text-muted-foreground">
