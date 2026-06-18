@@ -5,14 +5,14 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { AccountSettingsPage } from "./account"
-import { PreferencesSettingsPage } from "./preferences"
+import { GeneralSettingsPage } from "./general"
 import { Settings2Icon, User2Icon } from "lucide-react"
 
 const navItems = [
   { title: "アカウント", component: <AccountSettingsPage />, Icon: User2Icon },
   {
     title: "一般",
-    component: <PreferencesSettingsPage />,
+    component: <GeneralSettingsPage />,
     Icon: Settings2Icon,
   },
 ]
