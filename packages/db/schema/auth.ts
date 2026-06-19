@@ -1,6 +1,7 @@
 import {
   boolean,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -14,6 +15,10 @@ export const users = pgTable("user", {
   emailVerified: boolean("emailVerified").notNull().default(false),
   image: text("image"),
   creditQuota: integer("creditQuota").notNull().default(4),
+  editorSettings: jsonb("editorSettings")
+    .$type<{ snapToGrid: boolean }>()
+    .notNull()
+    .default({ snapToGrid: true }),
   createdAt: timestamp("createdAt", { withTimezone: true })
     .notNull()
     .defaultNow(),

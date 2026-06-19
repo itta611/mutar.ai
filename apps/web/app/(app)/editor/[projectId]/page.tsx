@@ -33,6 +33,7 @@ import {
   resizeWrappedTextBox,
 } from "@/hooks/editor-bbox"
 import { useEditorProject } from "@/hooks/use-editor-project"
+import { useEditorSettings } from "@/hooks/use-editor-settings"
 import { apiClient } from "@/lib/api-client"
 
 type EditingText = {
@@ -194,6 +195,8 @@ function Editor({ projectId }: { projectId: string }) {
   const setBoxes = useSetAtom(editorBoxesAtom)
   const setSaveBoxes = useSetAtom(editorSaveBoxesAtom)
   const { data: project } = useEditorProject(projectId)
+  const { data: settings } = useEditorSettings()
+  const snapToGrid = settings?.editorSettings.snapToGrid ?? true
   const isProjectReady = project?.status === "ready"
   const readyProject = isProjectReady ? project : null
   const imageSize: ImageSize | null = readyProject
@@ -493,13 +496,14 @@ function Editor({ projectId }: { projectId: string }) {
         }
 
         const rect = getBoxRect(box)
-        const nextPosition = isMultiSelection
-          ? { left: rect.left + leftOffset, top: rect.top + topOffset }
-          : snapBoxPosition(current, index, {
-              ...rect,
-              left: rect.left + leftOffset,
-              top: rect.top + topOffset,
-            })
+        const nextPosition =
+          isMultiSelection || !snapToGrid
+            ? { left: rect.left + leftOffset, top: rect.top + topOffset }
+            : snapBoxPosition(current, index, {
+                ...rect,
+                left: rect.left + leftOffset,
+                top: rect.top + topOffset,
+              })
 
         const textNode = textRefs.current.get(boxIndex)
         const position = dragStartPositions.get(boxIndex)
@@ -572,11 +576,17 @@ function Editor({ projectId }: { projectId: string }) {
     }
 
     const rect = getBoxRect(box)
-    const nextPosition = snapBoxPosition(boxes, index, {
-      ...rect,
-      left: rect.left + node.x() - textX,
-      top: rect.top + node.y(),
-    })
+    const nextPosition = snapToGrid
+      ? snapBoxPosition(boxes, index, {
+          ...rect,
+          left: rect.left + node.x() - textX,
+          top: rect.top + node.y(),
+        })
+      : {
+          guides: [],
+          left: rect.left + node.x() - textX,
+          top: rect.top + node.y(),
+        }
 
     node.x(textX + nextPosition.left - rect.left)
     node.y(nextPosition.top - rect.top)
@@ -594,13 +604,17 @@ function Editor({ projectId }: { projectId: string }) {
 
     const node = event.target as Konva.Text
     const rect = getBoxRect(box)
-    const nextRect = snapBoxWidth(
-      boxes,
-      index,
-      rect.left + node.x() - textX,
-      Math.max(1, node.width() * node.scaleX()),
-      getTextTransformer(index)?.getActiveAnchor() ?? null
-    )
+    const left = rect.left + node.x() - textX
+    const width = Math.max(1, node.width() * node.scaleX())
+    const nextRect = snapToGrid
+      ? snapBoxWidth(
+          boxes,
+          index,
+          left,
+          width,
+          getTextTransformer(index)?.getActiveAnchor() ?? null
+        )
+      : { guides: [], left, width }
     const nextBox = resizeWrappedTextBox(box, nextRect.left, nextRect.width)
 
     node.scaleX(1)
@@ -629,13 +643,17 @@ function Editor({ projectId }: { projectId: string }) {
         }
 
         const rect = getBoxRect(currentBox)
-        const nextRect = snapBoxWidth(
-          current,
-          index,
-          rect.left + node.x() - textX,
-          Math.max(1, node.width() * node.scaleX()),
-          getTextTransformer(index)?.getActiveAnchor() ?? null
-        )
+        const left = rect.left + node.x() - textX
+        const width = Math.max(1, node.width() * node.scaleX())
+        const nextRect = snapToGrid
+          ? snapBoxWidth(
+              current,
+              index,
+              left,
+              width,
+              getTextTransformer(index)?.getActiveAnchor() ?? null
+            )
+          : { left, width }
 
         node.scaleX(1)
         node.scaleY(1)

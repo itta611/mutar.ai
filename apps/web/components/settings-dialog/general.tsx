@@ -1,6 +1,13 @@
 "use client"
 
+import { useTheme } from "next-themes"
+import { toast } from "sonner"
+
 import { Switch } from "@/components/ui/switch"
+import {
+  useEditorSettings,
+  useUpdateEditorSettings,
+} from "@/hooks/use-editor-settings"
 import {
   Select,
   SelectContent,
@@ -11,6 +18,10 @@ import {
 import { SettingSection } from "./setting-section"
 
 export function GeneralSettingsPage() {
+  const { setTheme, theme } = useTheme()
+  const { data } = useEditorSettings()
+  const updateEditorSettings = useUpdateEditorSettings()
+
   return (
     <div className="space-y-12">
       <div className="space-y-5">
@@ -27,7 +38,7 @@ export function GeneralSettingsPage() {
           </Select>
         </SettingSection>
         <SettingSection title="テーマ">
-          <Select>
+          <Select value={theme} onValueChange={(value) => setTheme(value!)}>
             <SelectTrigger className="w-40">
               <SelectValue placeholder="テーマを選択" />
             </SelectTrigger>
@@ -46,7 +57,19 @@ export function GeneralSettingsPage() {
           description="オブジェクトをグリッドにスナップします。"
           horizontal
         >
-          <Switch />
+          <Switch
+            checked={data?.editorSettings.snapToGrid ?? true}
+            disabled={!data || updateEditorSettings.isPending}
+            onCheckedChange={(snapToGrid) =>
+              updateEditorSettings.mutate(
+                { snapToGrid },
+                {
+                  onError: () =>
+                    toast.error("エディタ設定を変更できませんでした。"),
+                }
+              )
+            }
+          />
         </SettingSection>
       </div>
     </div>

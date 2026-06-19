@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "editorSettings" jsonb DEFAULT '{"snapToGrid":true}'::jsonb NOT NULL;
