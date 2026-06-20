@@ -59,7 +59,7 @@ export function GeneralSettingsPage() {
         >
           <Switch
             checked={data?.editorSettings.snapToGrid ?? true}
-            disabled={!data || updateEditorSettings.isPending}
+            disabled={!data}
             onCheckedChange={(snapToGrid) =>
               updateEditorSettings.mutate(
                 { snapToGrid },

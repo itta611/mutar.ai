@@ -1,5 +1,6 @@
 "use client"
 
+import { useRef } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { apiClient } from "@/lib/api-client"
@@ -25,8 +26,10 @@ export function useEditorSettings() {
 
 export function useUpdateEditorSettings() {
   const queryClient = useQueryClient()
+  const version = useRef(0)
 
   return useMutation({
+    scope: { id: "editor-settings" },
     mutationFn: async (editorSettings: { snapToGrid: boolean }) => {
       const response = await apiClient.account.settings.$patch({
         json: editorSettings,
@@ -38,6 +41,26 @@ export function useUpdateEditorSettings() {
 
       return response.json()
     },
-    onSuccess: (data) => queryClient.setQueryData(queryKey, data),
+    onMutate: (editorSettings) => {
+      const previousData = queryClient.getQueryData<
+        Awaited<ReturnType<typeof getEditorSettings>>
+      >(queryKey)
+      const mutationVersion = ++version.current
+
+      queryClient.setQueryData(queryKey, {
+        ...previousData,
+        editorSettings: {
+          ...previousData?.editorSettings,
+          ...editorSettings,
+        },
+      })
+
+      return { mutationVersion, previousData }
+    },
+    onError: (_error, _editorSettings, context) => {
+      if (context?.mutationVersion === version.current) {
+        queryClient.setQueryData(queryKey, context.previousData)
+      }
+    },
   })
 }
