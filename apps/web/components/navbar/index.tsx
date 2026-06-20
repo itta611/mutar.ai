@@ -7,10 +7,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { useQuery } from "@tanstack/react-query"
 
-import {
-  editorBoxesAtom,
-  fontFamilyMap,
-} from "@/atom/generate"
+import { editorBoxesAtom, fontFamilyMap } from "@/atom/generate"
 import { Button } from "@/components/ui/button"
 import { editorProjectQuery } from "@/hooks/use-editor-project"
 
@@ -169,10 +166,6 @@ export function Navbar() {
         <XIcon />
       </Button>
       <div className="grow w-0 truncate">{projectName}</div>
-      <Button type="button" variant="outline">
-        <PencilLine />
-        修正
-      </Button>
       <Button aria-label="コピー" type="button" variant="outline">
         コピー
       </Button>
