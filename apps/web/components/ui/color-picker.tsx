@@ -33,7 +33,7 @@ function ColorPicker({
         render={
           <button
             aria-label="カラー"
-            className="border size-5! rounded-xs"
+            className="border size-5! rounded-sm"
             style={{ backgroundColor: value }}
             type="button"
           />
@@ -70,12 +70,18 @@ function ColorPicker({
 
 function ColorPickerWithInput({
   id,
+  className,
   onBlur,
   onValueChange,
   value,
 }: Parameters<typeof ColorPicker>[0]) {
   return (
-    <div className="flex items-center gap-1.75 w-27 bg-zinc-100 dark:bg-zinc-800 rounded-md p-2 h-9">
+    <div
+      className={cn(
+        "flex items-center gap-1.75 w-27 bg-zinc-100 dark:bg-zinc-800 rounded-md p-2 h-9",
+        className
+      )}
+    >
       <DropdownMenu
         onOpenChange={(open) => {
           if (!open) {

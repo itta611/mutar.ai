@@ -1,6 +1,6 @@
 "use client"
 
-import { DownloadIcon, PencilLine, XIcon } from "lucide-react"
+import { XIcon } from "lucide-react"
 import { useAtomValue } from "jotai"
 import { useParams, useRouter } from "next/navigation"
 import { useState } from "react"
@@ -166,7 +166,12 @@ export function Navbar() {
         <XIcon />
       </Button>
       <div className="grow w-0 truncate">{projectName}</div>
-      <Button aria-label="コピー" type="button" variant="outline">
+      <Button
+        disabled={!projectId || !imageSize || isSaving}
+        aria-label="コピー"
+        type="button"
+        variant="outline"
+      >
         コピー
       </Button>
       <Button
@@ -174,7 +179,6 @@ export function Navbar() {
         onClick={handleSaveImage}
         type="button"
       >
-        <DownloadIcon />
         {isSaving ? "保存中" : "画像を保存"}
       </Button>
     </nav>

@@ -1,12 +1,8 @@
 import { ChevronDown, PaletteIcon } from "lucide-react"
 import { Button } from "../ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu"
 import { ColorPickerWithInput } from "../ui/color-picker"
-import { Checkbox } from "../ui/checkbox"
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
+import { Switch } from "../ui/switch"
 
 export type PromptStyle = {
   themeColor: string
@@ -21,8 +17,8 @@ export function StyleSelect({
   onStyleChange: (style: PromptStyle) => void
 }) {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
+    <Popover>
+      <PopoverTrigger
         render={
           <Button variant="ghost" size="sm" className="pr-2">
             <PaletteIcon />
@@ -31,35 +27,43 @@ export function StyleSelect({
           </Button>
         }
       />
-      <DropdownMenuContent className="min-w-68 grid auto-rows-[36px] grid-cols-[1fr_auto] items-center justify-between gap-y-2 p-4">
-        <label className="text-sm text-muted-foreground" htmlFor="theme-color">
-          テーマ
-        </label>
-        <ColorPickerWithInput
-          id="theme-color"
-          onValueChange={(themeColor) =>
-            onStyleChange({ ...style, themeColor })
-          }
-          value={style.themeColor}
-        />
-        <label
-          className="text-sm text-muted-foreground"
-          htmlFor="transparent-background"
-        >
-          背景を透過
-        </label>
-        <Checkbox
-          checked={style.transparentBackground}
-          className="ml-1"
-          id="transparent-background"
-          onCheckedChange={(transparentBackground) =>
-            onStyleChange({
-              ...style,
-              transparentBackground: transparentBackground === true,
-            })
-          }
-        />
-      </DropdownMenuContent>
-    </DropdownMenu>
+      <PopoverContent align="start" className="min-w-68 p-4 gap-4">
+        <div className="flex items-center justify-between">
+          <label
+            className="text-sm text-muted-foreground"
+            htmlFor="theme-color"
+          >
+            テーマ
+          </label>
+          <ColorPickerWithInput
+            id="theme-color"
+            onValueChange={(themeColor) =>
+              onStyleChange({ ...style, themeColor })
+            }
+            className="border bg-background"
+            value={style.themeColor}
+          />
+        </div>
+        <div className="flex items-center justify-between h-9">
+          <label
+            className="text-sm text-muted-foreground"
+            htmlFor="transparent-background"
+          >
+            背景を透過
+          </label>
+          <Switch
+            checked={style.transparentBackground}
+            className="ml-1"
+            id="transparent-background"
+            onCheckedChange={(transparentBackground) =>
+              onStyleChange({
+                ...style,
+                transparentBackground: transparentBackground === true,
+              })
+            }
+          />
+        </div>
+      </PopoverContent>
+    </Popover>
   )
 }
