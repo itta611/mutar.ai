@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import { Switch } from "../ui/switch"
 
 export type PromptStyle = {
-  themeColor: string
+  themeColor?: string
   transparentBackground: boolean
 }
 
@@ -27,22 +27,35 @@ export function StyleSelect({
           </Button>
         }
       />
-      <PopoverContent align="start" className="min-w-68 p-4 gap-4">
-        <div className="flex items-center justify-between">
+      <PopoverContent align="start" className="min-w-68 p-4 gap-3">
+        <div className="flex items-center justify-between h-9">
           <label
             className="text-sm text-muted-foreground"
             htmlFor="theme-color"
           >
-            テーマ
+            テーマカラー
           </label>
-          <ColorPickerWithInput
-            id="theme-color"
-            onValueChange={(themeColor) =>
-              onStyleChange({ ...style, themeColor })
-            }
-            className="border bg-background"
-            value={style.themeColor}
-          />
+          {style.themeColor ? (
+            <ColorPickerWithInput
+              id="theme-color"
+              onValueChange={(themeColor) =>
+                onStyleChange({ ...style, themeColor })
+              }
+              className="border bg-background"
+              value={style.themeColor}
+            />
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() =>
+                onStyleChange({ ...style, themeColor: "#191714" })
+              }
+            >
+              設定する
+            </Button>
+          )}
         </div>
         <div className="flex items-center justify-between h-9">
           <label

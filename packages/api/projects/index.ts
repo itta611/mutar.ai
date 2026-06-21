@@ -20,7 +20,7 @@ const createProjectBaseSchema = z.object({
   referenceImages: z.array(z.string().startsWith("data:image/")).optional(),
   style: z
     .object({
-      themeColor: z.string(),
+      themeColor: z.string().optional(),
       transparentBackground: z.boolean(),
     })
     .optional(),

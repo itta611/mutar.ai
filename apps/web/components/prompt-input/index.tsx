@@ -43,7 +43,6 @@ export function PromptInput() {
   const aspect = useWatch({ control, name: "aspectRatio" })
   const count = useWatch({ control, name: "count" })
   const [style, setStyle] = useState<PromptStyle>({
-    themeColor: "#191714",
     transparentBackground: false,
   })
   const [isGenerating, setIsGenerating] = useState(false)
