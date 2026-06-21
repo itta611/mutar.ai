@@ -3,10 +3,10 @@
 import { HexColorInput, HexColorPicker } from "react-colorful"
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { XIcon } from "lucide-react"
 
@@ -35,14 +35,14 @@ function ColorPickerWithInput({
         className
       )}
     >
-      <DropdownMenu
+      <Popover
         onOpenChange={(open) => {
           if (!open) {
             onBlur?.()
           }
         }}
       >
-        <DropdownMenuTrigger
+        <PopoverTrigger
           render={
             <button
               aria-label="カラー"
@@ -52,7 +52,7 @@ function ColorPickerWithInput({
             />
           }
         />
-        <DropdownMenuContent
+        <PopoverContent
           className={cn(
             String.raw`space-y-3 w-auto p-3 bg-popover [&_.react-colorful]:h-auto! [&_.react-colorful\_\_pointer]:border-5! [&_.react-colorful\_\_pointer]:size-5!`,
             String.raw`[&_.react-colorful\_\_saturation]:border-b-0! [&_.react-colorful\_\_saturation]:rounded-lg! [&_.react-colorful\_\_saturation]:h-50!`,
@@ -60,8 +60,8 @@ function ColorPickerWithInput({
           )}
         >
           <HexColorPicker onChange={onValueChange} color={value} />
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </PopoverContent>
+      </Popover>
       <HexColorInput
         className="text-sm grow shrink basis-0 w-0 outline-0 font-mono uppercase"
         color={value}
