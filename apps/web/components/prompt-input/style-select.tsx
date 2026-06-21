@@ -43,15 +43,17 @@ export function StyleSelect({
               }
               className="border bg-background"
               value={style.themeColor}
+              showX
+              onXClick={() =>
+                onStyleChange({ ...style, themeColor: undefined })
+              }
             />
           ) : (
             <Button
               variant="outline"
               size="sm"
               type="button"
-              onClick={() =>
-                onStyleChange({ ...style, themeColor: "#191714" })
-              }
+              onClick={() => onStyleChange({ ...style, themeColor: "#000000" })}
             >
               設定する
             </Button>
