@@ -30,7 +30,7 @@ function MenuItem({
           { "border-2 border-primary": selected }
         )}
         style={{
-          backgroundColor: `color-mix(in srgb, ${color} 7%, transparent)`,
+          backgroundColor: color,
         }}
       >
         {children}
@@ -40,7 +40,10 @@ function MenuItem({
   )
 }
 
-function getDisplayColor(color: string) {
+function getDisplayColor(
+  color: string,
+  valueFromSaturation?: (saturation: number) => number
+) {
   const hex = color.replace("#", "")
   const values = /^[\dA-Fa-f]{6}$/.test(hex)
     ? [0, 2, 4].map(
@@ -62,7 +65,9 @@ function getDisplayColor(color: string) {
   }
 
   const hsvSaturation = max === 0 ? 0 : delta / max
-  const hsvValue = Math.min(0.9, Math.max(0.2, max))
+  const hsvValue = valueFromSaturation
+    ? valueFromSaturation(hsvSaturation)
+    : Math.min(0.9, Math.max(0.2, max))
   const hsvChroma = hsvValue * Math.min(0.7, hsvSaturation)
   const hsvX = hsvChroma * (1 - Math.abs(((hue / 60) % 2) - 1))
   const hsvMatch = hsvValue - hsvChroma
@@ -76,12 +81,13 @@ function getDisplayColor(color: string) {
           : hue < 240
             ? [0, hsvX, hsvChroma]
             : hue < 300
-            ? [hsvX, 0, hsvChroma]
-            : [hsvChroma, 0, hsvX]
+              ? [hsvX, 0, hsvChroma]
+              : [hsvChroma, 0, hsvX]
   const rgb = rgbOffsets.map((value) => value + hsvMatch)
 
   return {
     css: `rgb(${rgb.map((value) => Math.round(value * 255)).join(" ")})`,
+    translucent: `rgb(${rgb.map((value) => Math.round(value * 255)).join(" ")} / 6%)`,
     rgb,
   }
 }
@@ -120,6 +126,10 @@ export function StyleSelect({
 }) {
   const themeColor = style.themeColor ?? "#6366F1"
   const displayColor = getDisplayColor(themeColor)
+  const backgroundColor = getDisplayColor(
+    themeColor,
+    (saturation) => 0.5 + saturation * 0.5
+  )
   const [red, green, blue] = displayColor.rgb
   const baseLuminance =
     0.2126 * (99 / 255) + 0.7152 * (102 / 255) + 0.0722 * (241 / 255)
@@ -152,15 +162,19 @@ export function StyleSelect({
         <span className="text-sm text-muted-foreground">テクスチャ</span>
         <div className="grid grid-cols-3 gap-4 pb-1">
           <MenuItem
-            color={displayColor.css}
+            color={backgroundColor.translucent}
             selected={!style.texture}
             label="選択しない"
             onClick={() => onStyleChange({ ...style, texture: undefined })}
           >
-            <CircleSlashIcon style={{ color: displayColor.css }} />
+            <CircleSlashIcon
+              className={
+                style.texture ? "text-muted-foreground" : "text-primary"
+              }
+            />
           </MenuItem>
           <MenuItem
-            color={displayColor.css}
+            color={backgroundColor.translucent}
             selected={style.texture === "flat"}
             label="フラット"
             onClick={() => onStyleChange({ ...style, texture: "flat" })}
@@ -168,7 +182,7 @@ export function StyleSelect({
             <TextureImage src="/knight-flat.png" />
           </MenuItem>
           <MenuItem
-            color={displayColor.css}
+            color={backgroundColor.translucent}
             selected={style.texture === "outline"}
             label="アウトライン"
             onClick={() => onStyleChange({ ...style, texture: "outline" })}
@@ -176,7 +190,7 @@ export function StyleSelect({
             <TextureImage src="/knight-outline.png" />
           </MenuItem>
           <MenuItem
-            color={displayColor.css}
+            color={backgroundColor.translucent}
             selected={style.texture === "soft"}
             label="ふっくら"
             onClick={() => onStyleChange({ ...style, texture: "soft" })}
@@ -184,7 +198,7 @@ export function StyleSelect({
             <TextureImage src="/knight-gradient.png" />
           </MenuItem>
           <MenuItem
-            color={displayColor.css}
+            color={backgroundColor.translucent}
             selected={style.texture === "realistic"}
             label="リアル"
             onClick={() => onStyleChange({ ...style, texture: "realistic" })}
