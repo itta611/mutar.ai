@@ -62,10 +62,11 @@ function getDisplayColor(color: string) {
   }
 
   const hsvSaturation = max === 0 ? 0 : delta / max
-  const hsvChroma = max * Math.min(0.7, hsvSaturation)
+  const hsvValue = Math.min(0.9, Math.max(0.2, max))
+  const hsvChroma = hsvValue * Math.min(0.7, hsvSaturation)
   const hsvX = hsvChroma * (1 - Math.abs(((hue / 60) % 2) - 1))
-  const hsvMatch = max - hsvChroma
-  const hsvOffsets =
+  const hsvMatch = hsvValue - hsvChroma
+  const rgbOffsets =
     hue < 60
       ? [hsvChroma, hsvX, 0]
       : hue < 120
@@ -75,33 +76,9 @@ function getDisplayColor(color: string) {
           : hue < 240
             ? [0, hsvX, hsvChroma]
             : hue < 300
-              ? [hsvX, 0, hsvChroma]
-              : [hsvChroma, 0, hsvX]
-  const clampedValues = hsvOffsets.map((value) => value + hsvMatch)
-  const clampedMax = Math.max(...clampedValues)
-  const clampedMin = Math.min(...clampedValues)
-  const clampedDelta = clampedMax - clampedMin
-  const lightness = (clampedMax + clampedMin) / 2
-  const saturation =
-    clampedDelta === 0 ? 0 : clampedDelta / (1 - Math.abs(2 * lightness - 1))
-  const clampedLightness = Math.min(0.9, Math.max(0.2, lightness))
-  const chroma = (1 - Math.abs(2 * clampedLightness - 1)) * saturation
-  const x = chroma * (1 - Math.abs(((hue / 60) % 2) - 1))
-  const match = clampedLightness - chroma / 2
-  const [redOffset, greenOffset, blueOffset] =
-    hue < 60
-      ? [chroma, x, 0]
-      : hue < 120
-        ? [x, chroma, 0]
-        : hue < 180
-          ? [0, chroma, x]
-          : hue < 240
-            ? [0, x, chroma]
-            : hue < 300
-              ? [x, 0, chroma]
-              : [chroma, 0, x]
-
-  const rgb = [redOffset + match, greenOffset + match, blueOffset + match]
+            ? [hsvX, 0, hsvChroma]
+            : [hsvChroma, 0, hsvX]
+  const rgb = rgbOffsets.map((value) => value + hsvMatch)
 
   return {
     css: `rgb(${rgb.map((value) => Math.round(value * 255)).join(" ")})`,
