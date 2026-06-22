@@ -20,8 +20,9 @@ const createProjectBaseSchema = z.object({
   referenceImages: z.array(z.string().startsWith("data:image/")).optional(),
   style: z
     .object({
+      texture: z.enum(["flat", "outline", "soft", "realistic"]).optional(),
       themeColor: z.string().optional(),
-      transparentBackground: z.boolean(),
+      backgroundColor: z.string().optional(),
     })
     .optional(),
 })

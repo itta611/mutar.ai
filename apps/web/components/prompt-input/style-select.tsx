@@ -1,50 +1,44 @@
-import { ChevronDown, PaletteIcon } from "lucide-react"
+import { ChevronDown, CircleSlashIcon, PaletteIcon } from "lucide-react"
 import { Button } from "../ui/button"
 import { ColorPickerWithInput } from "../ui/color-picker"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
-import { Switch } from "../ui/switch"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 function MenuItem({
   children,
   onClick,
-  imageSrc,
+  label,
   selected = false,
 }: {
   children: React.ReactNode
   onClick?: () => void
-  imageSrc?: string
+  label: string
   selected?: boolean
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={cn(
-        `cursor-pointer rounded-lg grow basis-0 p-2 text-center text-xs text-muted-foreground`,
-        selected ? "border-2 border-primary" : "border"
-      )}
+      className="cursor-pointer grow basis-0 text-xs text-muted-foreground outline-none group"
     >
-      {imageSrc ? (
-        <div className="bg-muted w-full aspect-square rounded-md flex items-center justify-center mb-2">
-          <Image
-            src={imageSrc}
-            className="mx-auto"
-            alt=""
-            width={26}
-            height={26}
-          />
-        </div>
-      ) : null}
-      {children}
+      <div
+        className={cn(
+          "bg-muted w-full aspect-square rounded-lg flex items-center justify-center mb-2 group-focus:border-2 group-focus:border-primary",
+          { "border-2 border-primary": selected }
+        )}
+      >
+        {children}
+      </div>
+      {label}
     </button>
   )
 }
 
 export type PromptStyle = {
+  texture?: "flat" | "outline" | "soft" | "realistic"
   themeColor?: string
-  transparentBackground: boolean
+  backgroundColor?: string
 }
 
 export function StyleSelect({
@@ -65,14 +59,68 @@ export function StyleSelect({
           </Button>
         }
       />
-      <PopoverContent align="start" className="min-w-90 p-4 gap-3">
+      <PopoverContent align="start" className="min-w-80 p-4 gap-3">
         <span className="text-sm text-muted-foreground">テクスチャ</span>
-        <div className="grid grid-cols-3 gap-3 pb-1">
-          <MenuItem selected>選択しない</MenuItem>
-
-          <MenuItem imageSrc="/knight-flat.png">フラット</MenuItem>
-          <MenuItem imageSrc="/knight-gradient.png">立体感</MenuItem>
-          <MenuItem imageSrc="/knight-realistic.png">リアル</MenuItem>
+        <div className="grid grid-cols-3 gap-4 pb-1">
+          <MenuItem
+            selected={!style.texture}
+            label="選択しない"
+            onClick={() => onStyleChange({ ...style, texture: undefined })}
+          >
+            <CircleSlashIcon className="text-zinc-400 dark:text-zinc-500" />
+          </MenuItem>
+          <MenuItem
+            selected={style.texture === "flat"}
+            label="フラット"
+            onClick={() => onStyleChange({ ...style, texture: "flat" })}
+          >
+            <Image
+              src="/knight-flat.png"
+              className="mx-auto"
+              alt=""
+              width={30}
+              height={30}
+            />
+          </MenuItem>
+          <MenuItem
+            selected={style.texture === "outline"}
+            label="アウトライン"
+            onClick={() => onStyleChange({ ...style, texture: "outline" })}
+          >
+            <Image
+              src="/knight-outline.png"
+              className="mx-auto"
+              alt=""
+              width={30}
+              height={30}
+            />
+          </MenuItem>
+          <MenuItem
+            selected={style.texture === "soft"}
+            label="ふっくら"
+            onClick={() => onStyleChange({ ...style, texture: "soft" })}
+          >
+            <Image
+              src="/knight-gradient.png"
+              className="mx-auto"
+              alt=""
+              width={30}
+              height={30}
+            />
+          </MenuItem>
+          <MenuItem
+            selected={style.texture === "realistic"}
+            label="リアル"
+            onClick={() => onStyleChange({ ...style, texture: "realistic" })}
+          >
+            <Image
+              src="/knight-realistic.png"
+              className="mx-auto"
+              alt=""
+              width={30}
+              height={30}
+            />
+          </MenuItem>
         </div>
         <div className="flex items-center justify-between h-9">
           <label
@@ -108,21 +156,35 @@ export function StyleSelect({
         <div className="flex items-center justify-between h-9">
           <label
             className="text-sm text-muted-foreground"
-            htmlFor="transparent-background"
+            htmlFor="background-color"
           >
-            背景を透過
+            背景色
           </label>
-          <Switch
-            checked={style.transparentBackground}
-            className="ml-1"
-            id="transparent-background"
-            onCheckedChange={(transparentBackground) =>
-              onStyleChange({
-                ...style,
-                transparentBackground: transparentBackground === true,
-              })
-            }
-          />
+          {style.backgroundColor ? (
+            <ColorPickerWithInput
+              id="background-color"
+              onValueChange={(backgroundColor) =>
+                onStyleChange({ ...style, backgroundColor })
+              }
+              className="border bg-background"
+              value={style.backgroundColor}
+              showX
+              onXClick={() =>
+                onStyleChange({ ...style, backgroundColor: undefined })
+              }
+            />
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() =>
+                onStyleChange({ ...style, backgroundColor: "#FFFFFF" })
+              }
+            >
+              設定する
+            </Button>
+          )}
         </div>
       </PopoverContent>
     </Popover>

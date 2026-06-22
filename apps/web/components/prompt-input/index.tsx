@@ -42,9 +42,7 @@ export function PromptInput() {
   const prompt = useWatch({ control, name: "prompt" })
   const aspect = useWatch({ control, name: "aspectRatio" })
   const count = useWatch({ control, name: "count" })
-  const [style, setStyle] = useState<PromptStyle>({
-    transparentBackground: false,
-  })
+  const [style, setStyle] = useState<PromptStyle>({})
   const [isGenerating, setIsGenerating] = useState(false)
   const [images, setImages] = useState<UploadedImage[]>([])
   const canGenerate =
