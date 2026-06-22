@@ -1,4 +1,5 @@
-import * as React from "react"
+import type * as React from "react"
+
 const Logo = (props: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 479 128" {...props}>
     <title>Hengen</title>

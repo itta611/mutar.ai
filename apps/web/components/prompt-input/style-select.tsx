@@ -41,6 +41,13 @@ export type PromptStyle = {
   backgroundColor?: string
 }
 
+const textureLabels = {
+  flat: "フラット",
+  outline: "アウトライン",
+  soft: "ふっくら",
+  realistic: "リアル",
+} satisfies Record<NonNullable<PromptStyle["texture"]>, string>
+
 export function StyleSelect({
   style,
   onStyleChange,
@@ -54,7 +61,9 @@ export function StyleSelect({
         render={
           <Button variant="ghost" size="sm" className="pr-2">
             <PaletteIcon />
-            <span className="not-sm:hidden">スタイル</span>
+            <span className="not-sm:hidden">
+              {style.texture ? textureLabels[style.texture] : "スタイル"}
+            </span>
             <ChevronDown />
           </Button>
         }
@@ -67,7 +76,7 @@ export function StyleSelect({
             label="選択しない"
             onClick={() => onStyleChange({ ...style, texture: undefined })}
           >
-            <CircleSlashIcon className="text-indigo-400 dark:indigo-500" />
+            <CircleSlashIcon className="text-indigo-500 dark:indigo-500" />
             {/* <CircleSlashIcon className="text-zinc-400 dark:text-zinc-500" /> */}
           </MenuItem>
           <MenuItem
