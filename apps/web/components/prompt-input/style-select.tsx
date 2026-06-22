@@ -24,7 +24,7 @@ function MenuItem({
     >
       <div
         className={cn(
-          "bg-muted w-full aspect-square rounded-lg flex items-center justify-center mb-2 group-focus:border-2 group-focus:border-primary",
+          "bg-primary/7 w-full aspect-square rounded-lg flex items-center justify-center mb-2 group-focus-visible:border-2 group-focus-visible:border-primary",
           { "border-2 border-primary": selected }
         )}
       >
@@ -67,7 +67,8 @@ export function StyleSelect({
             label="選択しない"
             onClick={() => onStyleChange({ ...style, texture: undefined })}
           >
-            <CircleSlashIcon className="text-zinc-400 dark:text-zinc-500" />
+            <CircleSlashIcon className="text-indigo-400 dark:indigo-500" />
+            {/* <CircleSlashIcon className="text-zinc-400 dark:text-zinc-500" /> */}
           </MenuItem>
           <MenuItem
             selected={style.texture === "flat"}
