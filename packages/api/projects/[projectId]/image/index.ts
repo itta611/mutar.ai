@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator"
-import { findProjectByUserId } from "@hengen/db/repo"
+import { findProjectByUserId } from "@mutar/db/repo"
 import { Hono } from "hono"
 
 import { projectImageKey, readImageFromR2 } from "../../../r2"
@@ -31,7 +31,7 @@ export const projectImageRoutes = new Hono<SessionEnv>().get(
     try {
       asset = await readImageFromR2(projectImageKey(projectId, kind))
     } catch (error) {
-      console.error("[hengen] failed to read project image", error)
+      console.error("[mutar] failed to read project image", error)
       return c.json({ message: "Image not available" }, 404, {
         "Cache-Control": "private, no-store",
       })

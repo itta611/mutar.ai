@@ -6,7 +6,7 @@ import {
   listDeletedImagesByUserId,
   listGeneratedImagesByUserId,
   listStarredImagesByUserId,
-} from "@hengen/db/repo"
+} from "@mutar/db/repo"
 import { Hono } from "hono"
 import { z } from "zod"
 
@@ -76,11 +76,11 @@ export const projectsRoutes = new Hono<SessionEnv>()
     try {
       const responses = await Promise.all(
         projectIds.map((projectId) =>
-          fetch(new URL("/generate", env.HENGEN_WORKER_URL), {
+          fetch(new URL("/generate", env.MUTAR_WORKER_URL), {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${env.HENGEN_WORKER_SECRET}`,
+              Authorization: `Bearer ${env.MUTAR_WORKER_SECRET}`,
             },
             body: JSON.stringify({
               projectId,

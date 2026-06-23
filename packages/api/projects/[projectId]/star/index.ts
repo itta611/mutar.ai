@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator"
-import { updateProjectStarredByUserId } from "@hengen/db/repo"
+import { updateProjectStarredByUserId } from "@mutar/db/repo"
 import { Hono } from "hono"
 import { z } from "zod"
 

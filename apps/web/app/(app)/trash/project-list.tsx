@@ -1,4 +1,4 @@
-import { listDeletedImagesByUserId } from "@hengen/db/repo"
+import { listDeletedImagesByUserId } from "@mutar/db/repo"
 import { Gallery } from "@/components/gallary"
 import { getServerSession } from "@/lib/session"
 

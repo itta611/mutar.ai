@@ -1,6 +1,6 @@
 import { zValidator } from "@hono/zod-validator"
-import { db } from "@hengen/db"
-import { users } from "@hengen/db/schema"
+import { db } from "@mutar/db"
+import { users } from "@mutar/db/schema"
 import { eq } from "drizzle-orm"
 import { Hono } from "hono"
 import { z } from "zod"

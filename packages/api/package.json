@@ -1,5 +1,5 @@
 {
-  "name": "@hengen/api",
+  "name": "@mutar/api",
   "private": true,
   "type": "module",
   "exports": {

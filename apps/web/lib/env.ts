@@ -18,8 +18,8 @@ export const env = createEnv({
     BETTER_AUTH_URL: z.string(),
     RESEND_SECRET: z.string().min(1),
     RESEND_FROM: z.string().min(1),
-    HENGEN_WORKER_URL: z.string().url(),
-    HENGEN_WORKER_SECRET: z.string().min(1),
+    MUTAR_WORKER_URL: z.string().url(),
+    MUTAR_WORKER_SECRET: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_BETTER_AUTH_URL: z.string(),

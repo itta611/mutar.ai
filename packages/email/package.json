@@ -1,5 +1,5 @@
 {
-  "name": "@hengen/email",
+  "name": "@mutar/email",
   "private": true,
   "type": "module",
   "exports": {

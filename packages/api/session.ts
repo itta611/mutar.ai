@@ -1,4 +1,4 @@
-import { auth } from "@hengen/auth"
+import { auth } from "@mutar/auth"
 import { createMiddleware } from "hono/factory"
 
 export type Session = NonNullable<Awaited<ReturnType<typeof auth.api.getSession>>>

@@ -5,9 +5,9 @@ import { setSessionCookie } from "better-auth/cookies"
 import { nextCookies } from "better-auth/next-js"
 import { magicLink } from "better-auth/plugins"
 
-import { db } from "@hengen/db"
-import * as schema from "@hengen/db/schema"
-import { sendMagicLinkEmail } from "@hengen/email"
+import { db } from "@mutar/db"
+import * as schema from "@mutar/db/schema"
+import { sendMagicLinkEmail } from "@mutar/email"
 import { env } from "@/lib/env"
 
 const betaLogin = {
@@ -79,6 +79,6 @@ export const auth = betterAuth({
     }),
   ],
   advanced: {
-    cookiePrefix: "hengen",
+    cookiePrefix: "mutar",
   },
 })

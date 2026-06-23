@@ -1,5 +1,5 @@
 {
-  "name": "@hengen/auth",
+  "name": "@mutar/auth",
   "private": true,
   "type": "module",
   "exports": {

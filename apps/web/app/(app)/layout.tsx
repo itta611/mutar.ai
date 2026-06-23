@@ -4,7 +4,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Providers } from "./providers"
 
 export const metadata: Metadata = {
-  title: "Hengen",
+  title: "Mutar",
   description:
     "Slide and poster oriented AI image generation with editable text layers.",
 }

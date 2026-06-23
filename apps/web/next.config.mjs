@@ -13,10 +13,10 @@ const nextConfig = {
     remotePatterns: [new URL("https://lh3.googleusercontent.com/**")],
   },
   transpilePackages: [
-    "@hengen/api",
-    "@hengen/auth",
-    "@hengen/db",
-    "@hengen/email",
+    "@mutar/api",
+    "@mutar/auth",
+    "@mutar/db",
+    "@mutar/email",
   ],
   turbopack: {
     root,

@@ -1,5 +1,5 @@
 {
-  "name": "hengen",
+  "name": "mutar",
   "version": "0.0.1",
   "type": "module",
   "private": true,
@@ -8,9 +8,9 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "pnpm --filter @hengen/web dev",
-    "build": "pnpm --filter @hengen/web build",
-    "start": "pnpm --filter @hengen/web start",
+    "dev": "pnpm --filter @mutar/web dev",
+    "build": "pnpm --filter @mutar/web build",
+    "start": "pnpm --filter @mutar/web start",
     "lint": "eslint apps/web packages",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",

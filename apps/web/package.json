@@ -1,5 +1,5 @@
 {
-  "name": "@hengen/web",
+  "name": "@mutar/web",
   "private": true,
   "type": "module",
   "scripts": {

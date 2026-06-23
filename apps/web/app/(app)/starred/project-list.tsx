@@ -1,4 +1,4 @@
-import { listStarredImagesByUserId } from "@hengen/db/repo"
+import { listStarredImagesByUserId } from "@mutar/db/repo"
 import { Gallery } from "@/components/gallary"
 import { getServerSession } from "@/lib/session"
 

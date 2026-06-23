@@ -1,4 +1,4 @@
-import { app } from "@hengen/api"
+import { app } from "@mutar/api"
 import { handle } from "hono/vercel"
 
 export const runtime = "nodejs"

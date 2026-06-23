@@ -1,4 +1,4 @@
-import { getCreditUsageByUserId } from "@hengen/db/repo"
+import { getCreditUsageByUserId } from "@mutar/db/repo"
 import { Hono } from "hono"
 
 import { sessionMiddleware, type SessionEnv } from "../session"
