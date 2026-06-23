@@ -26,13 +26,13 @@ function MenuItem({
     >
       <div
         className={cn(
-          "w-full aspect-square rounded-lg flex items-center justify-center mb-2 group-focus-visible:border-2",
+          "w-full aspect-square rounded-lg flex items-center justify-center mb-2 group-focus-visible:border-2 border",
           { "border-2 border-primary": selected },
           { "bg-muted": !color }
         )}
-        style={{
-          backgroundColor: color,
-        }}
+        // style={{
+        //   backgroundColor: color,
+        // }}
       >
         {children}
       </div>
@@ -93,7 +93,13 @@ function getDisplayColor(
   }
 }
 
-function TextureImage({ src }: { src: string }) {
+function TextureImage({
+  src,
+  hasShadow,
+}: {
+  src: string
+  hasShadow?: boolean
+}) {
   return (
     <Image
       src={src}
@@ -101,7 +107,11 @@ function TextureImage({ src }: { src: string }) {
       width={30}
       height={30}
       className="pointer-events-none"
-      style={{ filter: "url(#texture-color-filter)" }}
+      style={{
+        filter: hasShadow
+          ? "url(#texture-color-filter) drop-shadow(-2px -4px 8px rgb(0 0 0 / 8%))"
+          : "url(#texture-color-filter)",
+      }}
     />
   )
 }
@@ -200,7 +210,7 @@ export function StyleSelect({
             label="ふっくら"
             onClick={() => onStyleChange({ ...style, texture: "soft" })}
           >
-            <TextureImage src="/knight-gradient.png" />
+            <TextureImage src="/knight-gradient.png" hasShadow />
           </MenuItem>
           <MenuItem
             color={backgroundColor.translucent}
@@ -208,7 +218,7 @@ export function StyleSelect({
             label="リアル"
             onClick={() => onStyleChange({ ...style, texture: "realistic" })}
           >
-            <TextureImage src="/knight-realistic.png" />
+            <TextureImage src="/knight-realistic.png" hasShadow />
           </MenuItem>
         </div>
         <div className="flex items-center justify-between h-9">
