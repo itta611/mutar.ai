@@ -1,8 +1,9 @@
 "use client"
 
-import { cn } from "@/lib/utils"
 import { Monitor, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
+
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const themes = [
   { label: "ダーク", value: "dark", icon: Moon },
@@ -16,22 +17,15 @@ export function ThemeSelect() {
   return (
     <>
       <span>テーマ</span>
-      <div className="flex rounded-md bg-muted p-0.5">
-        {themes.map(({ icon: Icon, label, value }) => (
-          <button
-            key={value}
-            type="button"
-            aria-label={label}
-            onClick={() => setTheme(value)}
-            className={cn(
-              "flex size-7 items-center justify-center rounded-sm text-muted-foreground hover:text-foreground",
-              theme === value && "bg-background text-foreground"
-            )}
-          >
-            <Icon />
-          </button>
-        ))}
-      </div>
+      <Tabs onValueChange={setTheme} value={theme}>
+        <TabsList>
+          {themes.map(({ icon: Icon, label, value }) => (
+            <TabsTrigger aria-label={label} key={value} value={value}>
+              <Icon />
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
     </>
   )
 }
