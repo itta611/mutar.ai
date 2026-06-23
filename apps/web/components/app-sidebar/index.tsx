@@ -139,11 +139,11 @@ export function AppSidebar() {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>お気に入り</SidebarGroupLabel>
-          <SidebarMenu>
-            {starredProjects.length !== 0 &&
-              starredProjects.map((project) => (
+        {starredProjects.length !== 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>お気に入り</SidebarGroupLabel>
+            <SidebarMenu>
+              {starredProjects.map((project) => (
                 <SidebarMenuItem key={project.id}>
                   <SidebarMenuButton
                     isActive={pathname === `/editor/${project.id}`}
@@ -163,8 +163,9 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-          </SidebarMenu>
-        </SidebarGroup>
+            </SidebarMenu>
+          </SidebarGroup>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
