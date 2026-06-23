@@ -15,7 +15,7 @@ function MenuItem({
   children: React.ReactNode
   onClick?: () => void
   label: string
-  color: string
+  color?: string
   selected?: boolean
 }) {
   return (
@@ -27,7 +27,8 @@ function MenuItem({
       <div
         className={cn(
           "w-full aspect-square rounded-lg flex items-center justify-center mb-2 group-focus-visible:border-2",
-          { "border-2 border-primary": selected }
+          { "border-2 border-primary": selected },
+          { "bg-muted": !color }
         )}
         style={{
           backgroundColor: color,
@@ -99,6 +100,7 @@ function TextureImage({ src }: { src: string }) {
       alt=""
       width={30}
       height={30}
+      className="pointer-events-none"
       style={{ filter: "url(#texture-color-filter)" }}
     />
   )
@@ -126,10 +128,13 @@ export function StyleSelect({
 }) {
   const themeColor = style.themeColor ?? "#6366F1"
   const displayColor = getDisplayColor(themeColor)
-  const backgroundColor = getDisplayColor(
-    themeColor,
-    (saturation) => 0.5 + saturation * 0.5
-  )
+  // const backgroundColor = getDisplayColor(
+  //   themeColor,
+  //   (saturation) =>
+  //     // Math.min(0.8 + saturation * 0.2, 1)
+  //     1
+  // )
+  const backgroundColor = displayColor
   const [red, green, blue] = displayColor.rgb
   const baseLuminance =
     0.2126 * (99 / 255) + 0.7152 * (102 / 255) + 0.0722 * (241 / 255)
@@ -149,6 +154,7 @@ export function StyleSelect({
         }
       />
       <PopoverContent align="start" className="min-w-80 p-4 gap-3">
+        {/** biome-ignore lint/a11y/noSvgWithoutTitle: SVG Filter */}
         <svg className="absolute size-0" aria-hidden>
           <filter id="texture-color-filter" colorInterpolationFilters="sRGB">
             <feColorMatrix
@@ -162,7 +168,6 @@ export function StyleSelect({
         <span className="text-sm text-muted-foreground">テクスチャ</span>
         <div className="grid grid-cols-3 gap-4 pb-1">
           <MenuItem
-            color={backgroundColor.translucent}
             selected={!style.texture}
             label="選択しない"
             onClick={() => onStyleChange({ ...style, texture: undefined })}
