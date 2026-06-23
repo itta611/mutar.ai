@@ -30,7 +30,7 @@ export function SettingsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="grid h-[min(760px,calc(100dvh-4rem))] max-w-250! grid-cols-1 gap-0 overflow-hidden p-0 sm:grid-cols-[240px_1fr]">
         <DialogTitle className="sr-only">設定</DialogTitle>
-        <aside className="border-b bg-muted/40 p-4 sm:border-r sm:border-b-0">
+        <aside className="border-b bg-muted/40 p-3 sm:border-r sm:border-b-0">
           <div className="grid gap-1">
             {navItems.map((item, index) => (
               <button
@@ -39,7 +39,7 @@ export function SettingsDialog({
                   setActiveTab(index)
                 }}
                 className={cn(
-                  "h-9 rounded-md px-2 text-left text-sm cursor-pointer hover:bg-accent inline-flex items-center",
+                  "h-9 rounded-md px-3 text-left text-sm cursor-pointer hover:bg-accent inline-flex items-center",
                   activeTab === index && "bg-accent text-accent-foreground"
                 )}
                 key={item.title}
@@ -50,7 +50,7 @@ export function SettingsDialog({
             ))}
           </div>
         </aside>
-        <div className="overflow-y-auto p-6 sm:p-10">
+        <div className="overflow-y-auto p-6 sm:p-10 scrollbar-thin hover:scrollbar-thumb-border scrollbar-thumb-transparent">
           <h2 className="mb-10 text-2xl font-bold">
             {navItems[activeTab].title}
           </h2>

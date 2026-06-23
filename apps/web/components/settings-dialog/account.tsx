@@ -77,7 +77,7 @@ export function AccountSettingsPage() {
         <form className="space-y-4" onSubmit={handleUpdateAccount}>
           <div className="max-w-90 flex gap-2">
             <Input {...accountForm.register("name")} />
-            <Button disabled={isSavingName} type="submit" variant="outline">
+            <Button disabled={isSavingName} type="submit">
               保存
             </Button>
           </div>
@@ -88,6 +88,17 @@ export function AccountSettingsPage() {
         <UsageCard />
       </SettingSection>
       <SettingSection title="メールアドレス" description={user?.email} />
+      <SettingSection title="ログアウト">
+        <Button
+          onClick={async () => {
+            await authClient.signOut()
+            router.push("/")
+          }}
+          variant="outline"
+        >
+          ログアウト
+        </Button>
+      </SettingSection>
       <SettingSection
         title="アカウント削除"
         description="アカウントと作成したプロジェクトを削除します。"

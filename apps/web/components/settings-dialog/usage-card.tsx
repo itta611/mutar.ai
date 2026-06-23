@@ -42,9 +42,9 @@ function UsageCard() {
     : "-"
 
   return (
-    <div className="border rounded-2xl px-5 space-y-4.5 py-4">
-      <div className="text-sm h-8">今月の使用量</div>
-      <div className="flex items-center justify-between gap-5 text-sm">
+    <div className="border rounded-xl px-5 space-y-4.5 py-4">
+      <div className="text-sm font-bold pb-2">無料プラン</div>
+      <div className="flex items-center justify-between gap-3 text-sm">
         <div className="w-12">
           {creditUsage ? `${creditUsage.used} / ${creditUsage.quota}` : "- / -"}
         </div>
