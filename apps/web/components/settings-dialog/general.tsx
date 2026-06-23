@@ -11,6 +11,7 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -32,20 +33,32 @@ export function GeneralSettingsPage() {
               <SelectValue placeholder="言語を選択" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ja">日本語</SelectItem>
-              <SelectItem value="en">English</SelectItem>
+              <SelectGroup>
+                <SelectItem value="ja">日本語</SelectItem>
+                <SelectItem value="en">English</SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
         </SettingSection>
         <SettingSection title="テーマ">
-          <Select value={theme} onValueChange={(value) => setTheme(value!)}>
+          <Select
+            value={theme}
+            onValueChange={(value) => setTheme(value!)}
+            items={[
+              { label: "システム", value: "system" },
+              { label: "ダーク", value: "dark" },
+              { label: "ライト", value: "light" },
+            ]}
+          >
             <SelectTrigger className="w-40">
               <SelectValue placeholder="テーマを選択" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="system">システム</SelectItem>
-              <SelectItem value="dark">ダーク</SelectItem>
-              <SelectItem value="light">ライト</SelectItem>
+              <SelectGroup>
+                <SelectItem value="system">システム</SelectItem>
+                <SelectItem value="dark">ダーク</SelectItem>
+                <SelectItem value="light">ライト</SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
         </SettingSection>
