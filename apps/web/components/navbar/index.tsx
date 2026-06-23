@@ -1,6 +1,6 @@
 "use client"
 
-import { XIcon } from "lucide-react"
+import { ChevronDownIcon, XIcon } from "lucide-react"
 import { useAtomValue } from "jotai"
 import { useParams, useRouter } from "next/navigation"
 import { useState } from "react"
@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query"
 
 import { editorBoxesAtom, fontFamilyMap } from "@/atom/generate"
 import { Button } from "@/components/ui/button"
+import { ButtonGroup } from "@/components/ui/button-group"
 import { editorProjectQuery } from "@/hooks/use-editor-project"
 
 function getTextWidth(
@@ -166,14 +167,24 @@ export function Navbar() {
         <XIcon />
       </Button>
       <div className="grow w-0 truncate">{projectName}</div>
-      <Button
-        disabled={!projectId || !imageSize || isSaving}
-        aria-label="コピー"
-        type="button"
-        variant="outline"
-      >
-        コピー
-      </Button>
+      <ButtonGroup aria-label="コピー">
+        <Button
+          disabled={!projectId || !imageSize || isSaving}
+          type="button"
+          variant="outline"
+        >
+          コピー
+        </Button>
+        <Button
+          aria-label="コピーオプション"
+          disabled={!projectId || !imageSize || isSaving}
+          size="icon"
+          type="button"
+          variant="outline"
+        >
+          <ChevronDownIcon />
+        </Button>
+      </ButtonGroup>
       <Button
         disabled={!projectId || !imageSize || isSaving}
         onClick={handleSaveImage}

@@ -142,11 +142,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>お気に入り</SidebarGroupLabel>
           <SidebarMenu>
-            {starredProjects.length === 0 ? (
-              <SidebarMenuItem className="text-xs text-muted-foreground/80 px-3 py-1.5">
-                プロジェクトをお気に入りしましょう。
-              </SidebarMenuItem>
-            ) : (
+            {starredProjects.length !== 0 &&
               starredProjects.map((project) => (
                 <SidebarMenuItem key={project.id}>
                   <SidebarMenuButton
@@ -166,8 +162,7 @@ export function AppSidebar() {
                     />
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))
-            )}
+              ))}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
