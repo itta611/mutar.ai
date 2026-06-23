@@ -31,7 +31,7 @@ function MenuItem({
         )}
         style={{
           background: color
-            ? `linear-gradient(0deg, ${color} 0%, var(--background) 100%)`
+            ? `linear-gradient(0deg, ${color} 0%, var(--background) 50%)`
             : undefined,
         }}
       >
@@ -187,7 +187,7 @@ export function StyleSelect({
             />
           </MenuItem>
           <MenuItem
-            color={backgroundColor.css}
+            color={backgroundColor.translucent}
             selected={style.texture === "flat"}
             label="フラット"
             onClick={() => onStyleChange({ ...style, texture: "flat" })}
@@ -195,7 +195,7 @@ export function StyleSelect({
             <TextureImage src="/knight-flat.png" />
           </MenuItem>
           <MenuItem
-            color={backgroundColor.css}
+            color={backgroundColor.translucent}
             selected={style.texture === "outline"}
             label="アウトライン"
             onClick={() => onStyleChange({ ...style, texture: "outline" })}
@@ -203,7 +203,7 @@ export function StyleSelect({
             <TextureImage src="/knight-outline.png" />
           </MenuItem>
           <MenuItem
-            color={backgroundColor.css}
+            color={backgroundColor.translucent}
             selected={style.texture === "soft"}
             label="ふっくら"
             onClick={() => onStyleChange({ ...style, texture: "soft" })}
@@ -211,7 +211,7 @@ export function StyleSelect({
             <TextureImage src="/knight-gradient.png" hasShadow />
           </MenuItem>
           <MenuItem
-            color={backgroundColor.css}
+            color={backgroundColor.translucent}
             selected={style.texture === "realistic"}
             label="リアル"
             onClick={() => onStyleChange({ ...style, texture: "realistic" })}
