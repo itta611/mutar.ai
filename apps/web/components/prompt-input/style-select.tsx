@@ -26,12 +26,14 @@ function MenuItem({
     >
       <div
         className={cn(
-          "w-full aspect-square rounded-lg flex items-center justify-center mb-1.5 group-focus-visible:border-2",
+          "w-full aspect-square rounded-lg flex items-center justify-center mb-1.5 group-focus-visible:border-2 relative from-pink",
           { "border-2 border-primary bg-primary/7": selected }
         )}
-        // style={{
-        //   backgroundColor: color,
-        // }}
+        style={{
+          background: color
+            ? `linear-gradient(0deg, ${color} 0%, var(--background) 100%)`
+            : undefined,
+        }}
       >
         {children}
       </div>
@@ -137,13 +139,10 @@ export function StyleSelect({
 }) {
   const themeColor = style.themeColor ?? "#6366F1"
   const displayColor = getDisplayColor(themeColor)
-  // const backgroundColor = getDisplayColor(
-  //   themeColor,
-  //   (saturation) =>
-  //     // Math.min(0.8 + saturation * 0.2, 1)
-  //     1
-  // )
-  const backgroundColor = displayColor
+  const backgroundColor = getDisplayColor(themeColor, (saturation) =>
+    Math.min(saturation, 1)
+  )
+  // const backgroundColor = displayColor
   const [red, green, blue] = displayColor.rgb
   const baseLuminance =
     0.2126 * (99 / 255) + 0.7152 * (102 / 255) + 0.0722 * (241 / 255)
@@ -188,7 +187,7 @@ export function StyleSelect({
             />
           </MenuItem>
           <MenuItem
-            color={backgroundColor.translucent}
+            color={backgroundColor.css}
             selected={style.texture === "flat"}
             label="フラット"
             onClick={() => onStyleChange({ ...style, texture: "flat" })}
@@ -196,7 +195,7 @@ export function StyleSelect({
             <TextureImage src="/knight-flat.png" />
           </MenuItem>
           <MenuItem
-            color={backgroundColor.translucent}
+            color={backgroundColor.css}
             selected={style.texture === "outline"}
             label="アウトライン"
             onClick={() => onStyleChange({ ...style, texture: "outline" })}
@@ -204,7 +203,7 @@ export function StyleSelect({
             <TextureImage src="/knight-outline.png" />
           </MenuItem>
           <MenuItem
-            color={backgroundColor.translucent}
+            color={backgroundColor.css}
             selected={style.texture === "soft"}
             label="ふっくら"
             onClick={() => onStyleChange({ ...style, texture: "soft" })}
@@ -212,7 +211,7 @@ export function StyleSelect({
             <TextureImage src="/knight-gradient.png" hasShadow />
           </MenuItem>
           <MenuItem
-            color={backgroundColor.translucent}
+            color={backgroundColor.css}
             selected={style.texture === "realistic"}
             label="リアル"
             onClick={() => onStyleChange({ ...style, texture: "realistic" })}
