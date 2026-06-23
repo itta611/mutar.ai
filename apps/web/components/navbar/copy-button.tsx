@@ -30,28 +30,24 @@ export function CopyButton({ disabled }: { disabled: boolean }) {
             </Button>
           }
         />
-        <DropdownMenuContent className="w-64 p-2" align="end">
+        <DropdownMenuContent className="w-72 p-1.5" align="end">
           <DropdownMenuItem
             onSelect={() => toast("コピーしました")}
-            className="flex-col items-start gap-1.5"
+            className="flex-col items-start gap-1"
           >
             <div className="text-foreground text-sm font-bold">
               画像としてコピー
             </div>
-            <div className="text-xs">
-              画像形式でクリップボードにコピーします。
-            </div>
+            <div className="text-xs">そのまま貼り付けられる画像としてコピー</div>
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => toast("コピーしました")}
-            className="flex-col items-start gap-1.5"
+            className="flex-col items-start gap-1"
           >
             <div className="text-foreground text-sm font-bold">
-              XXとしてコピー
+              編集可能な形式でコピー
             </div>
-            <div className="text-xs">
-              PowerPoint等に貼り付け可能な形式でコピーします。
-            </div>
+            <div className="text-xs">対応アプリで編集できる形式としてコピー</div>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
