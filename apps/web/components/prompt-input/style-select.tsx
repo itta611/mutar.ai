@@ -26,9 +26,8 @@ function MenuItem({
     >
       <div
         className={cn(
-          "w-full aspect-square rounded-lg flex items-center justify-center mb-2 group-focus-visible:border-2 border",
-          { "border-2 border-primary": selected },
-          { "bg-muted": !color }
+          "w-full aspect-square rounded-lg flex items-center justify-center mb-1.5 group-focus-visible:border-2",
+          { "border-2 border-primary bg-primary/7": selected }
         )}
         // style={{
         //   backgroundColor: color,
@@ -109,7 +108,7 @@ function TextureImage({
       className="pointer-events-none"
       style={{
         filter: hasShadow
-          ? "url(#texture-color-filter) drop-shadow(-2px -4px 8px rgb(0 0 0 / 8%))"
+          ? "url(#texture-color-filter) drop-shadow(0px 0px 8px rgb(0 0 0 / 10%))"
           : "url(#texture-color-filter)",
       }}
     />
