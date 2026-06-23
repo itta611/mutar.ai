@@ -5,18 +5,20 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 
+type RGB = [number, number, number]
+
 function MenuItem({
   children,
   onClick,
   label,
-  color,
+  backgroundColor,
   selected = false,
 }: {
   children: React.ReactNode
   onClick?: () => void
   label: string
-  color?: string
-  selected?: boolean
+  backgroundColor: RGB
+  selected: boolean
 }) {
   return (
     <button
@@ -26,13 +28,11 @@ function MenuItem({
     >
       <div
         className={cn(
-          "w-full aspect-square rounded-lg flex items-center justify-center mb-1.5 group-focus-visible:border-2 relative from-pink",
-          { "border-2 border-primary bg-primary/7": selected }
+          "w-full aspect-square rounded-lg flex items-center justify-center mb-1.5 group-focus-visible:border-2 border-primary",
+          { "border-2": selected }
         )}
         style={{
-          background: color
-            ? `linear-gradient(0deg, ${color} 0%, var(--background) 50%)`
-            : undefined,
+          background: `linear-gradient(0deg, ${toRGBAString(backgroundColor, 0.06)} 0%, ${toRGBAString(backgroundColor, 0)} 50%)`,
         }}
       >
         {children}
@@ -42,15 +42,19 @@ function MenuItem({
   )
 }
 
+function toRGBAString(rgb: RGB, alpha = 1) {
+  return `rgba(${rgb.map((value) => Math.round(value * 255)).join(", ")}, ${alpha})`
+}
+
 function getDisplayColor(
   color: string,
   valueFromSaturation?: (saturation: number) => number
 ) {
   const hex = color.replace("#", "")
-  const values = /^[\dA-Fa-f]{6}$/.test(hex)
-    ? [0, 2, 4].map(
+  const values: RGB = /^[\dA-Fa-f]{6}$/.test(hex)
+    ? ([0, 2, 4].map(
         (index) => Number.parseInt(hex.slice(index, index + 2), 16) / 255
-      )
+      ) as RGB)
     : [99 / 255, 102 / 255, 241 / 255]
   const [red, green, blue] = values
   const max = Math.max(...values)
@@ -69,11 +73,11 @@ function getDisplayColor(
   const hsvSaturation = max === 0 ? 0 : delta / max
   const hsvValue = valueFromSaturation
     ? valueFromSaturation(hsvSaturation)
-    : Math.min(0.9, Math.max(0.2, max))
+    : Math.min(0.9, Math.max(0.3, max))
   const hsvChroma = hsvValue * Math.min(0.7, hsvSaturation)
   const hsvX = hsvChroma * (1 - Math.abs(((hue / 60) % 2) - 1))
   const hsvMatch = hsvValue - hsvChroma
-  const rgbOffsets =
+  const rgbOffsets: RGB =
     hue < 60
       ? [hsvChroma, hsvX, 0]
       : hue < 120
@@ -85,13 +89,7 @@ function getDisplayColor(
             : hue < 300
               ? [hsvX, 0, hsvChroma]
               : [hsvChroma, 0, hsvX]
-  const rgb = rgbOffsets.map((value) => value + hsvMatch)
-
-  return {
-    css: `rgb(${rgb.map((value) => Math.round(value * 255)).join(" ")})`,
-    translucent: `rgb(${rgb.map((value) => Math.round(value * 255)).join(" ")} / 6%)`,
-    rgb,
-  }
+  return rgbOffsets.map((value) => value + hsvMatch) as RGB
 }
 
 function TextureImage({
@@ -139,11 +137,11 @@ export function StyleSelect({
 }) {
   const themeColor = style.themeColor ?? "#6366F1"
   const displayColor = getDisplayColor(themeColor)
-  const backgroundColor = getDisplayColor(themeColor, (saturation) =>
-    Math.min(saturation, 1)
+  const backgroundColor = getDisplayColor(
+    themeColor,
+    (saturation) => 0.5 + saturation * 0.5
   )
-  // const backgroundColor = displayColor
-  const [red, green, blue] = displayColor.rgb
+  const [red, green, blue] = displayColor
   const baseLuminance =
     0.2126 * (99 / 255) + 0.7152 * (102 / 255) + 0.0722 * (241 / 255)
   const shade = 0.75
@@ -176,6 +174,7 @@ export function StyleSelect({
         <span className="text-sm text-muted-foreground">テクスチャ</span>
         <div className="grid grid-cols-3 gap-4 pb-1">
           <MenuItem
+            backgroundColor={backgroundColor}
             selected={!style.texture}
             label="選択しない"
             onClick={() => onStyleChange({ ...style, texture: undefined })}
@@ -187,7 +186,7 @@ export function StyleSelect({
             />
           </MenuItem>
           <MenuItem
-            color={backgroundColor.translucent}
+            backgroundColor={backgroundColor}
             selected={style.texture === "flat"}
             label="フラット"
             onClick={() => onStyleChange({ ...style, texture: "flat" })}
@@ -195,7 +194,7 @@ export function StyleSelect({
             <TextureImage src="/knight-flat.png" />
           </MenuItem>
           <MenuItem
-            color={backgroundColor.translucent}
+            backgroundColor={backgroundColor}
             selected={style.texture === "outline"}
             label="アウトライン"
             onClick={() => onStyleChange({ ...style, texture: "outline" })}
@@ -203,7 +202,7 @@ export function StyleSelect({
             <TextureImage src="/knight-outline.png" />
           </MenuItem>
           <MenuItem
-            color={backgroundColor.translucent}
+            backgroundColor={backgroundColor}
             selected={style.texture === "soft"}
             label="ふっくら"
             onClick={() => onStyleChange({ ...style, texture: "soft" })}
@@ -211,7 +210,7 @@ export function StyleSelect({
             <TextureImage src="/knight-gradient.png" hasShadow />
           </MenuItem>
           <MenuItem
-            color={backgroundColor.translucent}
+            backgroundColor={backgroundColor}
             selected={style.texture === "realistic"}
             label="リアル"
             onClick={() => onStyleChange({ ...style, texture: "realistic" })}
