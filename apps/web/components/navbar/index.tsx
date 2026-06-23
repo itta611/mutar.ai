@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronDownIcon, XIcon } from "lucide-react"
+import { ChevronDownIcon, DownloadIcon, XIcon } from "lucide-react"
 import { useAtomValue } from "jotai"
 import { useParams, useRouter } from "next/navigation"
 import { useState } from "react"
@@ -181,6 +181,7 @@ export function Navbar() {
           size="icon"
           type="button"
           variant="outline"
+          className="w-7"
         >
           <ChevronDownIcon />
         </Button>
@@ -190,6 +191,7 @@ export function Navbar() {
         onClick={handleSaveImage}
         type="button"
       >
+        <DownloadIcon />
         {isSaving ? "保存中" : "画像を保存"}
       </Button>
     </nav>
