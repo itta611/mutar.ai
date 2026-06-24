@@ -17,7 +17,7 @@ function MenuItem({
   children: React.ReactNode
   onClick?: () => void
   label: string
-  backgroundColor: RGB
+  backgroundColor?: RGB
   selected: boolean
 }) {
   return (
@@ -29,10 +29,13 @@ function MenuItem({
       <div
         className={cn(
           "w-full aspect-square rounded-lg flex items-center justify-center mb-1.5 group-focus-visible:border-2 border-primary",
-          { "border-2": selected }
+          { "border-2": selected },
+          { "bg-muted/60": !backgroundColor }
         )}
         style={{
-          background: `linear-gradient(0deg, ${toRGBAString(backgroundColor, 0.06)} 0%, ${toRGBAString(backgroundColor, 0)} 50%)`,
+          background: backgroundColor
+            ? `linear-gradient(0deg, ${toRGBAString(backgroundColor, 0.06)} 0%, ${toRGBAString(backgroundColor, 0)} 50%)`
+            : undefined,
         }}
       >
         {children}
@@ -174,7 +177,6 @@ export function StyleSelect({
         <span className="text-sm text-muted-foreground">テクスチャ</span>
         <div className="grid grid-cols-3 gap-4 pb-1">
           <MenuItem
-            backgroundColor={backgroundColor}
             selected={!style.texture}
             label="選択しない"
             onClick={() => onStyleChange({ ...style, texture: undefined })}
