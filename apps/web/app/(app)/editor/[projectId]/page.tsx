@@ -225,6 +225,7 @@ function Editor({ projectId }: { projectId: string }) {
     useState<SelectionRectangle | null>(null)
   const selectionStartRef = useRef<{ x: number; y: number } | null>(null)
   const selectionDraggedRef = useRef(false)
+  const preserveSelectionAfterEditRef = useRef(false)
   const [snapGuides, setSnapGuides] = useState<SnapGuide[]>([])
   const saveBoxes = useCallback(
     (boxes: EditorBox[]) => {
@@ -311,8 +312,8 @@ function Editor({ projectId }: { projectId: string }) {
     )
     setEditingText(null)
     setHoveredIndex(null)
-    setSelectedIndex(null)
-    setSelectedIndexes([])
+    setSelectedIndex(index)
+    setSelectedIndexes([index])
     setSnapGuides([])
   }
 
@@ -363,6 +364,11 @@ function Editor({ projectId }: { projectId: string }) {
       return
     }
 
+    if (preserveSelectionAfterEditRef.current) {
+      preserveSelectionAfterEditRef.current = false
+      return
+    }
+
     for (
       let node: Konva.Node | null = event.target;
       node;
@@ -380,6 +386,7 @@ function Editor({ projectId }: { projectId: string }) {
 
     if (document.activeElement instanceof HTMLTextAreaElement) {
       document.activeElement.blur()
+      return
     }
 
     setHoveredIndex(null)
@@ -390,6 +397,11 @@ function Editor({ projectId }: { projectId: string }) {
 
   function startSelection(event: Konva.KonvaEventObject<MouseEvent>) {
     if (event.target !== event.target.getStage()) {
+      return
+    }
+
+    if (editingText) {
+      preserveSelectionAfterEditRef.current = true
       return
     }
 

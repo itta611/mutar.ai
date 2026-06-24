@@ -10,7 +10,6 @@ import { useQuery } from "@tanstack/react-query"
 import { editorBoxesAtom, fontFamilyMap } from "@/atom/generate"
 import { Button } from "@/components/ui/button"
 import { editorProjectQuery } from "@/hooks/use-editor-project"
-import { Command } from "../ui/command"
 import { CopyButton } from "./copy-button"
 
 function getTextWidth(
