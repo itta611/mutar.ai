@@ -167,7 +167,7 @@ export function EditorStage({
         {showThumbnail ? (
           <Image
             alt=""
-            className="absolute object-contain"
+            className="absolute object-contain blur-sm"
             height={600}
             src={`/api/projects/${activeProjectId}/image?kind=thumbnail`}
             style={{
