@@ -3,6 +3,7 @@ import { Button } from "../ui/button"
 import { ColorPickerWithInput } from "../ui/color-picker"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import Image from "next/image"
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 
 type RGB = [number, number, number]
@@ -138,6 +139,8 @@ export function StyleSelect({
   style: PromptStyle
   onStyleChange: (style: PromptStyle) => void
 }) {
+  const [open, setOpen] = useState(false)
+  const [colorPickerOpen, setColorPickerOpen] = useState(false)
   const themeColor = style.themeColor ?? "#6366F1"
   const displayColor = getDisplayColor(themeColor)
   const backgroundColor = getDisplayColor(
@@ -150,7 +153,23 @@ export function StyleSelect({
   const shade = 0.75
 
   return (
-    <Popover>
+    <Popover
+      open={open}
+      onOpenChange={(open, eventDetails) => {
+        if (
+          !open &&
+          eventDetails.reason === "outside-press" &&
+          colorPickerOpen
+        ) {
+          return
+        }
+
+        setOpen(open)
+        if (!open) {
+          setColorPickerOpen(false)
+        }
+      }}
+    >
       <PopoverTrigger
         render={
           <Button variant="ghost" size="sm" className="pr-2">
