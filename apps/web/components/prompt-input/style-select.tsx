@@ -124,7 +124,7 @@ export type PromptStyle = {
 const textureLabels = {
   flat: "フラット",
   outline: "アウトライン",
-  soft: "ふっくら",
+  soft: "ソフト",
   realistic: "リアル",
 } satisfies Record<NonNullable<PromptStyle["texture"]>, string>
 
@@ -204,7 +204,7 @@ export function StyleSelect({
           <MenuItem
             backgroundColor={backgroundColor}
             selected={style.texture === "soft"}
-            label="ふっくら"
+            label="ソフト"
             onClick={() => onStyleChange({ ...style, texture: "soft" })}
           >
             <TextureImage src="/knight-gradient.png" hasShadow />

@@ -157,9 +157,10 @@ export function EditorStage({
   const imageViewportSize = getImageViewportSize(containerSize)
 
   if (!imageSize || imageElement?.projectId !== activeProjectId) {
-    const skeletonScale = Math.min(
-      imageViewportSize.width / 4,
-      imageViewportSize.height / 3
+    const [placeholderWidth, placeholderHeight] = imageSize ?? [4, 3]
+    const placeholderScale = Math.min(
+      imageViewportSize.width / placeholderWidth,
+      imageViewportSize.height / placeholderHeight
     )
 
     return (
@@ -171,14 +172,18 @@ export function EditorStage({
             height={600}
             src={`/api/projects/${activeProjectId}/image?kind=thumbnail`}
             style={{
-              height: skeletonScale * 3,
+              height: placeholderScale * placeholderHeight,
               left:
                 defaultViewportPadding +
-                (imageViewportSize.width - skeletonScale * 4) / 2,
+                (imageViewportSize.width -
+                  placeholderScale * placeholderWidth) /
+                  2,
               top:
                 defaultViewportPadding +
-                (imageViewportSize.height - skeletonScale * 3) / 2,
-              width: skeletonScale * 4,
+                (imageViewportSize.height -
+                  placeholderScale * placeholderHeight) /
+                  2,
+              width: placeholderScale * placeholderWidth,
             }}
             unoptimized
             width={800}
@@ -187,14 +192,18 @@ export function EditorStage({
           <Skeleton
             className="absolute"
             style={{
-              height: skeletonScale * 3,
+              height: placeholderScale * placeholderHeight,
               left:
                 defaultViewportPadding +
-                (imageViewportSize.width - skeletonScale * 4) / 2,
+                (imageViewportSize.width -
+                  placeholderScale * placeholderWidth) /
+                  2,
               top:
                 defaultViewportPadding +
-                (imageViewportSize.height - skeletonScale * 3) / 2,
-              width: skeletonScale * 4,
+                (imageViewportSize.height -
+                  placeholderScale * placeholderHeight) /
+                  2,
+              width: placeholderScale * placeholderWidth,
             }}
           />
         )}
