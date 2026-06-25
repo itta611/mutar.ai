@@ -7,10 +7,7 @@ import { useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 
 import type { EditorAspectRatio } from "@/atom/generate"
-import {
-  addImageFiles,
-  type UploadedImage,
-} from "@/components/prompt-input/file-upload"
+import type { UploadedImage } from "@/components/prompt-input/file-upload"
 import type { PromptStyle } from "@/components/prompt-input/style-select"
 import { useAuthDialog } from "@/hooks/use-auth-dialog"
 import {
@@ -120,11 +117,31 @@ export function usePromptForm() {
   }
 
   async function attachProjectImage(project: { id: string; title: string }) {
-    const response = await fetch(
-      `/api/projects/${project.id}/image?kind=original`
-    )
+    const image = {
+      file: new File([], `${project.title}.png`, {
+        lastModified: 0,
+        type: "image/png",
+      }),
+    }
+
+    setImages((current) => [...current, image])
+
+    let response: Response
+
+    try {
+      response = await fetch(`/api/projects/${project.id}/image?kind=original`)
+    } catch {
+      setImages((current) =>
+        current.filter((currentImage) => currentImage !== image)
+      )
+      toast.error("添付に失敗しました。")
+      return
+    }
 
     if (!response.ok) {
+      setImages((current) =>
+        current.filter((currentImage) => currentImage !== image)
+      )
       toast.error("添付に失敗しました。")
       return
     }
@@ -135,7 +152,16 @@ export function usePromptForm() {
       type: blob.type,
     })
 
-    addImageFiles([file], images, setImages)
+    const reader = new FileReader()
+    reader.onload = () =>
+      setImages((current) =>
+        current.map((currentImage) =>
+          currentImage === image
+            ? { file, dataUrl: reader.result as string }
+            : currentImage
+        )
+      )
+    reader.readAsDataURL(file)
   }
 
   useEffect(() => {

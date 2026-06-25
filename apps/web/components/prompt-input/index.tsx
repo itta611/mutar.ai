@@ -4,6 +4,7 @@ import { SparklesIcon, XIcon } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { usePromptForm } from "@/hooks/use-prompt-form"
 import { ImagePreview } from "@/interfaces/image-preview"
@@ -119,7 +120,9 @@ export function PromptInput() {
                     src={image.dataUrl}
                     width={32}
                   />
-                ) : null}
+                ) : (
+                  <Skeleton className="size-full" />
+                )}
               </button>
               <span className="truncate">{image.file.name}</span>
               <button
