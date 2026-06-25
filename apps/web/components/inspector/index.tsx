@@ -300,7 +300,7 @@ export function Inspector() {
               テキストを選択してください
             </div>
             <div className="text-center text-muted-foreground text-[13px]">
-              テキストを選択するとフォントや文字サイズなどのスタイルを変更できます。
+              選択中テキストのフォントや文字サイズなどのスタイルを変更できます。
             </div>
           </div>
         </div>
