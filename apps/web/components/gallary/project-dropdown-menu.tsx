@@ -111,16 +111,6 @@ export function ProjectDropdownMenu({
       />
       <DropdownMenuContent align={align} className="w-48">
         <DropdownMenuItem
-          onClick={(event) => {
-            event.preventDefault()
-            event.stopPropagation()
-            navigator.clipboard.writeText(project.prompt)
-          }}
-        >
-          <ClipboardIcon />
-          プロンプトをコピー
-        </DropdownMenuItem>
-        <DropdownMenuItem
           disabled={project.status !== "ready"}
           onClick={(event) => {
             event.preventDefault()
@@ -130,6 +120,17 @@ export function ProjectDropdownMenu({
         >
           <ImagePlusIcon />
           プロンプトに添付
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={project.prompt.trim().length === 0}
+          onClick={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            navigator.clipboard.writeText(project.prompt)
+          }}
+        >
+          <ClipboardIcon />
+          プロンプトをコピー
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={(event) => {
