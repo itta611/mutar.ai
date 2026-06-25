@@ -2,127 +2,33 @@
 
 import { SparklesIcon, XIcon } from "lucide-react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { useForm, useWatch } from "react-hook-form"
-import { toast } from "sonner"
-import type { EditorAspectRatio } from "@/atom/generate"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { useAuthDialog } from "@/hooks/use-auth-dialog"
-import {
-  type GenerateProjectInput,
-  useGenerateProject,
-} from "@/hooks/use-generate-project"
-import { authClient } from "@/lib/auth-client"
+import { usePromptForm } from "@/hooks/use-prompt-form"
 import { AspectSelect } from "./aspect-select"
 import { CountSelect } from "./count-select"
-import { addImageFiles, FileUpload, type UploadedImage } from "./file-upload"
-import { type PromptStyle, StyleSelect } from "./style-select"
+import { addImageFiles, FileUpload } from "./file-upload"
+import { StyleSelect } from "./style-select"
 import { Suggestion } from "./suggestion"
 import { cn } from "@/lib/utils"
 
-const promptSettingsCookieName = "prompt-settings"
-const promptSettingsMaxAge = 60 * 60 * 24 * 365
-const defaultPromptSettings = {
-  aspectRatio: "auto" as EditorAspectRatio,
-  count: 2 as GenerateProjectInput["count"],
-  style: { themeColor: "#6366F1" } satisfies PromptStyle,
-}
-
-function getPromptSettingsCookie() {
-  if (typeof document === "undefined") {
-    return null
-  }
-
-  const cookie = document.cookie
-    .split("; ")
-    .find((cookie) => cookie.startsWith(`${promptSettingsCookieName}=`))
-
-  if (!cookie) {
-    return null
-  }
-
-  try {
-    return JSON.parse(decodeURIComponent(cookie.split("=")[1] ?? "")) as {
-      aspectRatio?: EditorAspectRatio
-      count?: GenerateProjectInput["count"]
-      style?: PromptStyle
-    }
-  } catch {
-    return null
-  }
-}
-
-function setPromptSettingsCookie(settings: {
-  aspectRatio: EditorAspectRatio
-  count: GenerateProjectInput["count"]
-  style: PromptStyle
-}) {
-  document.cookie = `${promptSettingsCookieName}=${encodeURIComponent(
-    JSON.stringify(settings)
-  )}; max-age=${promptSettingsMaxAge}; path=/; samesite=lax`
-}
-
 export function PromptInput() {
-  const initialSettings = getPromptSettingsCookie() ?? defaultPromptSettings
-  const generateProject = useGenerateProject()
-  const { openAuthDialog } = useAuthDialog()
-  const router = useRouter()
-  const session = authClient.useSession()
-  const user = session.data?.user
-  const { control, handleSubmit, register, setValue } = useForm<{
-    aspectRatio: EditorAspectRatio
-    count: GenerateProjectInput["count"]
-    prompt: string
-  }>({
-    defaultValues: {
-      prompt: "",
-      aspectRatio:
-        initialSettings.aspectRatio ?? defaultPromptSettings.aspectRatio,
-      count: initialSettings.count ?? defaultPromptSettings.count,
-    },
-  })
-  const prompt = useWatch({ control, name: "prompt" })
-  const aspect = useWatch({ control, name: "aspectRatio" })
-  const count = useWatch({ control, name: "count" })
-  const [style, setStyle] = useState<PromptStyle>(
-    initialSettings.style ?? defaultPromptSettings.style
-  )
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [images, setImages] = useState<UploadedImage[]>([])
-  const canGenerate =
-    !isGenerating &&
-    images.every((image) => image.dataUrl) &&
-    (prompt.trim().length > 0 || images.length > 0)
-
-  async function handleGenerate(
-    options: Omit<GenerateProjectInput, "referenceImages">
-  ) {
-    if (!user) {
-      openAuthDialog()
-      return
-    }
-
-    setIsGenerating(true)
-
-    try {
-      const referenceImages = images.map((image) => image.dataUrl!)
-      const projectId = await generateProject({
-        ...options,
-        referenceImages,
-        style,
-      })
-      router.push(`/editor/${projectId}`)
-    } catch {
-      toast.error("生成に失敗しました。")
-      setIsGenerating(false)
-    }
-  }
-
-  useEffect(() => {
-    setPromptSettingsCookie({ aspectRatio: aspect, count, style })
-  }, [aspect, count, style])
+  const {
+    aspect,
+    canGenerate,
+    count,
+    form,
+    handleGenerate,
+    images,
+    isGenerating,
+    setAspect,
+    setCount,
+    setImages,
+    setPrompt,
+    setStyle,
+    style,
+  } = usePromptForm()
+  const { handleSubmit, register } = form
 
   return (
     <>
@@ -159,13 +65,11 @@ export function PromptInput() {
             <FileUpload images={images} setImages={setImages} />
             <AspectSelect
               selectedAspect={aspect}
-              onAspectChange={(aspect) => setValue("aspectRatio", aspect)}
+              onAspectChange={setAspect}
             />
             <CountSelect
               selectedCount={count}
-              onCountChange={(count) =>
-                setValue("count", count as GenerateProjectInput["count"])
-              }
+              onCountChange={setCount}
             />
             <StyleSelect style={style} onStyleChange={setStyle} />
           </div>
@@ -215,7 +119,7 @@ export function PromptInput() {
           ))}
         </div>
       ) : null}
-      <Suggestion onSelect={(content) => setValue("prompt", content)} />
+      <Suggestion onSelect={setPrompt} />
     </>
   )
 }
