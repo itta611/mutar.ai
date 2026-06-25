@@ -6,11 +6,7 @@ import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
-import {
-  Command,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
+import { Command, CommandItem, CommandList } from "@/components/ui/command"
 import {
   Popover,
   PopoverContent,
@@ -62,11 +58,11 @@ export function CopyButton({
             </Button>
           }
         />
-        <PopoverContent className="w-73 p-0" align="end">
+        <PopoverContent className="w-75 p-0" align="end">
           <Command>
             <CommandList>
               <CommandItem onSelect={() => handleCopy(onCopyImage)}>
-                <div className="flex flex-col items-start gap-1">
+                <div className="flex flex-col items-start gap-1 py-2 px-1">
                   <div className="text-foreground text-xs font-bold">
                     画像としてコピー
                   </div>
@@ -76,7 +72,7 @@ export function CopyButton({
                 </div>
               </CommandItem>
               <CommandItem onSelect={() => handleCopy(onCopySvg)}>
-                <div className="flex flex-col items-start gap-1">
+                <div className="flex flex-col items-start gap-1 py-2 px-1">
                   <div className="text-foreground text-xs font-bold">
                     SVG形式でコピー
                   </div>

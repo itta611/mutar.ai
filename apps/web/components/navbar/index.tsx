@@ -22,13 +22,13 @@ export function Navbar() {
       ? ([project.width, project.height] as [number, number])
       : null
   const projectName = project?.title ?? ""
-  const { copyPng, copySvg, downloadPng, isExporting } = useExport({
+  const { copyPng, copySvg, downloadPng } = useExport({
     boxes,
     imageSize,
     projectId,
     projectName,
   })
-  const disabled = !projectId || !imageSize || isExporting
+  const disabled = !projectId || !imageSize
 
   async function handleDownloadPng() {
     try {
@@ -62,13 +62,9 @@ export function Navbar() {
           toast("コピーしました")
         }}
       />
-      <Button
-        disabled={disabled}
-        onClick={handleDownloadPng}
-        type="button"
-      >
+      <Button disabled={disabled} onClick={handleDownloadPng} type="button">
         <DownloadIcon />
-        {isExporting ? "保存中" : "画像を保存"}
+        画像を保存
       </Button>
     </nav>
   )

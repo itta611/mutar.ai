@@ -67,25 +67,25 @@ function getTextLines(
 
   return box.wrapText
     ? box.label.split("\n").flatMap((line) => {
-        const wrappedLines: string[] = []
-        let currentLine = ""
+      const wrappedLines: string[] = []
+      let currentLine = ""
 
-        for (const char of Array.from(line)) {
-          const nextLine = currentLine + char
+      for (const char of Array.from(line)) {
+        const nextLine = currentLine + char
 
-          if (
-            currentLine &&
-            getTextWidth(context, nextLine, letterSpacing) > boxWidth
-          ) {
-            wrappedLines.push(currentLine)
-            currentLine = char
-          } else {
-            currentLine = nextLine
-          }
+        if (
+          currentLine &&
+          getTextWidth(context, nextLine, letterSpacing) > boxWidth
+        ) {
+          wrappedLines.push(currentLine)
+          currentLine = char
+        } else {
+          currentLine = nextLine
         }
+      }
 
-        return currentLine ? [...wrappedLines, currentLine] : wrappedLines
-      })
+      return currentLine ? [...wrappedLines, currentLine] : wrappedLines
+    })
     : box.label.split("\n")
 }
 
@@ -137,8 +137,6 @@ export function useExport({
   projectId: string | undefined
   projectName: string
 }) {
-  const [isExporting, setIsExporting] = useState(false)
-
   async function exportPngBlob() {
     if (!projectId || !imageSize) {
       throw new Error("project_not_ready")
@@ -242,44 +240,27 @@ export function useExport({
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><image href="${imageDataUrl}" width="${width}" height="${height}"/>${texts.join("")}</svg>`
   }
 
-  async function runExport(action: () => Promise<void>) {
-    if (isExporting) {
-      return
-    }
-
-    setIsExporting(true)
-    try {
-      await action()
-    } finally {
-      setIsExporting(false)
-    }
-  }
-
   return {
-    copyPng: () =>
-      runExport(async () => {
-        const blob = await exportPngBlob()
-        await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })])
-      }),
-    copySvg: () =>
-      runExport(async () => {
-        const svg = await exportSvgText()
-        await navigator.clipboard.write([
-          new ClipboardItem({
-            "text/html": new Blob([svg], { type: "text/html" }),
-            "text/plain": new Blob([svg], { type: "text/plain" }),
-          }),
-        ])
-      }),
-    downloadPng: () =>
-      runExport(async () => {
-        const blob = await exportPngBlob()
-        const link = document.createElement("a")
-        link.href = URL.createObjectURL(blob)
-        link.download = `${projectName || "image"}.png`
-        link.click()
-        URL.revokeObjectURL(link.href)
-      }),
-    isExporting,
+    copyPng: () => (async () => {
+      const blob = await exportPngBlob()
+      await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })])
+    }),
+    copySvg: () => (async () => {
+      const svg = await exportSvgText()
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "text/html": new Blob([svg], { type: "text/html" }),
+          "text/plain": new Blob([svg], { type: "text/plain" }),
+        }),
+      ])
+    }),
+    downloadPng: () => (async () => {
+      const blob = await exportPngBlob()
+      const link = document.createElement("a")
+      link.href = URL.createObjectURL(blob)
+      link.download = `${projectName || "image"}.png`
+      link.click()
+      URL.revokeObjectURL(link.href)
+    }),
   }
 }
