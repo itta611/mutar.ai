@@ -142,8 +142,13 @@ export function Inspector() {
             <Textarea
               onBlur={() => saveBoxes?.(boxes)}
               onChange={(event) => updateLabel(event.currentTarget.value)}
-              value={selectedBoxes.length === 1 ? selectedBoxes[0]?.label ?? "" : ""}
+              value={
+                selectedBoxes.length === 1
+                  ? (selectedBoxes[0]?.label ?? "")
+                  : ""
+              }
               disabled={selectedBoxes.length !== 1}
+              className="min-h-0 py-1.75"
             />
           </div>
           <div className="flex items-center justify-between gap-4">
