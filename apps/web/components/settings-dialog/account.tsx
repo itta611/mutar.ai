@@ -88,7 +88,10 @@ export function AccountSettingsPage() {
         <UsageCard />
       </SettingSection>
       <SettingSection title="メールアドレス" description={user?.email} />
-      <SettingSection title="ログアウト">
+      <SettingSection
+        title="ログアウト"
+        description="この端末からログアウトします。"
+      >
         <Button
           onClick={async () => {
             await authClient.signOut()

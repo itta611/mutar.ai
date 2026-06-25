@@ -206,7 +206,7 @@ export function AppSidebar() {
                 }
               />
               <DropdownMenuContent>
-                <div className="text-muted-foreground relative flex cursor-default items-center gap-2 pl-2 p-1 text-sm">
+                <div className="text-muted-foreground relative flex cursor-default items-center gap-2 pl-2 text-sm">
                   <PaletteIcon size={16} />
                   <div className="grow">テーマ</div>
                   <Tabs onValueChange={(value) => setTheme(value)}>

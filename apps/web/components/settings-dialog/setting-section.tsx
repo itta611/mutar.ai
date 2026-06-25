@@ -14,7 +14,7 @@ function SettingSection({
   return (
     <div
       className={
-        horizontal ? "flex items-center justify-between space-x-4" : "space-y-4"
+        horizontal ? "flex items-center justify-between space-x-3" : "space-y-3"
       }
     >
       <div className="space-y-2">
