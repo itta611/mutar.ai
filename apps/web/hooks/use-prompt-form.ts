@@ -111,6 +111,7 @@ export function usePromptForm() {
         referenceImages,
         style,
       })
+      setImages([])
       router.push(`/editor/${projectId}`)
     } catch {
       toast.error("生成に失敗しました。")

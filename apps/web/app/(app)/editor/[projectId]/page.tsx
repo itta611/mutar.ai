@@ -429,6 +429,10 @@ function Editor({ projectId }: { projectId: string }) {
   }
 
   function clearTextSelection(event: Konva.KonvaEventObject<Event>) {
+    if (event.evt instanceof MouseEvent && event.evt.button !== 0) {
+      return
+    }
+
     if (selectionDraggedRef.current) {
       selectionDraggedRef.current = false
       return
