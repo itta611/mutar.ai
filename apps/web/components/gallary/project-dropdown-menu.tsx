@@ -64,7 +64,7 @@ export function ProjectDropdownMenu({
 }: {
   align?: "start" | "center" | "end"
   onDelete?: (id: string) => void
-  onPromptAttach: (id: string) => void
+  onPromptAttach: (project: ProjectDropdownMenuProject) => void
   onRestore?: (id: string) => void
   onStarredChange: (
     project: ProjectDropdownMenuProject,
@@ -115,7 +115,7 @@ export function ProjectDropdownMenu({
           onClick={(event) => {
             event.preventDefault()
             event.stopPropagation()
-            onPromptAttach(project.id)
+            onPromptAttach(project)
           }}
         >
           <ImagePlusIcon />

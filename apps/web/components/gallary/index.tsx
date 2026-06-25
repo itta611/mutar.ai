@@ -51,7 +51,7 @@ export function GallerySkeleton() {
 }
 
 export function Gallery({ initialImages, queryKey }: GeneratedImagesViewProps) {
-  const { attachProjectThumbnail } = usePromptForm()
+  const { attachProjectImage } = usePromptForm()
   const [images, setImages] = useState(initialImages)
   const handleStarredChange = (input: { id: string; isStarred: boolean }) =>
     setImages((images) =>
@@ -127,7 +127,7 @@ export function Gallery({ initialImages, queryKey }: GeneratedImagesViewProps) {
             </Link>
             <ProjectDropdownMenu
               project={image}
-              onPromptAttach={(id) => void attachProjectThumbnail(id)}
+              onPromptAttach={(project) => void attachProjectImage(project)}
               onDelete={(id) =>
                 setImages((images) => images.filter((image) => image.id !== id))
               }

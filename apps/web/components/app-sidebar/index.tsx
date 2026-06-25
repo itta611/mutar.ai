@@ -67,7 +67,7 @@ export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { setTheme } = useTheme()
-  const { attachProjectThumbnail } = usePromptForm()
+  const { attachProjectImage } = usePromptForm()
   const session = authClient.useSession()
   const user = session.data?.user
   const { data: starredProjects = [] } = useQuery({
@@ -155,7 +155,9 @@ export function AppSidebar() {
                     {project.title}
                     <ProjectDropdownMenu
                       project={project}
-                      onPromptAttach={(id) => void attachProjectThumbnail(id)}
+                      onPromptAttach={(project) =>
+                        void attachProjectImage(project)
+                      }
                       onStarredChange={(project, isStarred) =>
                         updateProjectStarredMutation.mutate({
                           project,

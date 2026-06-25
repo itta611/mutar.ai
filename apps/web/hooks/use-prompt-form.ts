@@ -119,9 +119,9 @@ export function usePromptForm() {
     }
   }
 
-  async function attachProjectThumbnail(projectId: string) {
+  async function attachProjectImage(project: { id: string; title: string }) {
     const response = await fetch(
-      `/api/projects/${projectId}/image?kind=thumbnail`
+      `/api/projects/${project.id}/image?kind=original`
     )
 
     if (!response.ok) {
@@ -130,7 +130,7 @@ export function usePromptForm() {
     }
 
     const blob = await response.blob()
-    const file = new File([blob], `${projectId}-thumbnail.png`, {
+    const file = new File([blob], `${project.title}.png`, {
       lastModified: 0,
       type: blob.type,
     })
@@ -144,7 +144,7 @@ export function usePromptForm() {
 
   return {
     aspect,
-    attachProjectThumbnail,
+    attachProjectImage,
     canGenerate,
     count,
     form,

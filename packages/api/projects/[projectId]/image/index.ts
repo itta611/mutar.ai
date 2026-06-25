@@ -26,7 +26,11 @@ export const projectImageRoutes = new Hono<SessionEnv>().get(
     }
 
     let asset: Awaited<ReturnType<typeof readImageFromR2>>
-    const kind = c.req.query("kind") === "thumbnail" ? "thumbnail" : "cleaned"
+    const queryKind = c.req.query("kind")
+    const kind =
+      queryKind === "thumbnail" || queryKind === "original"
+        ? queryKind
+        : "cleaned"
 
     try {
       asset = await readImageFromR2(projectImageKey(projectId, kind))
