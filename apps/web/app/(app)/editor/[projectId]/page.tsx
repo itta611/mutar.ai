@@ -71,6 +71,7 @@ function getSnapStops(boxes: EditorBox[], skipIndex: number) {
 
       const rect = getBoxRect(box)
 
+      stops.verticalLeft.push(rect.left)
       stops.vertical.push(
         rect.left,
         rect.left + rect.width / 2,
@@ -84,7 +85,11 @@ function getSnapStops(boxes: EditorBox[], skipIndex: number) {
 
       return stops
     },
-    { horizontal: [] as number[], vertical: [] as number[] }
+    {
+      horizontal: [] as number[],
+      vertical: [] as number[],
+      verticalLeft: [] as number[],
+    }
   )
 }
 
@@ -98,7 +103,12 @@ function snapPoint(value: number, stops: number[]) {
     : { guide: null, value }
 }
 
-function snapAxis(start: number, size: number, stops: number[]) {
+function snapAxis(
+  start: number,
+  size: number,
+  stops: number[],
+  leftStops = stops
+) {
   const points = [
     { offset: 0, value: start },
     { offset: size / 2, value: start + size / 2 },
@@ -106,7 +116,7 @@ function snapAxis(start: number, size: number, stops: number[]) {
   ]
   const closest = points
     .flatMap((point) =>
-      stops.map((stop) => ({
+      (point.offset === 0 ? leftStops : stops).map((stop) => ({
         diff: Math.abs(stop - point.value),
         offset: point.offset,
         stop,
@@ -125,7 +135,7 @@ function snapBoxPosition(
   rect: { height: number; left: number; top: number; width: number }
 ) {
   const stops = getSnapStops(boxes, index)
-  const x = snapAxis(rect.left, rect.width, stops.vertical)
+  const x = snapAxis(rect.left, rect.width, stops.vertical, stops.verticalLeft)
   const y = snapAxis(rect.top, rect.height, stops.horizontal)
 
   return {
@@ -152,7 +162,7 @@ function snapBoxWidth(
   const stops = getSnapStops(boxes, index)
 
   if (activeAnchor === "middle-left") {
-    const nextLeft = snapPoint(left, stops.vertical)
+    const nextLeft = snapPoint(left, stops.verticalLeft)
 
     return {
       guides:
