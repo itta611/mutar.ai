@@ -28,9 +28,14 @@ export function GeneralSettingsPage() {
       <div className="space-y-5">
         <h3 className="text-lg font-bold">表示</h3>
         <SettingSection title="言語">
-          <Select>
+          <Select
+            items={[
+              { label: "日本語", value: "ja" },
+              { label: "English", value: "en" },
+            ]}
+          >
             <SelectTrigger className="w-40">
-              <SelectValue placeholder="言語を選択" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
@@ -51,7 +56,7 @@ export function GeneralSettingsPage() {
             ]}
           >
             <SelectTrigger className="w-40">
-              <SelectValue placeholder="テーマを選択" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
