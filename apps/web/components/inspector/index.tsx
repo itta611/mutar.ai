@@ -11,6 +11,7 @@ import {
 } from "@/atom/generate"
 import { ColorPickerWithInput } from "@/components/ui/color-picker"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
@@ -117,13 +118,36 @@ export function Inspector() {
     })
   }
 
+  function updateLabel(label: string) {
+    const selectedIndex = selectedIndexes[0]
+
+    if (selectedIndexes.length !== 1 || selectedIndex === undefined) {
+      return
+    }
+
+    setBoxes((current) =>
+      current.map((box, boxIndex) =>
+        boxIndex === selectedIndex ? resizeTextBox(box, label) : box
+      )
+    )
+  }
+
   return (
     <div className="hidden w-80 border-l border-border/70 bg-background px-5 py-3 md:block">
       <div className="mb-7 text-sm font-semibold">インスペクタ</div>
       {selectedBoxes.length > 0 ? (
         <div className="space-y-5">
+          <div className="space-y-2">
+            <div className="text-sm text-muted-foreground">テキスト</div>
+            <Textarea
+              onBlur={() => saveBoxes?.(boxes)}
+              onChange={(event) => updateLabel(event.currentTarget.value)}
+              value={selectedBoxes.length === 1 ? selectedBoxes[0]?.label ?? "" : ""}
+              disabled={selectedBoxes.length !== 1}
+            />
+          </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm text-foreground">フォント</span>
+            <span className="text-sm text-muted-foreground">フォント</span>
             <Select
               items={fonts}
               onValueChange={(fontFamily) => {
@@ -153,7 +177,7 @@ export function Inspector() {
             </Select>
           </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm text-foreground">文字サイズ</span>
+            <span className="text-sm text-muted-foreground">文字サイズ</span>
             <Input
               className="w-27"
               min={1}
@@ -170,7 +194,7 @@ export function Inspector() {
             />
           </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm text-foreground">行間</span>
+            <span className="text-sm text-muted-foreground">行間</span>
             <Input
               className="w-27"
               min={0.1}
@@ -188,7 +212,7 @@ export function Inspector() {
             />
           </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm text-foreground">字間</span>
+            <span className="text-sm text-muted-foreground">字間</span>
             <Input
               className="w-27"
               onChange={(event) => {
@@ -205,7 +229,7 @@ export function Inspector() {
             />
           </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm text-foreground">字体</span>
+            <span className="text-sm text-muted-foreground">字体</span>
             <Select
               items={[
                 { label: "標準", value: "normal" },
@@ -232,7 +256,7 @@ export function Inspector() {
             </Select>
           </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm text-foreground">文字揃え</span>
+            <span className="text-sm text-muted-foreground">文字揃え</span>
             <Tabs
               onValueChange={(align) =>
                 updateBox({ align: align as EditorBox["align"] }, true)
@@ -253,7 +277,7 @@ export function Inspector() {
             </Tabs>
           </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="text-sm text-foreground">文字色</span>
+            <span className="text-sm text-muted-foreground">文字色</span>
             <ColorPickerWithInput
               onValueChange={(color) => updateBox({ color })}
               onBlur={() => saveBoxes?.(boxes)}
