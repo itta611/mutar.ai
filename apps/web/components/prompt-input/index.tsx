@@ -3,7 +3,7 @@
 import { SparklesIcon, XIcon } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 import type { EditorAspectRatio } from "@/atom/generate"
@@ -22,7 +22,50 @@ import { type PromptStyle, StyleSelect } from "./style-select"
 import { Suggestion } from "./suggestion"
 import { cn } from "@/lib/utils"
 
+const promptSettingsCookieName = "prompt-settings"
+const promptSettingsMaxAge = 60 * 60 * 24 * 365
+const defaultPromptSettings = {
+  aspectRatio: "auto" as EditorAspectRatio,
+  count: 2 as GenerateProjectInput["count"],
+  style: { themeColor: "#6366F1" } satisfies PromptStyle,
+}
+
+function getPromptSettingsCookie() {
+  if (typeof document === "undefined") {
+    return null
+  }
+
+  const cookie = document.cookie
+    .split("; ")
+    .find((cookie) => cookie.startsWith(`${promptSettingsCookieName}=`))
+
+  if (!cookie) {
+    return null
+  }
+
+  try {
+    return JSON.parse(decodeURIComponent(cookie.split("=")[1] ?? "")) as {
+      aspectRatio?: EditorAspectRatio
+      count?: GenerateProjectInput["count"]
+      style?: PromptStyle
+    }
+  } catch {
+    return null
+  }
+}
+
+function setPromptSettingsCookie(settings: {
+  aspectRatio: EditorAspectRatio
+  count: GenerateProjectInput["count"]
+  style: PromptStyle
+}) {
+  document.cookie = `${promptSettingsCookieName}=${encodeURIComponent(
+    JSON.stringify(settings)
+  )}; max-age=${promptSettingsMaxAge}; path=/; samesite=lax`
+}
+
 export function PromptInput() {
+  const initialSettings = getPromptSettingsCookie() ?? defaultPromptSettings
   const generateProject = useGenerateProject()
   const { openAuthDialog } = useAuthDialog()
   const router = useRouter()
@@ -35,16 +78,17 @@ export function PromptInput() {
   }>({
     defaultValues: {
       prompt: "",
-      aspectRatio: "auto",
-      count: 2,
+      aspectRatio:
+        initialSettings.aspectRatio ?? defaultPromptSettings.aspectRatio,
+      count: initialSettings.count ?? defaultPromptSettings.count,
     },
   })
   const prompt = useWatch({ control, name: "prompt" })
   const aspect = useWatch({ control, name: "aspectRatio" })
   const count = useWatch({ control, name: "count" })
-  const [style, setStyle] = useState<PromptStyle>({
-    themeColor: "#6366F1",
-  })
+  const [style, setStyle] = useState<PromptStyle>(
+    initialSettings.style ?? defaultPromptSettings.style
+  )
   const [isGenerating, setIsGenerating] = useState(false)
   const [images, setImages] = useState<UploadedImage[]>([])
   const canGenerate =
@@ -75,6 +119,11 @@ export function PromptInput() {
       setIsGenerating(false)
     }
   }
+
+  useEffect(() => {
+    setPromptSettingsCookie({ aspectRatio: aspect, count, style })
+  }, [aspect, count, style])
+
   return (
     <>
       <form
@@ -135,7 +184,7 @@ export function PromptInput() {
         <div className="mx-0.5 flex flex-wrap gap-2 rounded-b-2xl border-b border-l border-r bg-zinc-50 dark:bg-zinc-800 p-2 pt-6 relative -top-4 -mb-4 z-10">
           {images.map((image, index) => (
             <div
-              className="flex max-w-52 items-center gap-2.5 rounded-lg bg-background p-1 pr-2.5 text-xs border"
+              className="flex max-w-52 items-center gap-2.5 rounded-lg bg-background dark:bg-white/5 p-1 pr-2.5 text-xs border"
               key={`${image.file.name}-${image.file.lastModified}-${index}`}
             >
               <div className="size-8 shrink-0 overflow-hidden rounded">
