@@ -237,19 +237,55 @@ function Editor({ projectId }: { projectId: string }) {
     [projectId]
   )
 
-  function updateBoxesAndSave(update: (boxes: EditorBox[]) => EditorBox[]) {
-    setBoxes((current) => {
-      const next = update(current)
-      saveBoxes(next)
-      return next
-    })
-  }
+  const updateBoxesAndSave = useCallback(
+    (update: (boxes: EditorBox[]) => EditorBox[]) => {
+      setBoxes((current) => {
+        const next = update(current)
+        saveBoxes(next)
+        return next
+      })
+    },
+    [saveBoxes, setBoxes]
+  )
 
   useEffect(() => {
     setSaveBoxes(() => saveBoxes)
 
     return () => setSaveBoxes(null)
   }, [saveBoxes, setSaveBoxes])
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (
+        event.key !== "Backspace" ||
+        editingText ||
+        selectedIndexes.length === 0 ||
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement
+      ) {
+        return
+      }
+
+      event.preventDefault()
+      updateBoxesAndSave((current) =>
+        current.filter((_, index) => !selectedIndexes.includes(index))
+      )
+      setSelectedIndex(null)
+      setSelectedIndexes([])
+      setHoveredIndex(null)
+      setSnapGuides([])
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [
+    editingText,
+    selectedIndexes,
+    setSelectedIndex,
+    setSelectedIndexes,
+    updateBoxesAndSave,
+  ])
 
   useEffect(() => {
     if (!isProjectReady) {
