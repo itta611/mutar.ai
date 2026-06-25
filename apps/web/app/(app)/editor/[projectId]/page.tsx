@@ -256,13 +256,47 @@ function Editor({ projectId }: { projectId: string }) {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      const moveOffset =
+        event.key === "ArrowUp"
+          ? { x: 0, y: -1 }
+          : event.key === "ArrowDown"
+            ? { x: 0, y: 1 }
+            : event.key === "ArrowLeft"
+              ? { x: -1, y: 0 }
+              : event.key === "ArrowRight"
+                ? { x: 1, y: 0 }
+                : null
+
       if (
-        event.key !== "Backspace" ||
         editingText ||
         selectedIndexes.length === 0 ||
         event.target instanceof HTMLInputElement ||
         event.target instanceof HTMLTextAreaElement
       ) {
+        return
+      }
+
+      if (moveOffset) {
+        event.preventDefault()
+        updateBoxesAndSave((current) =>
+          current.map((box, index) => {
+            if (!selectedIndexes.includes(index)) {
+              return box
+            }
+
+            const rect = getBoxRect(box)
+            return moveTextBox(
+              box,
+              rect.left + moveOffset.x,
+              rect.top + moveOffset.y
+            )
+          })
+        )
+        setSnapGuides([])
+        return
+      }
+
+      if (event.key !== "Backspace") {
         return
       }
 

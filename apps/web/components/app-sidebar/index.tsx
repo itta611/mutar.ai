@@ -95,7 +95,7 @@ export function AppSidebar() {
       <SidebarHeader className="h-13 py-0 gap-0">
         <div className="flex items-center h-full">
           <Link href="/home" className="ml-2">
-            <Logo height={26} />
+            <Logo height={25} />
           </Link>
         </div>
         <div className="h-px mx-1 bg-border/70" />

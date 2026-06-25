@@ -148,7 +148,7 @@ export function Inspector() {
                   : ""
               }
               disabled={selectedBoxes.length !== 1}
-              className="min-h-8 py-1.75"
+              className="min-h-9 py-1.75"
             />
           </div>
           <div className="flex items-center justify-between gap-4">
