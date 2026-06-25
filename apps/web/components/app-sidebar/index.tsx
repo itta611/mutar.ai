@@ -41,6 +41,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
+import { usePromptForm } from "@/hooks/use-prompt-form"
 import { useUpdateProjectStarred } from "@/hooks/use-update-project-starred"
 import { apiClient } from "@/lib/api-client"
 import { authClient } from "@/lib/auth-client"
@@ -66,6 +67,7 @@ export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { setTheme } = useTheme()
+  const { attachProjectThumbnail } = usePromptForm()
   const session = authClient.useSession()
   const user = session.data?.user
   const { data: starredProjects = [] } = useQuery({
@@ -153,6 +155,7 @@ export function AppSidebar() {
                     {project.title}
                     <ProjectDropdownMenu
                       project={project}
+                      onPromptAttach={(id) => void attachProjectThumbnail(id)}
                       onStarredChange={(project, isStarred) =>
                         updateProjectStarredMutation.mutate({
                           project,

@@ -1,12 +1,16 @@
 "use client"
 
+import { atom, useAtom } from "jotai"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { toast } from "sonner"
 
 import type { EditorAspectRatio } from "@/atom/generate"
-import type { UploadedImage } from "@/components/prompt-input/file-upload"
+import {
+  addImageFiles,
+  type UploadedImage,
+} from "@/components/prompt-input/file-upload"
 import type { PromptStyle } from "@/components/prompt-input/style-select"
 import { useAuthDialog } from "@/hooks/use-auth-dialog"
 import {
@@ -17,6 +21,7 @@ import { authClient } from "@/lib/auth-client"
 
 const promptSettingsCookieName = "prompt-settings"
 const promptSettingsMaxAge = 60 * 60 * 24 * 365
+const promptImagesAtom = atom<UploadedImage[]>([])
 const defaultPromptSettings = {
   aspectRatio: "auto" as EditorAspectRatio,
   count: 2 as GenerateProjectInput["count"],
@@ -83,7 +88,7 @@ export function usePromptForm() {
     initialSettings.style ?? defaultPromptSettings.style
   )
   const [isGenerating, setIsGenerating] = useState(false)
-  const [images, setImages] = useState<UploadedImage[]>([])
+  const [images, setImages] = useAtom(promptImagesAtom)
   const canGenerate =
     !isGenerating &&
     images.every((image) => image.dataUrl) &&
@@ -113,12 +118,32 @@ export function usePromptForm() {
     }
   }
 
+  async function attachProjectThumbnail(projectId: string) {
+    const response = await fetch(
+      `/api/projects/${projectId}/image?kind=thumbnail`
+    )
+
+    if (!response.ok) {
+      toast.error("添付に失敗しました。")
+      return
+    }
+
+    const blob = await response.blob()
+    const file = new File([blob], `${projectId}-thumbnail.png`, {
+      lastModified: 0,
+      type: blob.type,
+    })
+
+    addImageFiles([file], images, setImages)
+  }
+
   useEffect(() => {
     setPromptSettingsCookie({ aspectRatio: aspect, count, style })
   }, [aspect, count, style])
 
   return {
     aspect,
+    attachProjectThumbnail,
     canGenerate,
     count,
     form,

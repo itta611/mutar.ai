@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useState } from "react"
 
 import { Skeleton } from "@/components/ui/skeleton"
+import { usePromptForm } from "@/hooks/use-prompt-form"
 import { useUpdateProjectStarred } from "@/hooks/use-update-project-starred"
 import { apiClient } from "@/lib/api-client"
 import { ProjectDropdownMenu } from "./project-dropdown-menu"
@@ -50,6 +51,7 @@ export function GallerySkeleton() {
 }
 
 export function Gallery({ initialImages, queryKey }: GeneratedImagesViewProps) {
+  const { attachProjectThumbnail } = usePromptForm()
   const [images, setImages] = useState(initialImages)
   const handleStarredChange = (input: { id: string; isStarred: boolean }) =>
     setImages((images) =>
@@ -125,6 +127,7 @@ export function Gallery({ initialImages, queryKey }: GeneratedImagesViewProps) {
             </Link>
             <ProjectDropdownMenu
               project={image}
+              onPromptAttach={(id) => void attachProjectThumbnail(id)}
               onDelete={(id) =>
                 setImages((images) => images.filter((image) => image.id !== id))
               }

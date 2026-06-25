@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
   ClipboardIcon,
   EllipsisIcon,
+  ImagePlusIcon,
   StarIcon,
   StarOffIcon,
   Trash2Icon,
@@ -56,12 +57,14 @@ async function restoreProject(id: string) {
 export function ProjectDropdownMenu({
   align = "start",
   onDelete,
+  onPromptAttach,
   onRestore,
   onStarredChange,
   project,
 }: {
   align?: "start" | "center" | "end"
   onDelete?: (id: string) => void
+  onPromptAttach: (id: string) => void
   onRestore?: (id: string) => void
   onStarredChange: (
     project: ProjectDropdownMenuProject,
@@ -116,6 +119,17 @@ export function ProjectDropdownMenu({
         >
           <ClipboardIcon />
           プロンプトをコピー
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={project.status !== "ready"}
+          onClick={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            onPromptAttach(project.id)
+          }}
+        >
+          <ImagePlusIcon />
+          プロンプトに添付
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={(event) => {
