@@ -134,7 +134,7 @@ export function Inspector() {
 
   return (
     <div className="hidden w-80 border-l border-border/70 bg-background px-5 py-3 md:block">
-      <div className="mb-7 text-sm font-semibold">インスペクタ</div>
+      <div className="mb-5 text-sm font-semibold">インスペクタ</div>
       {selectedBoxes.length > 0 ? (
         <div className="space-y-5">
           <div className="space-y-2">
@@ -148,7 +148,7 @@ export function Inspector() {
                   : ""
               }
               disabled={selectedBoxes.length !== 1}
-              className="min-h-0 py-1.75"
+              className="min-h-8 py-1.75"
             />
           </div>
           <div className="flex items-center justify-between gap-4">
@@ -291,7 +291,9 @@ export function Inspector() {
           </div>
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">テキストを選択</p>
+        <div className="text-sm text-muted-foreground">
+          テキストを選択してください
+        </div>
       )}
     </div>
   )
