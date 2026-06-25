@@ -1,8 +1,8 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useSetAtom } from "jotai"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 
 import {
   type EditorBox,
@@ -51,9 +51,11 @@ export function editorProjectQuery(projectId: string) {
 }
 
 export function useEditorProject(projectId: string) {
+  const queryClient = useQueryClient()
   const setBoxes = useSetAtom(editorBoxesAtom)
   const setSelectedIndex = useSetAtom(editorSelectedBoxIndexAtom)
   const setSelectedIndexes = useSetAtom(editorSelectedBoxIndexesAtom)
+  const syncedProjectIdRef = useRef<string | null>(null)
   const query = useQuery({
     ...editorProjectQuery(projectId),
     refetchOnMount: "always",
@@ -64,6 +66,18 @@ export function useEditorProject(projectId: string) {
     },
   })
   const project = query.data
+
+  useEffect(() => {
+    if (
+      project?.status !== "ready" ||
+      syncedProjectIdRef.current === projectId
+    ) {
+      return
+    }
+
+    syncedProjectIdRef.current = projectId
+    queryClient.invalidateQueries({ exact: true, queryKey: ["projects"] })
+  }, [project?.status, projectId, queryClient])
 
   useEffect(() => {
     setSelectedIndex(null)

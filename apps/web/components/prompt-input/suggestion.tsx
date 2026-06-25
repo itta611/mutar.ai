@@ -1,16 +1,21 @@
 import { ComponentProps } from "react"
-import { Button } from "../ui/button"
 import { cn } from "@/lib/utils"
+import {
+  BriefcaseBusinessIcon,
+  DollarSignIcon,
+  FileImageIcon,
+} from "lucide-react"
 
 const SuggestionButton = ({
   className,
   ...props
 }: ComponentProps<"button">) => {
   return (
-    <Button
-      size="sm"
-      variant="outline"
-      className={cn("rounded-full font-medium!", className)}
+    <button
+      className={cn(
+        "transition cursor-pointer text-sm text-muted-foreground h-10 gap-2 rounded-lg px-5 flex items-center bg-zinc-50 hover:bg-zinc-100 active:scale-98 dark:bg-zinc-800 dark:hover:bg-zinc-700",
+        className
+      )}
       {...props}
     />
   )
@@ -22,7 +27,7 @@ export function Suggestion({
   onSelect: (content: string) => void
 }) {
   return (
-    <div className="mt-5">
+    <div className="mt-7">
       <div className="flex gap-2 sm:justify-center flex-wrap">
         <SuggestionButton
           onClick={() =>
@@ -32,6 +37,7 @@ export function Suggestion({
 モダンで見やすいWebデザイン風。`)
           }
         >
+          <DollarSignIcon className="w-4 h-4" />
           SaaS料金プラン表
         </SuggestionButton>
         <SuggestionButton
@@ -43,57 +49,21 @@ export function Suggestion({
             )
           }
         >
-          業務フロー図スライド
+          <BriefcaseBusinessIcon className="w-4 h-4" />
+          業務フロー説明スライド資料
         </SuggestionButton>
         <SuggestionButton
           onClick={() =>
             onSelect(
-              `カフェの春限定キャンペーン用ポスター案を作成。
-メインコピーは「Spring Coffee Fair」。
-サブコピーは「新しい季節に、新しい一杯を」。
-桜、コーヒーカップ、明るい自然光を使った上品な広告風デザイン。`
+              `採用広報やイベント告知にも使えるブランドポスターを作成。
+大きなキャッチコピーを主役にし、サブコピー、開催情報またはサービス名、短い紹介文を整理して配置。
+写真を使わず、タイポグラフィと図形表現を中心に構成する。
+モダンで感度の高いデザインにし、スタートアップらしい世界観が伝わるビジュアルにする。`
             )
           }
         >
-          カフェのキャンペーン用ポスター
-        </SuggestionButton>
-        <SuggestionButton
-          onClick={() =>
-            onSelect(
-              `新発売の炭酸飲料のInstagram投稿用ビジュアルを作成。
-商品名は「Citrus Spark」。
-テキストは「はじける柑橘、夏の一口」。
-オレンジ、レモン、炭酸の泡を使った爽やかな正方形デザイン。`
-            )
-          }
-        >
-          炭酸飲料のInstagram投稿用ビジュアル
-        </SuggestionButton>
-        <SuggestionButton
-          onClick={() =>
-            onSelect(
-              `テックイベントの告知ポスターを作成。
-イベント名は「AI Design Meetup 2026」。
-日付は「2026.07.18」、場所は「Tokyo」。
-黒背景にネオンブルーの光、近未来的でかっこいいデザイン。`
-            )
-          }
-          className="not-sm:hidden"
-        >
-          テックイベントの告知ポスター
-        </SuggestionButton>
-        <SuggestionButton
-          onClick={() =>
-            onSelect(
-              `スマホアプリのプロトタイプ紹介画像を作成。
-アプリ名は「TaskPilot」。
-キャッチコピーは「毎日のタスクを、もっと軽く」。
-スマホ画面、チェックリスト、カレンダー、通知アイコンを含めた、SaaS風の広告ビジュアル。`
-            )
-          }
-          className="not-sm:hidden"
-        >
-          スマホアプリの紹介画像
+          <FileImageIcon className="w-4 h-4" />
+          ブランドポスター
         </SuggestionButton>
       </div>
     </div>
