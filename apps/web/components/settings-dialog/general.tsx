@@ -71,8 +71,8 @@ export function GeneralSettingsPage() {
       <div className="space-y-5">
         <h3 className="text-lg font-bold">エディタ</h3>
         <SettingSection
-          title="グリッドにスナップ"
-          description="オブジェクトをグリッドにスナップします。"
+          title="ガイドラインにスナップ"
+          description="有効にすると、テキストを近傍のオブジェクトのガイドラインにスナップします。"
           horizontal
         >
           <Switch
