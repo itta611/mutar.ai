@@ -1,7 +1,7 @@
 "use client"
 
 import { useAtom, useAtomValue } from "jotai"
-import { AlignCenter, AlignLeft, AlignRight } from "lucide-react"
+import { AlignCenter, AlignLeft, AlignRight, TypeIcon } from "lucide-react"
 
 import {
   type EditorBox,
@@ -291,8 +291,18 @@ export function Inspector() {
           </div>
         </div>
       ) : (
-        <div className="text-sm text-muted-foreground">
-          テキストを選択してください
+        <div className="flex flex-col gap-3.5 items-center justify-center pt-10 px-2">
+          <div className="bg-muted size-10 rounded-sm flex items-center justify-center">
+            <TypeIcon className="size-5" />
+          </div>
+          <div className="text-center space-y-2">
+            <div className="font-bold text-[14px]">
+              テキストを選択してください
+            </div>
+            <div className="text-center text-muted-foreground text-[13px]">
+              テキストを選択するとフォントや文字サイズなどのスタイルを変更できます。
+            </div>
+          </div>
         </div>
       )}
     </div>
