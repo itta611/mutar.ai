@@ -2,9 +2,11 @@
 
 import { SparklesIcon, XIcon } from "lucide-react"
 import Image from "next/image"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { usePromptForm } from "@/hooks/use-prompt-form"
+import { ImagePreview } from "@/interfaces/image-preview"
 import { AspectSelect } from "./aspect-select"
 import { CountSelect } from "./count-select"
 import { addImageFiles, FileUpload } from "./file-upload"
@@ -13,6 +15,11 @@ import { Suggestion } from "./suggestion"
 import { cn } from "@/lib/utils"
 
 export function PromptInput() {
+  const [previewImage, setPreviewImage] = useState<{
+    height: number
+    src: string
+    width: number
+  } | null>(null)
   const {
     aspect,
     canGenerate,
@@ -91,7 +98,19 @@ export function PromptInput() {
               className="flex max-w-52 items-center gap-2.5 rounded-lg bg-background dark:bg-white/5 p-1 pr-2.5 text-xs border"
               key={`${image.file.name}-${image.file.lastModified}-${index}`}
             >
-              <div className="size-8 shrink-0 overflow-hidden rounded">
+              <button
+                className="size-8 shrink-0 cursor-pointer overflow-hidden rounded border-0 bg-transparent p-0 disabled:cursor-default"
+                disabled={!image.dataUrl}
+                onClick={() =>
+                  image.dataUrl &&
+                  setPreviewImage({
+                    height: window.innerHeight,
+                    src: image.dataUrl,
+                    width: window.innerWidth,
+                  })
+                }
+                type="button"
+              >
                 {image.dataUrl ? (
                   <Image
                     alt=""
@@ -101,7 +120,7 @@ export function PromptInput() {
                     width={32}
                   />
                 ) : null}
-              </div>
+              </button>
               <span className="truncate">{image.file.name}</span>
               <button
                 aria-label={`${image.file.name}を削除`}
@@ -118,6 +137,14 @@ export function PromptInput() {
             </div>
           ))}
         </div>
+      ) : null}
+      {previewImage ? (
+        <ImagePreview
+          height={previewImage.height}
+          onClose={() => setPreviewImage(null)}
+          src={previewImage.src}
+          width={previewImage.width}
+        />
       ) : null}
       <Suggestion onSelect={setPrompt} />
     </>
