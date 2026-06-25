@@ -109,7 +109,7 @@ export function ProjectDropdownMenu({
           </Button>
         }
       />
-      <DropdownMenuContent align={align} className="w-48">
+      <DropdownMenuContent align={align} className="w-52">
         <DropdownMenuItem
           disabled={project.status !== "ready"}
           onClick={(event) => {
@@ -119,7 +119,7 @@ export function ProjectDropdownMenu({
           }}
         >
           <ImagePlusIcon />
-          プロンプトに添付
+          画像をプロンプトに添付
         </DropdownMenuItem>
         <DropdownMenuItem
           disabled={project.prompt.trim().length === 0}
