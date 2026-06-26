@@ -14,7 +14,7 @@ export const users = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("emailVerified").notNull().default(false),
   image: text("image"),
-  creditQuota: integer("creditQuota").notNull().default(400),
+  creditQuota: integer("creditQuota").notNull().default(40),
   editorSettings: jsonb("editorSettings")
     .$type<{ snapToGrid: boolean }>()
     .notNull()

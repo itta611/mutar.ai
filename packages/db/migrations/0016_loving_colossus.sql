@@ -1,0 +1,1 @@
+ALTER TABLE "user" ALTER COLUMN "creditQuota" SET DEFAULT 40;
