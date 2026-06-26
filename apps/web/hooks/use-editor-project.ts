@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useSetAtom } from "jotai"
 import { useEffect } from "react"
+import { toast } from "sonner"
 
 import {
   type EditorBox,
@@ -64,6 +65,16 @@ export function useEditorProject(projectId: string) {
     },
   })
   const project = query.data
+
+  useEffect(() => {
+    if (project?.status !== "error") {
+      return
+    }
+
+    toast.error("生成に失敗しました。", {
+      id: `project-generation-error-${projectId}`,
+    })
+  }, [project?.status, projectId])
 
   useEffect(() => {
     setSelectedIndex(null)
