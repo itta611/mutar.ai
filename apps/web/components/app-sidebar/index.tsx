@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query"
 import {
   ChevronDown,
+  CircleArrowUpIcon,
+  GlobeIcon,
   HomeIcon,
   LogOutIcon,
   MonitorIcon,
@@ -229,8 +231,12 @@ export function AppSidebar() {
                   </Tabs>
                 </div>
                 <div className="h-px bg-border my-1 mx-1" />
+                <DropdownMenuItem>
+                  <CircleArrowUpIcon />
+                  アップグレード
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
-                  <SettingsIcon size={16} />
+                  <SettingsIcon />
                   設定
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -239,7 +245,7 @@ export function AppSidebar() {
                     router.push("/")
                   }}
                 >
-                  <LogOutIcon size={16} />
+                  <LogOutIcon />
                   ログアウト
                 </DropdownMenuItem>
               </DropdownMenuContent>

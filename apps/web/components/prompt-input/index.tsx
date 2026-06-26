@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { usePromptForm } from "@/hooks/use-prompt-form"
-import { ImagePreview } from "@/interfaces/image-preview"
+import { ImagePreview } from "@/components/image-preview"
 import { AspectSelect } from "./aspect-select"
 import { CountSelect } from "./count-select"
+import { FileDropUpload } from "./file-drop-upload"
 import { addImageFiles, FileUpload } from "./file-upload"
 import { StyleSelect } from "./style-select"
 import { Suggestion } from "./suggestion"
@@ -40,6 +41,7 @@ export function PromptInput() {
 
   return (
     <>
+      <FileDropUpload images={images} setImages={setImages} />
       <form
         onSubmit={handleSubmit(handleGenerate)}
         className={cn(
@@ -71,14 +73,8 @@ export function PromptInput() {
         <div className="flex items-end justify-between">
           <div className="flex gap-px">
             <FileUpload images={images} setImages={setImages} />
-            <AspectSelect
-              selectedAspect={aspect}
-              onAspectChange={setAspect}
-            />
-            <CountSelect
-              selectedCount={count}
-              onCountChange={setCount}
-            />
+            <AspectSelect selectedAspect={aspect} onAspectChange={setAspect} />
+            <CountSelect selectedCount={count} onCountChange={setCount} />
             <StyleSelect style={style} onStyleChange={setStyle} />
           </div>
           <Button
