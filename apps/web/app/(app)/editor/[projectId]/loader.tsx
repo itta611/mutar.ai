@@ -4,7 +4,7 @@ import Rive from "@rive-app/react-canvas"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 
-const countdownSeconds = 3.5 * 60
+const countdownSeconds = 4 * 60
 
 function getRemainingSeconds(createdAt: string | null, now: number) {
   if (!createdAt) {
@@ -46,7 +46,7 @@ export function EditorLoader({ createdAt }: { createdAt: string | null }) {
 
   return (
     <div className="flex overflow-hidden bg-background dark:bg-muted h-full w-full rounded-2xl">
-      <div className="w-1/2 h-full flex flex-col justify-center items-center">
+      <div className="md:w-1/2 h-full flex flex-col justify-center items-center">
         <div className="flex items-center justify-center gap-3">
           <Rive className="size-10 dark:invert" src="/loading.riv" />
           <div className="font-bold text-5xl leading-none tabular-nums">
@@ -57,16 +57,16 @@ export function EditorLoader({ createdAt }: { createdAt: string | null }) {
           {loadingMessage}
         </div>
       </div>
-      <div className="w-1/2 h-full p-10 bg-linear-to-b flex justify-center flex-col items-center from-indigo-400/40 to-background dark:to-background">
+      <div className="w-1/2 h-full p-10 bg-linear-to-b flex justify-center flex-col items-center from-indigo-500/50 to-background dark:to-background max-md:hidden">
         <Image
           alt=""
-          className="object-contain"
-          // src="/api/projects/b9984e2e-6df2-417b-b37c-b39089581f2e/image?kind=thumbnail"
+          className="object-contain rounded-lg shadow-xl shadow-indigo-400/20 outline-8 outline-indigo-400/20"
+          src="/project-sample-1.png"
           width={300}
           height={300}
         />
-        <div className="text-center text-sm leading-tight text-muted-foreground mt-5">
-          テキストテキスト
+        <div className="text-center text-sm leading-tight text-muted-foreground mt-7 w-[320px]">
+          「Fintech企業のシリーズA資金調達に向けた、投資家向けピッチ資料を作成」
         </div>
       </div>
     </div>
