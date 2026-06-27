@@ -1,10 +1,10 @@
 "use client"
 
-import Rive from "@rive-app/react-canvas"
 import Konva from "konva"
-import Image from "next/image"
 import { type ReactNode, useLayoutEffect, useRef, useState } from "react"
 import { Stage } from "react-konva"
+
+import { EditorLoader, editorLoaderSize } from "./loader"
 
 type StageTransform = {
   key: string
@@ -75,7 +75,6 @@ export function EditorStage({
   children,
   imageElement,
   imageSize,
-  showThumbnail,
   onClick,
   onMouseDown,
   onMouseMove,
@@ -86,7 +85,6 @@ export function EditorStage({
   children: ReactNode
   imageElement: ImageElement | null
   imageSize: [width: number, height: number] | null
-  showThumbnail: boolean
   onClick: (event: Konva.KonvaEventObject<Event>) => void
   onMouseDown: (event: Konva.KonvaEventObject<MouseEvent>) => void
   onMouseMove: (event: Konva.KonvaEventObject<MouseEvent>) => void
@@ -155,8 +153,11 @@ export function EditorStage({
 
   const imageViewportSize = getImageViewportSize(containerSize)
 
-  if (true) {
-    const [placeholderWidth, placeholderHeight] = [4, 3]
+  if (!imageSize || imageElement?.projectId !== activeProjectId) {
+    const [placeholderWidth, placeholderHeight] = [
+      editorLoaderSize.width,
+      editorLoaderSize.height,
+    ]
     const placeholderScale = Math.min(
       imageViewportSize.width / placeholderWidth,
       imageViewportSize.height / placeholderHeight
@@ -164,71 +165,24 @@ export function EditorStage({
 
     return (
       <div className="relative h-full min-w-0" ref={containerRef}>
-        {false ? (
-          <Image
-            alt=""
-            className="absolute object-contain blur-sm"
-            height={600}
-            src={`/api/projects/${activeProjectId}/image?kind=thumbnail`}
-            style={{
-              height: placeholderScale * placeholderHeight,
-              left:
-                defaultViewportPadding +
-                (imageViewportSize.width -
-                  placeholderScale * placeholderWidth) /
-                  2,
-              top:
-                defaultViewportPadding +
-                (imageViewportSize.height -
-                  placeholderScale * placeholderHeight) /
-                  2,
-              width: placeholderScale * placeholderWidth,
-            }}
-            unoptimized
-            width={800}
-          />
-        ) : (
-          <div
-            className="absolute shadow-xl/2 bg-background rounded-2xl flex justify-center items-center overflow-hidden"
-            style={{
-              height: placeholderScale * placeholderHeight,
-              left:
-                defaultViewportPadding +
-                (imageViewportSize.width -
-                  placeholderScale * placeholderWidth) /
-                  2,
-              top:
-                defaultViewportPadding +
-                (imageViewportSize.height -
-                  placeholderScale * placeholderHeight) /
-                  2,
-              width: placeholderScale * placeholderWidth,
-            }}
-          >
-            <div className="flex flex-col space-y-5 w-1/2">
-              <div className="flex gap-3 items-center justify-center">
-                <Rive className="size-8 text-primary" src="/loading.riv" />
-                <div className="lg:text-4xl font-bold text-3xl">3:20</div>
-              </div>
-              <div className="lg:text-base text-sm text-muted-foreground text-center">
-                画像を生成しています
-              </div>
-            </div>
-            <div className="bg-linear-to-b from-indigo-100 to-background h-full flex flex-col gap-5 justify-center items-center w-1/2 p-[5%]">
-              <Image
-                alt=""
-                className="object-contain shadow-xl/5 rounded-md overflow-hidden"
-                height={400}
-                src={`/api/projects/${activeProjectId}/image?kind=thumbnail`}
-                unoptimized
-                width={400}
-              />
-              <div className="text-xs text-muted-foreground text-center px-2">
-                生成中の画像は、完成後に自動で差し替わります
-              </div>
-            </div>
-          </div>
-        )}
+        <div
+          className="absolute overflow-hidden rounded-2xl bg-background shadow-xl/2"
+          style={{
+            height: placeholderScale * placeholderHeight,
+            left:
+              defaultViewportPadding +
+              (imageViewportSize.width - placeholderScale * placeholderWidth) /
+                2,
+            top:
+              defaultViewportPadding +
+              (imageViewportSize.height -
+                placeholderScale * placeholderHeight) /
+                2,
+            width: placeholderScale * placeholderWidth,
+          }}
+        >
+          <EditorLoader />
+        </div>
       </div>
     )
   }
