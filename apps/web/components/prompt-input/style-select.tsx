@@ -244,7 +244,7 @@ export function StyleSelect({
             className="text-sm text-muted-foreground"
             htmlFor="theme-color"
           >
-            テーマカラー
+            テーマ
           </label>
           {style.themeColor ? (
             <ColorPickerWithInput

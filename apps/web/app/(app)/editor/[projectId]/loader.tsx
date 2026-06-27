@@ -1,12 +1,8 @@
 "use client"
 
 import Rive from "@rive-app/react-canvas"
+import Image from "next/image"
 import { useEffect, useState } from "react"
-
-export const editorLoaderSize = {
-  height: 1098,
-  width: 1454,
-}
 
 const countdownSeconds = 3.5 * 60
 
@@ -33,13 +29,7 @@ function formatRemainingTime(seconds: number) {
   return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`
 }
 
-export function EditorLoader({
-  activeProjectId,
-  createdAt,
-}: {
-  activeProjectId: string
-  createdAt: string | null
-}) {
+export function EditorLoader({ createdAt }: { createdAt: string | null }) {
   const [now, setNow] = useState(() => Date.now())
   const remainingSeconds = getRemainingSeconds(createdAt, now)
   const remainingTime = formatRemainingTime(remainingSeconds)
@@ -55,96 +45,30 @@ export function EditorLoader({
   }, [])
 
   return (
-    <svg
-      aria-label={loadingMessage}
-      className="size-full"
-      preserveAspectRatio="xMidYMid meet"
-      role="img"
-      viewBox={`0 0 ${editorLoaderSize.width} ${editorLoaderSize.height}`}
-    >
-      <title>{loadingMessage}</title>
-      <defs>
-        <linearGradient id="loading-preview-bg" x1="0" x2="0" y1="0" y2="1">
-          <stop
-            offset="0%"
-            className="[stop-color:#dfe7ff] dark:[stop-color:#615fff55]"
-          />
-          <stop offset="100%" stopColor="var(--background)" />
-        </linearGradient>
-        <filter
-          id="loading-preview-shadow"
-          colorInterpolationFilters="sRGB"
-          filterUnits="userSpaceOnUse"
-          height="460"
-          width="660"
-          x="760"
-          y="280"
-        >
-          <feDropShadow
-            dx="0"
-            dy="4"
-            floodColor="#0f172a"
-            floodOpacity="0.08"
-            stdDeviation="14"
-          />
-        </filter>
-      </defs>
-
-      <rect
-        className="fill-background dark:fill-muted"
-        height="1098"
-        width="1454"
-      />
-      <rect
-        height={1098}
-        width={727}
-        x={727}
-        y={0}
-        fill="url(#loading-preview-bg)"
-      />
-
-      <foreignObject height="60" width="60" x="248" y="480">
-        <Rive className="size-full dark:invert" src="/loading.riv" />
-      </foreignObject>
-      <text
-        fill="var(--foreground)"
-        fontSize="72"
-        fontWeight="700"
-        x="330"
-        y="538"
-      >
-        {remainingTime}
-      </text>
-      <text
-        fill="var(--muted-foreground)"
-        fontSize="28"
-        fontWeight="400"
-        textAnchor="middle"
-        x="364"
-        y="622"
-      >
-        {loadingMessage}
-      </text>
-
-      <image
-        filter="url(#loading-preview-shadow)"
-        height="388"
-        href={`/api/projects/${activeProjectId}/image?kind=thumbnail`}
-        preserveAspectRatio="xMidYMid meet"
-        width="580"
-        x="799"
-        y="320"
-      />
-      <text
-        fill="var(--muted-foreground)"
-        fontSize="24"
-        fontWeight="400"
-        textAnchor="middle"
-        x="1089"
-        y="774"
-      >
-        生成中の画像は、完成後に自動で差し替わります
-      </text>
-    </svg>
+    <div className="flex overflow-hidden bg-background dark:bg-muted h-full w-full rounded-2xl">
+      <div className="w-1/2 h-full flex flex-col justify-center items-center">
+        <div className="flex items-center justify-center gap-3">
+          <Rive className="size-10 dark:invert" src="/loading.riv" />
+          <div className="font-bold text-5xl leading-none tabular-nums">
+            {remainingTime}
+          </div>
+        </div>
+        <div className="text-center text-lg text-muted-foreground mt-4">
+          {loadingMessage}
+        </div>
+      </div>
+      <div className="w-1/2 h-full p-10 bg-linear-to-b flex justify-center flex-col items-center from-indigo-400/40 to-background dark:to-background">
+        <Image
+          alt=""
+          className="object-contain"
+          // src="/api/projects/b9984e2e-6df2-417b-b37c-b39089581f2e/image?kind=thumbnail"
+          width={300}
+          height={300}
+        />
+        <div className="text-center text-sm leading-tight text-muted-foreground mt-5">
+          テキストテキスト
+        </div>
+      </div>
+    </div>
   )
 }

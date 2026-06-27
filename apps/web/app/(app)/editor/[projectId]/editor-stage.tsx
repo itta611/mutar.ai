@@ -5,7 +5,7 @@ import Image from "next/image"
 import { type ReactNode, useLayoutEffect, useRef, useState } from "react"
 import { Stage } from "react-konva"
 
-import { EditorLoader, editorLoaderSize } from "./loader"
+import { EditorLoader } from "./loader"
 
 type StageTransform = {
   key: string
@@ -161,7 +161,7 @@ export function EditorStage({
   if (!imageSize || imageElement?.projectId !== activeProjectId) {
     const [placeholderWidth, placeholderHeight] = showThumbnail
       ? (imageSize ?? [4, 3])
-      : [editorLoaderSize.width, editorLoaderSize.height]
+      : [4, 3]
     const placeholderScale = Math.min(
       imageViewportSize.width / placeholderWidth,
       imageViewportSize.height / placeholderHeight
@@ -210,10 +210,7 @@ export function EditorStage({
               width: placeholderScale * placeholderWidth,
             }}
           >
-            <EditorLoader
-              activeProjectId={activeProjectId}
-              createdAt={createdAt}
-            />
+            <EditorLoader createdAt={createdAt} />
           </div>
         )}
       </div>
