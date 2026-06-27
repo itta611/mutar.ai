@@ -57,15 +57,15 @@ export function EditorLoader({ createdAt }: { createdAt: string | null }) {
           {loadingMessage}
         </div>
       </div>
-      <div className="w-1/2 h-full p-10 bg-linear-to-b flex justify-center flex-col items-center from-indigo-500/50 to-background dark:to-background max-md:hidden">
+      <div className="w-1/2 h-full p-12 bg-linear-to-b flex justify-center flex-col items-center from-indigo-500/50 to-background dark:to-background max-md:hidden">
         <Image
           alt=""
-          className="object-contain w-full rounded-lg outline-10 outline-indigo-400/10"
+          className="object-contain w-full rounded-md outline-9 outline-indigo-400/10"
           src="/project-sample-1.png"
           width={300}
           height={300}
         />
-        <div className="text-center text-sm leading-tight text-muted-foreground mt-7 w-[320px]">
+        <div className="text-center text-sm leading-tight text-muted-foreground mt-7">
           「Fintech企業のシリーズA資金調達に向けた、投資家向けピッチ資料を作成」
         </div>
       </div>
