@@ -1,6 +1,6 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useSetAtom } from "jotai"
 import { useEffect } from "react"
 import { toast } from "sonner"
@@ -11,6 +11,7 @@ import {
   editorSelectedBoxIndexAtom,
   editorSelectedBoxIndexesAtom,
 } from "@/atom/generate"
+import type { GeneratedImage } from "@/components/gallary"
 import { resizeTextBox } from "@/hooks/editor-bbox"
 import { apiClient } from "@/lib/api-client"
 
@@ -54,6 +55,7 @@ export function editorProjectQuery(projectId: string) {
 }
 
 export function useEditorProject(projectId: string) {
+  const queryClient = useQueryClient()
   const setBoxes = useSetAtom(editorBoxesAtom)
   const setSelectedIndex = useSetAtom(editorSelectedBoxIndexAtom)
   const setSelectedIndexes = useSetAtom(editorSelectedBoxIndexesAtom)
@@ -76,7 +78,11 @@ export function useEditorProject(projectId: string) {
     toast.error("生成に失敗しました。", {
       id: `project-generation-error-${projectId}`,
     })
-  }, [project?.status, projectId])
+    queryClient.setQueriesData<GeneratedImage[]>(
+      { queryKey: ["projects"] },
+      (projects) => projects?.filter((project) => project.id !== projectId)
+    )
+  }, [project?.status, projectId, queryClient])
 
   useEffect(() => {
     setSelectedIndex(null)

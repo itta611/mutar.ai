@@ -53,7 +53,7 @@ export function EditorLoader({ createdAt }: { createdAt: string | null }) {
             {remainingTime}
           </div>
         </div>
-        <div className="text-center text-lg text-muted-foreground mt-4">
+        <div className="text-center text-base text-muted-foreground mt-4">
           {loadingMessage}
         </div>
       </div>
