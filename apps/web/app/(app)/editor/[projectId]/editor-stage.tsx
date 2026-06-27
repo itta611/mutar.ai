@@ -1,6 +1,7 @@
 "use client"
 
 import Konva from "konva"
+import Image from "next/image"
 import { type ReactNode, useLayoutEffect, useRef, useState } from "react"
 import { Stage } from "react-konva"
 
@@ -76,6 +77,7 @@ export function EditorStage({
   createdAt,
   imageElement,
   imageSize,
+  showThumbnail,
   onClick,
   onMouseDown,
   onMouseMove,
@@ -87,6 +89,7 @@ export function EditorStage({
   createdAt: string | null
   imageElement: ImageElement | null
   imageSize: [width: number, height: number] | null
+  showThumbnail: boolean
   onClick: (event: Konva.KonvaEventObject<Event>) => void
   onMouseDown: (event: Konva.KonvaEventObject<MouseEvent>) => void
   onMouseMove: (event: Konva.KonvaEventObject<MouseEvent>) => void
@@ -156,10 +159,9 @@ export function EditorStage({
   const imageViewportSize = getImageViewportSize(containerSize)
 
   if (!imageSize || imageElement?.projectId !== activeProjectId) {
-    const [placeholderWidth, placeholderHeight] = [
-      editorLoaderSize.width,
-      editorLoaderSize.height,
-    ]
+    const [placeholderWidth, placeholderHeight] = showThumbnail
+      ? (imageSize ?? [4, 3])
+      : [editorLoaderSize.width, editorLoaderSize.height]
     const placeholderScale = Math.min(
       imageViewportSize.width / placeholderWidth,
       imageViewportSize.height / placeholderHeight
@@ -167,27 +169,53 @@ export function EditorStage({
 
     return (
       <div className="relative h-full min-w-0" ref={containerRef}>
-        <div
-          className="absolute overflow-hidden rounded-2xl bg-background shadow-xl/2"
-          style={{
-            height: placeholderScale * placeholderHeight,
-            left:
-              defaultViewportPadding +
-              (imageViewportSize.width - placeholderScale * placeholderWidth) /
-                2,
-            top:
-              defaultViewportPadding +
-              (imageViewportSize.height -
-                placeholderScale * placeholderHeight) /
-                2,
-            width: placeholderScale * placeholderWidth,
-          }}
-        >
-          <EditorLoader
-            activeProjectId={activeProjectId}
-            createdAt={createdAt}
+        {showThumbnail ? (
+          <Image
+            alt=""
+            className="absolute object-contain blur-sm"
+            height={600}
+            src={`/api/projects/${activeProjectId}/image?kind=thumbnail`}
+            style={{
+              height: placeholderScale * placeholderHeight,
+              left:
+                defaultViewportPadding +
+                (imageViewportSize.width -
+                  placeholderScale * placeholderWidth) /
+                  2,
+              top:
+                defaultViewportPadding +
+                (imageViewportSize.height -
+                  placeholderScale * placeholderHeight) /
+                  2,
+              width: placeholderScale * placeholderWidth,
+            }}
+            unoptimized
+            width={800}
           />
-        </div>
+        ) : (
+          <div
+            className="absolute overflow-hidden rounded-2xl bg-background shadow-xl/2"
+            style={{
+              height: placeholderScale * placeholderHeight,
+              left:
+                defaultViewportPadding +
+                (imageViewportSize.width -
+                  placeholderScale * placeholderWidth) /
+                  2,
+              top:
+                defaultViewportPadding +
+                (imageViewportSize.height -
+                  placeholderScale * placeholderHeight) /
+                  2,
+              width: placeholderScale * placeholderWidth,
+            }}
+          >
+            <EditorLoader
+              activeProjectId={activeProjectId}
+              createdAt={createdAt}
+            />
+          </div>
+        )}
       </div>
     )
   }
