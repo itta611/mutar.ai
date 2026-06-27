@@ -8,7 +8,7 @@ export const editorLoaderSize = {
   width: 1454,
 }
 
-const countdownSeconds = 3 * 60
+const countdownSeconds = 3.5 * 60
 
 function getRemainingSeconds(createdAt: string | null, now: number) {
   if (!createdAt) {
@@ -44,11 +44,9 @@ export function EditorLoader({
   const remainingSeconds = getRemainingSeconds(createdAt, now)
   const remainingTime = formatRemainingTime(remainingSeconds)
   const loadingMessage =
-    remainingSeconds === 0 ? "おまたせしています..." : "画像を生成しています"
+    remainingSeconds === 0 ? "お待たせしています..." : "画像を生成しています"
 
   useEffect(() => {
-    setNow(Date.now())
-
     const intervalId = window.setInterval(() => {
       setNow(Date.now())
     }, 1000)
@@ -68,7 +66,7 @@ export function EditorLoader({
       <defs>
         <linearGradient id="loading-preview-bg" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%" stopColor="#dfe7ff" />
-          <stop offset="100%" stopColor="#ffffff" />
+          <stop offset="100%" stopColor="var(--background)" />
         </linearGradient>
         <filter
           id="loading-preview-shadow"
@@ -89,17 +87,33 @@ export function EditorLoader({
         </filter>
       </defs>
 
-      <rect fill="#ffffff" height="1098" width="1454" />
-      <path d="M727 0H21474V1098H727V0Z" fill="url(#loading-preview-bg)" />
+      <rect
+        className="fill-background dark:fill-muted"
+        height="1098"
+        width="1454"
+      />
+      <rect
+        height={1098}
+        width={727}
+        x={727}
+        y={0}
+        fill="url(#loading-preview-bg)"
+      />
 
       <foreignObject height="60" width="60" x="248" y="480">
         <Rive className="size-full" src="/loading.riv" />
       </foreignObject>
-      <text fill="#030712" fontSize="72" fontWeight="700" x="330" y="538">
+      <text
+        fill="var(--foreground)"
+        fontSize="72"
+        fontWeight="700"
+        x="330"
+        y="538"
+      >
         {remainingTime}
       </text>
       <text
-        fill="#6b7280"
+        fill="var(--muted-foreground)"
         fontSize="28"
         fontWeight="400"
         textAnchor="middle"
@@ -119,7 +133,7 @@ export function EditorLoader({
         y="320"
       />
       <text
-        fill="#6b7280"
+        fill="var(--muted-foreground)"
         fontSize="24"
         fontWeight="400"
         textAnchor="middle"

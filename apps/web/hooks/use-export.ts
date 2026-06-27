@@ -1,8 +1,6 @@
 "use client"
 
-import { useState } from "react"
-
-import { fontFamilyMap, type EditorBox, type ImageSize } from "@/atom/generate"
+import { type EditorBox, fontFamilyMap, type ImageSize } from "@/atom/generate"
 
 function getTextWidth(
   context: CanvasRenderingContext2D,
@@ -67,25 +65,25 @@ function getTextLines(
 
   return box.wrapText
     ? box.label.split("\n").flatMap((line) => {
-      const wrappedLines: string[] = []
-      let currentLine = ""
+        const wrappedLines: string[] = []
+        let currentLine = ""
 
-      for (const char of Array.from(line)) {
-        const nextLine = currentLine + char
+        for (const char of Array.from(line)) {
+          const nextLine = currentLine + char
 
-        if (
-          currentLine &&
-          getTextWidth(context, nextLine, letterSpacing) > boxWidth
-        ) {
-          wrappedLines.push(currentLine)
-          currentLine = char
-        } else {
-          currentLine = nextLine
+          if (
+            currentLine &&
+            getTextWidth(context, nextLine, letterSpacing) > boxWidth
+          ) {
+            wrappedLines.push(currentLine)
+            currentLine = char
+          } else {
+            currentLine = nextLine
+          }
         }
-      }
 
-      return currentLine ? [...wrappedLines, currentLine] : wrappedLines
-    })
+        return currentLine ? [...wrappedLines, currentLine] : wrappedLines
+      })
     : box.label.split("\n")
 }
 
@@ -241,11 +239,13 @@ export function useExport({
   }
 
   return {
-    copyPng: () => (async () => {
+    copyPng: async () => {
       const blob = await exportPngBlob()
-      await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })])
-    }),
-    copySvg: () => (async () => {
+      await navigator.clipboard.write([
+        new ClipboardItem({ [blob.type]: blob }),
+      ])
+    },
+    copySvg: async () => {
       const svg = await exportSvgText()
       await navigator.clipboard.write([
         new ClipboardItem({
@@ -253,14 +253,14 @@ export function useExport({
           "text/plain": new Blob([svg], { type: "text/plain" }),
         }),
       ])
-    }),
-    downloadPng: () => (async () => {
+    },
+    downloadPng: async () => {
       const blob = await exportPngBlob()
       const link = document.createElement("a")
       link.href = URL.createObjectURL(blob)
       link.download = `${projectName || "image"}.png`
       link.click()
       URL.revokeObjectURL(link.href)
-    }),
+    },
   }
 }
