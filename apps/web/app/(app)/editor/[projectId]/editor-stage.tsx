@@ -1,11 +1,10 @@
 "use client"
 
+import Rive from "@rive-app/react-canvas"
 import Konva from "konva"
 import Image from "next/image"
 import { type ReactNode, useLayoutEffect, useRef, useState } from "react"
 import { Stage } from "react-konva"
-
-import { Skeleton } from "@/components/ui/skeleton"
 
 type StageTransform = {
   key: string
@@ -156,8 +155,8 @@ export function EditorStage({
 
   const imageViewportSize = getImageViewportSize(containerSize)
 
-  if (!imageSize || imageElement?.projectId !== activeProjectId) {
-    const [placeholderWidth, placeholderHeight] = imageSize ?? [4, 3]
+  if (true) {
+    const [placeholderWidth, placeholderHeight] = [4, 3]
     const placeholderScale = Math.min(
       imageViewportSize.width / placeholderWidth,
       imageViewportSize.height / placeholderHeight
@@ -165,7 +164,7 @@ export function EditorStage({
 
     return (
       <div className="relative h-full min-w-0" ref={containerRef}>
-        {showThumbnail ? (
+        {false ? (
           <Image
             alt=""
             className="absolute object-contain blur-sm"
@@ -189,8 +188,8 @@ export function EditorStage({
             width={800}
           />
         ) : (
-          <Skeleton
-            className="absolute"
+          <div
+            className="absolute shadow-xl/2 bg-background rounded-2xl flex justify-center items-center overflow-hidden"
             style={{
               height: placeholderScale * placeholderHeight,
               left:
@@ -205,7 +204,30 @@ export function EditorStage({
                   2,
               width: placeholderScale * placeholderWidth,
             }}
-          />
+          >
+            <div className="flex flex-col space-y-5 w-1/2">
+              <div className="flex gap-3 items-center justify-center">
+                <Rive className="size-8 text-primary" src="/loading.riv" />
+                <div className="lg:text-4xl font-bold text-3xl">3:20</div>
+              </div>
+              <div className="lg:text-base text-sm text-muted-foreground text-center">
+                画像を生成しています
+              </div>
+            </div>
+            <div className="bg-linear-to-b from-indigo-100 to-background h-full flex flex-col gap-5 justify-center items-center w-1/2 p-[5%]">
+              <Image
+                alt=""
+                className="object-contain shadow-xl/5 rounded-md overflow-hidden"
+                height={400}
+                src={`/api/projects/${activeProjectId}/image?kind=thumbnail`}
+                unoptimized
+                width={400}
+              />
+              <div className="text-xs text-muted-foreground text-center px-2">
+                生成中の画像は、完成後に自動で差し替わります
+              </div>
+            </div>
+          </div>
         )}
       </div>
     )
