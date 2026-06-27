@@ -95,6 +95,21 @@ function escapeXml(value: string) {
     .replaceAll('"', "&quot;")
 }
 
+function getAlphabeticBaselineY(
+  context: CanvasRenderingContext2D,
+  text: string,
+  centerY: number,
+  fontSize: number
+) {
+  const metrics = context.measureText(text || "M")
+  const ascent =
+    metrics.actualBoundingBoxAscent || metrics.fontBoundingBoxAscent || fontSize
+  const descent =
+    metrics.actualBoundingBoxDescent || metrics.fontBoundingBoxDescent || 0
+
+  return centerY + (ascent - descent) / 2
+}
+
 function canvasToBlob(canvas: HTMLCanvasElement) {
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -215,22 +230,25 @@ export function useExport({
           : align === "right"
             ? rect.left + rect.width
             : rect.left + rect.width / 2
-      const y = rect.top + rect.height / 2
       const textAnchor =
         align === "left" ? "start" : align === "right" ? "end" : "middle"
 
       context.font = `${box.bold ? 700 : 400} ${fontSize}px ${fontFamily}`
+      const lines = getTextLines(context, box, rect.width)
+      const firstLineCenterY =
+        rect.top + rect.height / 2 - ((lines.length - 1) * lineHeight) / 2
 
-      return `<text x="${x}" y="${y}" fill="${escapeXml(
+      return `<text fill="${escapeXml(
         box.color ?? "rgba(0,0,0,1)"
-      )}" font-family="${escapeXml(fontFamily)}" font-size="${fontSize}" font-weight="${box.bold ? 700 : 400}" letter-spacing="${box.letterSpacing ?? 0}" text-anchor="${textAnchor}" dominant-baseline="middle" xml:space="preserve">${getTextLines(
-        context,
-        box,
-        rect.width
-      )
+      )}" font-family="${escapeXml(fontFamily)}" font-size="${fontSize}" font-weight="${box.bold ? 700 : 400}" letter-spacing="${box.letterSpacing ?? 0}" text-anchor="${textAnchor}" xml:space="preserve">${lines
         .map(
-          (line, index, lines) =>
-            `<tspan x="${x}" dy="${index === 0 ? -((lines.length - 1) * lineHeight) / 2 : lineHeight}">${escapeXml(line)}</tspan>`
+          (line, index) =>
+            `<tspan x="${x}" y="${getAlphabeticBaselineY(
+              context,
+              line,
+              firstLineCenterY + index * lineHeight,
+              fontSize
+            )}">${escapeXml(line)}</tspan>`
         )
         .join("")}</text>`
     })

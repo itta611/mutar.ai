@@ -65,7 +65,10 @@ export function EditorLoader({
       <title>{loadingMessage}</title>
       <defs>
         <linearGradient id="loading-preview-bg" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="#dfe7ff" />
+          <stop
+            offset="0%"
+            className="[stop-color:#dfe7ff] dark:[stop-color:#615fff55]"
+          />
           <stop offset="100%" stopColor="var(--background)" />
         </linearGradient>
         <filter
@@ -101,7 +104,7 @@ export function EditorLoader({
       />
 
       <foreignObject height="60" width="60" x="248" y="480">
-        <Rive className="size-full" src="/loading.riv" />
+        <Rive className="size-full dark:invert" src="/loading.riv" />
       </foreignObject>
       <text
         fill="var(--foreground)"
