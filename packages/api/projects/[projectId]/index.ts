@@ -8,7 +8,7 @@ import {
 import { Hono } from "hono"
 import { z } from "zod"
 
-import { sessionMiddleware, type SessionEnv } from "../../session"
+import { type SessionEnv, sessionMiddleware } from "../../session"
 import { projectParamsSchema } from "../schema"
 
 const updateProjectSchema = z.object({
@@ -36,6 +36,7 @@ export const projectRoutes = new Hono<SessionEnv>()
           id: project.id,
           title: project.title,
           status: project.status,
+          createdAt: project.createdAt,
         },
         200
       )

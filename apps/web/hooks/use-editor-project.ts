@@ -19,6 +19,7 @@ type ProjectBox = EditorBox & { lineHeight?: number }
 type EditorProject =
   | {
       analysis: { boxes: ProjectBox[]; summary: string }
+      createdAt: string
       height: number
       id: string
       status: "ready"
@@ -26,6 +27,7 @@ type EditorProject =
       width: number
     }
   | {
+      createdAt: string
       id: string
       status: "generating" | "analyzing" | "erasing" | "error"
       title: string

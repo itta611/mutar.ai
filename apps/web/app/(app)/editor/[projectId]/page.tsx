@@ -12,16 +12,13 @@ import {
   Text,
   Transformer,
 } from "react-konva"
-
-import { EditorStage } from "./editor-stage"
-import { TextEditor } from "./text-editor"
 import {
+  type EditorBox,
   editorBoxesAtom,
   editorSaveBoxesAtom,
   editorSelectedBoxIndexAtom,
   editorSelectedBoxIndexesAtom,
   fontFamilyMap,
-  type EditorBox,
   type ImageSize,
 } from "@/atom/generate"
 import {
@@ -35,6 +32,8 @@ import {
 import { useEditorProject } from "@/hooks/use-editor-project"
 import { useEditorSettings } from "@/hooks/use-editor-settings"
 import { apiClient } from "@/lib/api-client"
+import { EditorStage } from "./editor-stage"
+import { TextEditor } from "./text-editor"
 
 type EditingText = {
   index: number
@@ -214,9 +213,7 @@ function Editor({ projectId }: { projectId: string }) {
     : null
   const textRefs = useRef(new Map<number, Konva.Text>())
   const hoverTransformerRef = useRef<Konva.Transformer>(null)
-  const selectionTransformerRefs = useRef(
-    new Map<number, Konva.Transformer>()
-  )
+  const selectionTransformerRefs = useRef(new Map<number, Konva.Transformer>())
   const transformerRef = useRef<Konva.Transformer>(null)
   const dragStartPositionsRef = useRef(
     new Map<number, { x: number; y: number }>()
@@ -377,12 +374,7 @@ function Editor({ projectId }: { projectId: string }) {
 
     transformer.nodes(textNode ? [textNode] : [])
     transformer.getLayer()?.batchDraw()
-  }, [
-    boxes,
-    editingText?.index,
-    hoveredIndex,
-    selectedIndexes,
-  ])
+  }, [boxes, editingText?.index, hoveredIndex, selectedIndexes])
 
   function updateLabel(index: number, label: string) {
     updateBoxesAndSave((current) =>
@@ -766,6 +758,7 @@ function Editor({ projectId }: { projectId: string }) {
   return (
     <EditorStage
       activeProjectId={projectId}
+      createdAt={project?.createdAt ?? null}
       imageElement={imageElement}
       imageSize={imageSize}
       onClick={clearTextSelection}

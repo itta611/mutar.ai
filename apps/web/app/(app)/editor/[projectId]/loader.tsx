@@ -1,22 +1,70 @@
 "use client"
 
 import Rive from "@rive-app/react-canvas"
+import { useEffect, useState } from "react"
 
 export const editorLoaderSize = {
   height: 1098,
   width: 1454,
 }
 
-export function EditorLoader() {
+const countdownSeconds = 3 * 60
+
+function getRemainingSeconds(createdAt: string | null, now: number) {
+  if (!createdAt) {
+    return countdownSeconds
+  }
+
+  const createdTime = new Date(createdAt).getTime()
+
+  if (Number.isNaN(createdTime)) {
+    return countdownSeconds
+  }
+
+  const elapsedSeconds = Math.floor((now - createdTime) / 1000)
+
+  return Math.max(0, countdownSeconds - elapsedSeconds)
+}
+
+function formatRemainingTime(seconds: number) {
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = seconds % 60
+
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`
+}
+
+export function EditorLoader({
+  activeProjectId,
+  createdAt,
+}: {
+  activeProjectId: string
+  createdAt: string | null
+}) {
+  const [now, setNow] = useState(() => Date.now())
+  const remainingSeconds = getRemainingSeconds(createdAt, now)
+  const remainingTime = formatRemainingTime(remainingSeconds)
+  const loadingMessage =
+    remainingSeconds === 0 ? "おまたせしています..." : "画像を生成しています"
+
+  useEffect(() => {
+    setNow(Date.now())
+
+    const intervalId = window.setInterval(() => {
+      setNow(Date.now())
+    }, 1000)
+
+    return () => window.clearInterval(intervalId)
+  }, [])
+
   return (
     <svg
-      aria-label="画像を生成しています"
+      aria-label={loadingMessage}
       className="size-full"
       preserveAspectRatio="xMidYMid meet"
       role="img"
       viewBox={`0 0 ${editorLoaderSize.width} ${editorLoaderSize.height}`}
     >
-      <title></title>
+      <title>{loadingMessage}</title>
       <defs>
         <linearGradient id="loading-preview-bg" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%" stopColor="#dfe7ff" />
@@ -48,7 +96,7 @@ export function EditorLoader() {
         <Rive className="size-full" src="/loading.riv" />
       </foreignObject>
       <text fill="#030712" fontSize="72" fontWeight="700" x="330" y="538">
-        3:20
+        {remainingTime}
       </text>
       <text
         fill="#6b7280"
@@ -58,13 +106,13 @@ export function EditorLoader() {
         x="364"
         y="622"
       >
-        画像を生成しています
+        {loadingMessage}
       </text>
 
       <image
         filter="url(#loading-preview-shadow)"
         height="388"
-        href={`/api/projects/376d6aee-826a-4a9f-8a93-501eb1a60b2c/image?kind=thumbnail`}
+        href={`/api/projects/${activeProjectId}/image?kind=thumbnail`}
         preserveAspectRatio="xMidYMid meet"
         width="580"
         x="799"

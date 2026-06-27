@@ -130,6 +130,7 @@ export async function findProjectDimensionsByUserId({
       status: projects.status,
       width: projects.width,
       height: projects.height,
+      createdAt: projects.createdAt,
     })
     .from(projects)
     .where(and(eq(projects.id, projectId), eq(projects.userId, userId)))

@@ -73,6 +73,7 @@ function getCenteredStageTransform(
 export function EditorStage({
   activeProjectId,
   children,
+  createdAt,
   imageElement,
   imageSize,
   onClick,
@@ -83,6 +84,7 @@ export function EditorStage({
 }: {
   activeProjectId: string
   children: ReactNode
+  createdAt: string | null
   imageElement: ImageElement | null
   imageSize: [width: number, height: number] | null
   onClick: (event: Konva.KonvaEventObject<Event>) => void
@@ -181,7 +183,10 @@ export function EditorStage({
             width: placeholderScale * placeholderWidth,
           }}
         >
-          <EditorLoader />
+          <EditorLoader
+            activeProjectId={activeProjectId}
+            createdAt={createdAt}
+          />
         </div>
       </div>
     )
