@@ -4,7 +4,7 @@ import { ProjectList } from "./project-list"
 
 export default async function Page() {
   return (
-    <div className="min-h-full px-10 pb-10">
+    <div className="min-h-full pb-10 sm:px-10 px-5">
       <h1 className="py-10 text-2xl font-bold pl-1">ゴミ箱</h1>
       <Suspense fallback={<GallerySkeleton />}>
         <ProjectList />

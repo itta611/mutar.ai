@@ -22,6 +22,15 @@ export function ProjectSwitcher() {
   const { data: projects = [] } = useQuery({
     queryKey: ["projects"],
     queryFn: listProjects,
+    refetchInterval: (query) => {
+      const projects = query.state.data
+
+      return projects?.some(
+        (project) => project.status !== "ready" && project.status !== "error"
+      )
+        ? 5000
+        : false
+    },
   })
 
   useEffect(() => {

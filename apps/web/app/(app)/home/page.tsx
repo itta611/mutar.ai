@@ -6,7 +6,7 @@ import { ProjectList } from "./project-list"
 
 export default async function Page() {
   return (
-    <div className="pb-10 min-h-full px-10">
+    <div className="pb-10 min-h-full sm:px-10 px-5">
       <div className="pt-36 pb-24 md:px-5 max-w-200 mx-auto">
         <div className="flex mx-auto mb-6 px-1.5 items-center gap-3">
           <LogoIcon width={30} />
