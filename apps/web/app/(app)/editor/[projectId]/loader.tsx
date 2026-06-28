@@ -79,7 +79,7 @@ export function EditorLoader({ createdAt }: { createdAt: string | null }) {
   }, [])
 
   return (
-    <div className="flex overflow-hidden bg-background dark:bg-muted h-full w-full rounded-2xl">
+    <div className="flex overflow-hidden bg-background dark:bg-muted h-full w-full rounded-2xl justify-center">
       <div className="md:w-1/2 h-full flex flex-col justify-center items-center">
         <div className="flex items-center justify-center gap-4">
           <Rive className="size-10 dark:invert" src="/loading.riv" />
