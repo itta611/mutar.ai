@@ -8,7 +8,7 @@ const countdownSeconds = 4 * 60
 const projectSamples = [
   {
     prompt:
-      "「中小企業向け決済プラットフォームの投資家向けスライド資料の表紙を作成」",
+      "「中小企業向け決済プラットフォームの投資家向けスライド資料の表紙を作成。」",
     src: "/project-sample-1.png",
   },
   // {
@@ -16,16 +16,16 @@ const projectSamples = [
   //   src: "/project-sample-2.png",
   // },
   {
-    prompt: "「プロダクトローンチのロードマップ資料を作成」",
+    prompt:
+      "「プロダクトローンチのロードマップ資料を作成。それぞれのステップにアイコンと説明文。」",
     src: "/project-sample-3.png",
   },
   {
-    prompt:
-      "「ローンチ準備・実行ロードマップを作成。Q1からQ4を4列で配置。横長タイムライン、マイルストーン、進捗バー、優先度タグを含む洗練された資料画像。」",
+    prompt: "「ローンチ準備・実行ロードマップを作成。Q1からQ4を4列で配置。」",
     src: "/project-sample-4.png",
   },
   {
-    prompt: "「会場情報まで入れたギャラリー展示ポスターを作成」",
+    prompt: "「会場情報まで入れたギャラリー展示ポスターを作成。」",
     src: "/project-sample-5.png",
   },
 ]
@@ -73,7 +73,7 @@ export function EditorLoader({ createdAt }: { createdAt: string | null }) {
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       setSampleIndex((current) => (current + 1) % projectSamples.length)
-    }, 5000)
+    }, 10000)
 
     return () => window.clearInterval(intervalId)
   }, [])
@@ -91,7 +91,7 @@ export function EditorLoader({ createdAt }: { createdAt: string | null }) {
           {loadingMessage}
         </div>
       </div>
-      <div className="w-1/2 h-full p-[5%] bg-linear-to-b flex justify-center flex-col items-center from-indigo-500/50 to-background dark:to-muted max-md:hidden">
+      <div className="w-1/2 h-full p-[7%] bg-linear-to-b flex justify-center flex-col items-center from-indigo-500/50 to-background dark:to-muted max-md:hidden">
         <div className="aspect-video w-full">
           <Image
             alt=""
