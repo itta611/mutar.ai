@@ -71,12 +71,33 @@ function getCenteredStageTransform(
   }
 }
 
+function getFocusedStageTransform(
+  key: string,
+  imageViewportSize: Size,
+  focusPoint: Point,
+  scale: number
+) {
+  return {
+    key,
+    scale,
+    x:
+      defaultViewportPadding +
+      imageViewportSize.width / 2 -
+      focusPoint.x * scale,
+    y:
+      defaultViewportPadding +
+      imageViewportSize.height / 2 -
+      focusPoint.y * scale,
+  }
+}
+
 export function EditorStage({
   activeProjectId,
   children,
   createdAt,
   imageElement,
   imageSize,
+  resizeFocusPoint,
   showThumbnail,
   onClick,
   onMouseDown,
@@ -89,6 +110,7 @@ export function EditorStage({
   createdAt: string | null
   imageElement: ImageElement | null
   imageSize: [width: number, height: number] | null
+  resizeFocusPoint: Point | null
   showThumbnail: boolean
   onClick: (event: Konva.KonvaEventObject<Event>) => void
   onMouseDown: (event: Konva.KonvaEventObject<MouseEvent>) => void
@@ -101,6 +123,7 @@ export function EditorStage({
   const lastTouchCenterRef = useRef<Point | null>(null)
   const lastTouchDistanceRef = useRef(0)
   const panStartRef = useRef<Point | null>(null)
+  const resizeFocusPointRef = useRef<Point | null>(null)
   const [containerSize, setContainerSize] = useState<Size>({
     height: 0,
     width: 0,
@@ -110,6 +133,7 @@ export function EditorStage({
   )
   const imageWidth = imageSize?.[0]
   const imageHeight = imageSize?.[1]
+  resizeFocusPointRef.current = resizeFocusPoint
 
   useLayoutEffect(() => {
     const container = containerRef.current
@@ -138,13 +162,20 @@ export function EditorStage({
         return
       }
 
+      const key = `${activeProjectId}:${imageWidth}:${imageHeight}`
+      const imageViewportSize = getImageViewportSize(nextContainerSize)
+      const focusPoint = resizeFocusPointRef.current
+      const scale = stage.scaleX()
+
       setStageTransform(
-        getCenteredStageTransform(
-          `${activeProjectId}:${imageWidth}:${imageHeight}`,
-          getImageViewportSize(nextContainerSize),
-          [imageWidth, imageHeight],
-          stage.scaleX()
-        )
+        focusPoint
+          ? getFocusedStageTransform(key, imageViewportSize, focusPoint, scale)
+          : getCenteredStageTransform(
+              key,
+              imageViewportSize,
+              [imageWidth, imageHeight],
+              scale
+            )
       )
     }
 

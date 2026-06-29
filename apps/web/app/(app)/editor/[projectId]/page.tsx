@@ -234,6 +234,33 @@ function Editor({ projectId }: { projectId: string }) {
   const selectionDraggedRef = useRef(false)
   const preserveSelectionAfterEditRef = useRef(false)
   const [snapGuides, setSnapGuides] = useState<SnapGuide[]>([])
+  const resizeFocusPoint =
+    selectedIndexes.length > 0
+      ? (() => {
+          const rects = selectedIndexes.flatMap((index) => {
+            const box = boxes[index]
+            return box ? [getBoxRect(box)] : []
+          })
+
+          if (rects.length === 0) {
+            return null
+          }
+
+          const left = Math.min(...rects.map((rect) => rect.left))
+          const top = Math.min(...rects.map((rect) => rect.top))
+          const right = Math.max(
+            ...rects.map((rect) => rect.left + rect.width)
+          )
+          const bottom = Math.max(
+            ...rects.map((rect) => rect.top + rect.height)
+          )
+
+          return {
+            x: left + (right - left) / 2,
+            y: top + (bottom - top) / 2,
+          }
+        })()
+      : null
   const saveBoxes = useCallback(
     (boxes: EditorBox[]) => {
       void apiClient.projects[":projectId"].$put({
@@ -761,6 +788,7 @@ function Editor({ projectId }: { projectId: string }) {
       createdAt={project?.createdAt ?? null}
       imageElement={imageElement}
       imageSize={imageSize}
+      resizeFocusPoint={resizeFocusPoint}
       showThumbnail={!project || isProjectReady}
       onClick={clearTextSelection}
       onMouseDown={startSelection}
