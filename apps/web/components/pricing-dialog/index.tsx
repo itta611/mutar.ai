@@ -111,7 +111,7 @@ function PricingDialog() {
         <div className="mt-6 text-center">
           <a
             className="text-sm text-slate-400 underline underline-offset-4 transition-colors hover:text-slate-600"
-            href="#"
+            href="/terms/specified"
           >
             特定商取引に関する表示
           </a>
@@ -131,7 +131,7 @@ function PlanCard({
   features: string[]
 }) {
   return (
-    <div className="rounded-3xl border-[8px] border-indigo-50/80 bg-white p-4 shadow-lg/5 space-y-3">
+    <div className="rounded-3xl border-[8px] border-indigo-50/80 bg-white p-4 shadow-lg/5">
       <div className="text-lg font-bold text-indigo-500">{name}</div>
       <div>
         <span className="text-3xl font-bold mr-1 font-[ui-sans-serif,_system-ui,_sans-serif]">
@@ -146,16 +146,20 @@ function PlanCard({
       <ul className="mt-4 space-y-2">
         {features.map((feature) => (
           <li
-            className="flex items-center gap-3 text-base font-medium text-slate-600 sm:text-lg"
+            className="flex items-center gap-2 text-base font-medium text-slate-600 sm:text-lg"
             key={feature}
           >
-            <CheckIcon className="size-6 shrink-0 text-emerald-500" />
+            <CheckIcon className="size-6 shrink-0 text-indigo-500" />
             <span className="text-sm">{feature}</span>
           </li>
         ))}
       </ul>
 
-      <Button type="button" size="lg" className="w-full">
+      <Button
+        type="button"
+        size="lg"
+        className="w-full shadow shadow-indigo-500/10 mt-4"
+      >
         {name}プランを開始
       </Button>
     </div>
