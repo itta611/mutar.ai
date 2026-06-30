@@ -1,6 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query"
+import { usePricingDialog } from "@/components/pricing-dialog"
 import { apiClient } from "@/lib/api-client"
 import { Button } from "../ui/button"
 import { Progress } from "../ui/progress"
@@ -30,6 +31,7 @@ function formatNextResetDate(periodStart: string, resetDay: number) {
 }
 
 function UsageCard() {
+  const pricingDialog = usePricingDialog()
   const { data: creditUsage } = useQuery({
     queryKey: ["credit-usage"],
     queryFn: getCreditUsage,
@@ -57,7 +59,7 @@ function UsageCard() {
         <span className="text-muted-foreground">
           次回 {nextResetDate} にリセットされます。
         </span>
-        <Button>アップグレード</Button>
+        <Button onClick={pricingDialog.open}>アップグレード</Button>
       </div>
     </div>
   )

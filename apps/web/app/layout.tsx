@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import { AuthDialog } from "@/components/auth-dialog"
 import { AuthDialogProvider } from "@/hooks/use-auth-dialog"
+import { PricingDialogProvider } from "@/components/pricing-dialog"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Toaster } from "@/components/ui/sonner"
 import { AuthRedirect } from "./auth-redirect"
@@ -83,11 +84,13 @@ export default function RootLayout({
           }
         >
           <AuthDialogProvider>
-            <ThemeProvider>
-              <AuthRedirect>{children}</AuthRedirect>
-              <AuthDialog />
-              <Toaster position="bottom-center" />
-            </ThemeProvider>
+            <PricingDialogProvider>
+              <ThemeProvider>
+                <AuthRedirect>{children}</AuthRedirect>
+                <AuthDialog />
+                <Toaster position="bottom-center" />
+              </ThemeProvider>
+            </PricingDialogProvider>
           </AuthDialogProvider>
         </SidebarProvider>
       </body>

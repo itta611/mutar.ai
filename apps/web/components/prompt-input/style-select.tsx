@@ -193,7 +193,7 @@ export function StyleSelect({
             />
           </filter>
         </svg>
-        <span className="text-sm text-muted-foreground">テクスチャ</span>
+        <span className="text-sm text-muted-foreground">図のテクスチャ</span>
         <div className="grid grid-cols-3 gap-4 pb-1">
           <MenuItem
             selected={!style.texture}

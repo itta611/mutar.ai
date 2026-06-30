@@ -22,6 +22,7 @@ import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 import { ProjectDropdownMenu } from "@/components/gallary/project-dropdown-menu"
 import { Logo } from "@/components/logo"
+import { usePricingDialog } from "@/components/pricing-dialog"
 import { ProjectSearchDialog } from "@/components/project-search-dialog"
 import { SettingsDialog } from "@/components/settings-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -69,6 +70,7 @@ export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { setTheme } = useTheme()
+  const pricingDialog = usePricingDialog()
   const { attachProjectImage } = usePromptForm()
   const session = authClient.useSession()
   const user = session.data?.user
@@ -231,7 +233,7 @@ export function AppSidebar() {
                   </Tabs>
                 </div>
                 <div className="h-px bg-border my-1 mx-1" />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={pricingDialog.open}>
                   <CircleArrowUpIcon />
                   アップグレード
                 </DropdownMenuItem>
