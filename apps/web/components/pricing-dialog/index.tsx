@@ -111,7 +111,7 @@ function PricingDialog() {
         <div className="mt-6 text-center">
           <a
             className="text-sm text-slate-400 underline underline-offset-4 transition-colors hover:text-slate-600"
-            href="/terms/specified"
+            href="/specified"
           >
             特定商取引に関する表示
           </a>
